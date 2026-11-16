@@ -1,0 +1,10 @@
+{
+  "name": "clip-rpg",
+  "private": true,
+  "description": "Motor de regras e ficha digital do Sistema Clip",
+  "type": "module",
+  "scripts": {
+    "test": "node --test test/*.test.js",
+    "serve": "python3 -m http.server 4000"
+  }
+}

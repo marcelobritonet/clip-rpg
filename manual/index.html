@@ -1,0 +1,183 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Manual do Sistema Clip</title>
+  <meta name="description" content="Regras do Sistema Clip, com âncoras para cada Atributo, Aprimoramento e regra.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Alegreya:wght@500;700&family=Alegreya+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../assets/clip.css">
+  <style>
+    .layout { display: grid; grid-template-columns: 260px minmax(0, 1fr); max-width: 1180px; margin: 0 auto; }
+    .sumario { position: sticky; top: 58px; align-self: start; max-height: calc(100vh - 58px); overflow: auto; padding: 20px 12px 40px 16px; font-size: 0.92rem; }
+    .sumario a { display: block; padding: 3px 8px; border-radius: 6px; color: var(--ink-2); text-decoration: none; }
+    .sumario a:hover { background: var(--surface-2); color: var(--ink); }
+    .sumario a.ativo { color: var(--ink); background: var(--surface-2); font-weight: 600; }
+    .sumario .n3 { padding-left: 20px; }
+    .sumario .n4 { padding-left: 32px; font-size: 0.88rem; }
+    .busca { width: 100%; margin-bottom: 10px; }
+    article { padding: 8px 32px 80px; max-width: 820px; }
+    article h1 { font-size: 2.4rem; }
+    article h2 { margin-top: 2.4em; padding-bottom: 6px; border-bottom: 1px solid var(--line); }
+    article h3 { margin-top: 2em; }
+    article h4 { font-size: 1.2rem; margin-top: 1.8em; }
+    article h5 { font-size: 1.25rem; margin: 1.6em 0 0.4em; color: var(--accent); }
+    article h6 { font-size: 1.15rem; margin: 1.4em 0 0.4em; }
+    article li > p:only-child { margin: 0; }
+    article :is(h1, h2, h3, h4, h5, h6, li) { scroll-margin-top: 72px; }
+    article blockquote { margin: 1em 0; padding: 8px 16px; border-left: 3px solid var(--accent); background: var(--surface); border-radius: 0 8px 8px 0; }
+    article blockquote p { margin: 0.3em 0; }
+    article code { background: var(--surface-2); padding: 2px 6px; border-radius: 4px; font-size: 0.9em; }
+    article table { border-collapse: collapse; margin: 1em 0; display: block; overflow-x: auto; max-width: 100%; }
+    article th, article td { border: 1px solid var(--line); padding: 6px 10px; text-align: left; vertical-align: top; }
+    article th { background: var(--surface-2); }
+    article img { max-width: 100%; }
+    :target, .destaque { background: var(--mark); border-radius: 6px; box-shadow: 0 0 0 6px var(--mark); transition: background 1.5s; }
+    .estado { color: var(--ink-2); padding: 40px 0; }
+    .ancora-link { opacity: 0; margin-left: 6px; text-decoration: none; font-size: 0.8em; }
+    :is(h2, h3, h4, h5, h6):hover .ancora-link { opacity: 1; }
+
+    /* Dentro da ficha (iframe): só o texto */
+    .embutido .topo, .embutido .sumario { display: none; }
+    .embutido .layout { display: block; }
+    .embutido article { padding: 4px 18px 60vh; }
+
+    @media (max-width: 860px) {
+      .layout { display: block; }
+      .sumario { position: static; max-height: none; border-bottom: 1px solid var(--line); }
+      .sumario details > :not(summary) { margin-top: 8px; }
+      article { padding: 8px 16px 80px; }
+    }
+    @media (min-width: 861px) { .sumario summary { display: none; } }
+  </style>
+</head>
+<body>
+  <header class="topo">
+    <a class="marca" href="../">Clip</a>
+    <nav>
+      <a href="./" aria-current="page">Manual</a>
+      <a href="../ficha/">Ficha digital</a>
+      <a href="https://github.com/marcelobritonet/clip-rpg">GitHub</a>
+    </nav>
+  </header>
+  <div class="layout">
+    <nav class="sumario" aria-label="Sumário">
+      <details open>
+        <summary>Sumário</summary>
+        <input class="busca" type="search" placeholder="Filtrar seções…" aria-label="Filtrar seções">
+        <div id="sumario"></div>
+      </details>
+    </nav>
+    <article id="conteudo"><p class="estado">Carregando o manual…</p></article>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/marked@12.0.2/marked.min.js"></script>
+  <script type="module">
+    import { slug } from '../motor/clip.js';
+
+    if (window.self !== window.top) document.documentElement.classList.add('embutido');
+
+    // Local (servidor estático) lê o README do próprio repositório; no GitHub
+    // Pages o Jekyll transforma o .md em página, então lê a versão publicada.
+    const FONTES = ['../README.md', 'https://raw.githubusercontent.com/marcelobritonet/clip-rpg/master/README.md'];
+
+    async function carregar() {
+      for (const url of FONTES) {
+        try {
+          const r = await fetch(url, { cache: 'no-cache' });
+          const tipo = r.headers.get('content-type') || '';
+          if (r.ok && !tipo.includes('html')) return await r.text();
+        } catch { /* tenta a próxima fonte */ }
+      }
+      throw new Error('README indisponível');
+    }
+
+    /** Texto do próprio item de lista, sem as sublistas. */
+    function textoProprio(el) {
+      let t = '';
+      for (const n of el.childNodes) {
+        if (n.nodeType === 1 && /^(UL|OL)$/.test(n.tagName)) continue;
+        t += n.textContent;
+      }
+      return t.trim();
+    }
+
+    function ancorar(raiz) {
+      const usados = new Set();
+      const unico = (base) => {
+        let id = base, i = 2;
+        while (usados.has(id)) id = `${base}-${i++}`;
+        usados.add(id);
+        return id;
+      };
+      for (const el of raiz.querySelectorAll('h1, h2, h3, h4, h5, h6, li')) {
+        const texto = el.tagName === 'LI' ? textoProprio(el) : el.textContent.trim();
+        const base = slug(texto);
+        if (!base) continue;
+        el.id = unico(base);
+        if (el.tagName !== 'LI') {
+          const a = document.createElement('a');
+          a.href = `#${el.id}`;
+          a.className = 'ancora-link';
+          a.textContent = '#';
+          a.setAttribute('aria-label', `Link para ${texto}`);
+          el.append(a);
+        }
+      }
+    }
+
+    function montarSumario(raiz) {
+      const alvo = document.getElementById('sumario');
+      const links = [];
+      for (const h of raiz.querySelectorAll('h2, h3, h4')) {
+        const a = document.createElement('a');
+        a.href = `#${h.id}`;
+        a.textContent = h.firstChild.textContent.trim();
+        a.className = `n${h.tagName[1]}`;
+        alvo.append(a);
+        links.push([a, h]);
+      }
+      document.querySelector('.busca').addEventListener('input', (e) => {
+        const q = slug(e.target.value);
+        for (const [a] of links) a.hidden = q && !slug(a.textContent).includes(q);
+      });
+      const obs = new IntersectionObserver((itens) => {
+        for (const it of itens) {
+          if (!it.isIntersecting) continue;
+          for (const [a, h] of links) a.classList.toggle('ativo', h === it.target);
+        }
+      }, { rootMargin: '-60px 0px -70% 0px' });
+      for (const [, h] of links) obs.observe(h);
+    }
+
+    function irParaHash() {
+      const id = decodeURIComponent(location.hash.slice(1));
+      const el = id && document.getElementById(id);
+      if (!el) return;
+      el.scrollIntoView({ block: 'start' });
+      el.classList.add('destaque');
+      setTimeout(() => el.classList.remove('destaque'), 1600);
+    }
+
+    try {
+      const md = await carregar();
+      const conteudo = document.getElementById('conteudo');
+      conteudo.innerHTML = marked.parse(md);
+      // Links relativos do README apontam para a raiz do repositório.
+      for (const a of conteudo.querySelectorAll('a[href]')) {
+        const href = a.getAttribute('href');
+        if (/^\.?\/?[\w-]+\.md$/.test(href)) a.href = `https://github.com/marcelobritonet/clip-rpg/blob/master/${href.replace(/^\.?\//, '')}`;
+      }
+      ancorar(conteudo);
+      montarSumario(conteudo);
+      irParaHash();
+      window.addEventListener('hashchange', irParaHash);
+    } catch (e) {
+      document.getElementById('conteudo').innerHTML =
+        '<p class="estado">Não foi possível carregar o manual. <a href="https://github.com/marcelobritonet/clip-rpg#readme">Leia no GitHub</a>.</p>';
+    }
+  </script>
+</body>
+</html>

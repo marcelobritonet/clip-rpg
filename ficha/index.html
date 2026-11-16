@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Ficha do Sistema Clip</title>
+  <meta name="description" content="Ficha digital do Sistema Clip: distribui pontos, valida as regras, calcula os valores e rola os dados.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Alegreya:wght@500;700&family=Alegreya+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../assets/clip.css">
+  <link rel="stylesheet" href="ficha.css">
+</head>
+<body>
+  <header class="topo">
+    <a class="marca" href="../">Clip</a>
+    <nav>
+      <a href="../manual/">Manual</a>
+      <a href="./" aria-current="page">Ficha digital</a>
+      <a href="https://github.com/marcelobritonet/clip-rpg">GitHub</a>
+    </nav>
+    <span class="espaco"></span>
+    <div class="acoes">
+      <label class="chave"><input type="checkbox" id="modo-jogador"> Modo jogador</label>
+      <label class="chave"><input type="checkbox" id="propostos"> Aprimoramentos propostos</label>
+      <details class="menu">
+        <summary>Ficha ▾</summary>
+        <div class="menu-itens">
+          <button type="button" data-acao="nova">Nova ficha</button>
+          <button type="button" data-acao="exemplo">Carregar exemplo</button>
+          <button type="button" data-acao="link">Copiar link da ficha</button>
+          <button type="button" data-acao="exportar">Exportar JSON</button>
+          <label class="botao">Importar JSON<input type="file" id="importar" accept="application/json,.json" hidden></label>
+          <button type="button" data-acao="imprimir">Imprimir</button>
+        </div>
+      </details>
+    </div>
+  </header>
+
+  <div class="pagina">
+    <main id="ficha" aria-live="polite"></main>
+    <aside id="painel" class="painel" aria-label="Manual" hidden>
+      <div class="painel-topo">
+        <strong>Manual</strong>
+        <a id="painel-abrir" href="../manual/" target="_blank" rel="noopener">Abrir em nova aba ↗</a>
+        <button type="button" id="painel-fechar" aria-label="Fechar o manual">✕</button>
+      </div>
+      <iframe id="painel-frame" title="Manual do Sistema Clip"></iframe>
+    </aside>
+  </div>
+
+  <div id="aviso" class="toast" role="status" hidden></div>
+
+  <script type="module" src="ficha.js"></script>
+</body>
+</html>

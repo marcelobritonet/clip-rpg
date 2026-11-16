@@ -3,6 +3,8 @@
   
 _Um RGP Simples, básico e adaptável_  
   
+**[Ficha digital](https://marcelobritonet.github.io/clip-rpg/ficha/)** (monta o personagem, confere as regras e rola os dados) · **[Manual navegável](https://marcelobritonet.github.io/clip-rpg/manual/)** · [Pendências das regras](./PENDENCIAS.md)
+
 > O sistema ainda em versão de testes. Problemas, lacunas e falhas podem ocorrer. Caso queira relatar algum erro, dar alguma dica ou sugestão acesse as [regras de contribuição](./CONTRIBUTING.md).  
   
 ## Introdução  
