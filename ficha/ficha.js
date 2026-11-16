@@ -1,4 +1,5 @@
 import * as clip from '../motor/clip.js';
+import { aposRender } from './dicas.js';
 
 /* ------------------------------------------------------------------------ */
 /* Estado e persistência                                                    */
@@ -79,13 +80,19 @@ function mudar(fn) {
 
 const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
 
-/** Texto que leva ao trecho do manual. */
-const ref = (ancora, texto) =>
-  ancora ? `<a class="ref" href="../manual/#${ancora}" data-manual="${ancora}" title="Ver no manual">${texto}</a>` : texto;
+/**
+ * Texto que leva ao trecho do manual. Ao passar o mouse, mostra a dica do
+ * glossário (por padrão a da própria âncora; `chave` troca por outra).
+ */
+const ref = (ancora, texto, chave = ancora) =>
+  ancora ? `<a class="ref" href="../manual/#${ancora}" data-manual="${ancora}" data-dica="${chave}">${texto}</a>` : texto;
 
-/** Selo "§ regra" que leva ao trecho do manual. */
+/** Selo "§ regra" que leva ao trecho do manual, também com dica. */
 const selo = (ancora, rotulo = 'regra') =>
-  `<a class="ref-icone" href="../manual/#${ancora}" data-manual="${ancora}" title="Ver no manual">§ ${rotulo}</a>`;
+  `<a class="ref-icone" href="../manual/#${ancora}" data-manual="${ancora}" data-dica="${ancora}" aria-label="${rotulo}: ver no manual">§ ${rotulo}</a>`;
+
+/** Rótulo sem link, mas com dica. */
+const termo = (chave, texto) => `<span class="termo" data-dica="${chave}" tabindex="0">${texto}</span>`;
 
 const pips = (n, max = 5) =>
   `<span class="pips" aria-hidden="true">${Array.from({ length: Math.max(max, n) }, (_, i) => `<i class="${i < n ? 'on' : ''}"></i>`).join('')}</span>`;
@@ -161,7 +168,7 @@ function secaoCaminhos(f) {
   const vc = clip.valoresCaminhos(f);
   const dom = clip.caminhoDominante(f);
   const desempate = dom.empate
-    ? `<div class="desempate"><span>Empate entre Caminhos. Qual é o principal? ${selo(clip.SECOES.valores, 'por quê')}</span>
+    ? `<div class="desempate"><span>Empate entre Caminhos. Qual é o ${termo('caminho-principal', 'Caminho principal')}?</span>
         ${dom.empate.map((id) => `<label class="chave"><input type="radio" name="principal" data-acao="principal" value="${id}" ${dom.id === id ? 'checked' : ''}> ${nomeCaminho[id]}</label>`).join('')}</div>`
     : '';
   const cartoes = clip.CAMINHOS.map((c) => {
@@ -244,7 +251,9 @@ function secaoPericias(f) {
     }).join('');
     const nomeP = p.magica || clip.PERICIAS_EXEMPLO.some((x) => x.id === p.id && x.manual)
       ? ref(clip.ancora(p.id), esc(p.nome))
-      : esc(p.nome);
+      : clip.PERICIAS_EXEMPLO.some((x) => x.id === p.id)
+        ? ref('pericias', esc(p.nome), p.id)
+        : esc(p.nome);
     return `<tr class="${p.nivel > max ? 'invalido' : ''}">
       <td class="largo"><span class="nome">${nomeP}</span>${p.magica ? '<span class="tag">mágica</span>' : ''}</td>
       <td class="largo"><div class="chips">${chips}</div></td>
@@ -265,7 +274,7 @@ function secaoPericias(f) {
   return `<section class="cartao">
     <h2>Perícias ${selo(clip.SECOES.pericias)} ${selo(clip.SECOES.limitesMagia, 'mágicas')}
       <span class="sub">O nível nunca passa do menor requisito.</span></h2>
-    ${f.pericias.length ? `<table class="itens"><thead><tr><th>Perícia</th><th>Requisitos</th><th>Nível</th><th>Em combate</th><th></th></tr></thead><tbody>${linhas}</tbody></table>` : '<p class="vazio">Nenhuma Perícia ainda.</p>'}
+    ${f.pericias.length ? `<table class="itens"><thead><tr><th>Perícia</th><th>Requisitos</th><th>Nível</th><th>${termo('em-combate', 'Em combate')}</th><th></th></tr></thead><tbody>${linhas}</tbody></table>` : '<p class="vazio">Nenhuma Perícia ainda.</p>'}
     <div class="adicionar">
       <select id="catalogo" aria-label="Perícia do manual">
         <optgroup label="Exemplos do manual">${opt(clip.PERICIAS_EXEMPLO.filter((p) => !p.magica))}</optgroup>
@@ -351,10 +360,10 @@ function secaoMesa(f) {
         </label>
         <div class="lado">
           <label class="campo">${ref(clip.SECOES.dificuldades, 'Dificuldade')}<input type="number" min="1" max="40" data-mesa="teste.dificuldade" data-foco="m:dif" value="${m.teste.dificuldade}"></label>
-          <label class="campo">Objeto (mod.)<input type="number" min="0" max="10" data-mesa="teste.objeto" data-foco="m:obj" value="${m.teste.objeto}"></label>
+          <label class="campo">${termo('objeto', 'Objeto (mod.)')}<input type="number" min="0" max="10" data-mesa="teste.objeto" data-foco="m:obj" value="${m.teste.objeto}"></label>
         </div>
         <span class="formula" style="font-size:.85rem;color:var(--ink-2)">${faixa ? faixa.nome : 'Fora da tabela'} · rola ${Math.max(1, clip.nivelDe(f, m.teste.alvo) + m.teste.objeto)}D6${clip.nivelDe(f, m.teste.alvo) + m.teste.objeto <= 0 ? ' − 2' : ''}</span>
-        <label class="check"><input type="checkbox" data-mesa="teste.insistir" data-foco="m:ins" ${m.teste.insistir ? 'checked' : ''} ${caminhoDoAlvo === 'corpo' ? '' : 'disabled'}> Insistir, pagando com Vida (só Corpo)</label>
+        <label class="check"><input type="checkbox" data-mesa="teste.insistir" data-foco="m:ins" ${m.teste.insistir ? 'checked' : ''} ${caminhoDoAlvo === 'corpo' ? '' : 'disabled'}> ${termo('insistir', 'Insistir')}, pagando com Vida (só Corpo)</label>
         <button type="button" class="primario" data-acao="rolar-teste">Rolar teste</button>
       </div>
 
@@ -437,6 +446,7 @@ function render() {
     const el = main.querySelector(`[data-foco="${CSS.escape(foco)}"]`);
     if (el && !el.disabled) el.focus({ preventScroll: true });
   }
+  aposRender();
 }
 
 /* ------------------------------------------------------------------------ */
@@ -540,7 +550,7 @@ function rolarMagia() {
     ? `<div class="det">Pediu ${m.pm} PM, mas só ${r.gasto} valem: ${r.teto === nivel ? `a Perícia está no nível ${nivel}` : `restam ${disponivel} PM`}. A forma é livre; o efeito, não.</div>`
     : '';
   const ataque = r.valorAtaque != null ? ` · Valor de Ataque <b>${r.valorAtaque}</b> (dado ${r.dado} + ${r.gasto})` : '';
-  registrar(`${nome}: gastou ${r.gasto} PM, potência <b>${r.potencia}</b>${ataque}${limite}`);
+  registrar(`${nome}: gastou ${r.gasto} PM, ${termo('potencia-magica', 'potência')} <b>${r.potencia}</b>${ataque}${limite}`);
 }
 
 /* ------------------------------------------------------------------------ */

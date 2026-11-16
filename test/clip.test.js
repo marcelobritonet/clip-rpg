@@ -205,3 +205,31 @@ test('Toda âncora usada pelo motor existe no manual', () => {
   const faltando = usadas.filter((a) => !ids.has(a));
   assert.deepEqual(faltando, []);
 });
+
+test('Versões do rodapé estão no CHANGELOG', async () => {
+  const { VERSAO } = await import('../motor/versao.js');
+  const log = readFileSync(new URL('../CHANGELOG.md', import.meta.url), 'utf8');
+  assert.match(log, new RegExp(`^### ${VERSAO.ferramentas.replace(/\./g, '\\.')}\\b`, 'm'));
+  assert.match(log, new RegExp(`^### ${VERSAO.regras.replace(/\./g, '\\.')}\\b`, 'm'));
+});
+
+test('Toda dica da ficha existe no glossário e aponta para o manual', async () => {
+  const { GLOSSARIO, dica } = await import('../motor/glossario.js');
+  const readme = readFileSync(new URL('../README.md', import.meta.url), 'utf8');
+  const ids = new Set();
+  for (const linha of readme.split('\n')) {
+    const m = linha.match(/^#{1,6}\s+(.*?)\s*$/) || linha.match(/^\s*[*-]\s+(.*?)\s*$/);
+    if (m) ids.add(clip.slug(m[1].replace(/[*_`]/g, '')));
+  }
+  // Toda âncora usada pela ficha tem resumo
+  const usadas = [
+    ...Object.values(clip.SECOES),
+    ...clip.CAMINHOS.map((c) => c.manual),
+    ...[...Object.keys(clip.ATRIBUTOS), ...Object.keys(clip.APRIMORAMENTOS)].map(clip.ancora).filter(Boolean),
+    // Perícias comuns usam o próprio id; as mágicas, a âncora da seção delas.
+    ...clip.PERICIAS_EXEMPLO.map((p) => (p.magica ? clip.ancora(p.id) : p.id)),
+  ];
+  assert.deepEqual(usadas.filter((k) => !GLOSSARIO[k]), []);
+  // Todo "ler no manual" leva a uma âncora que existe
+  assert.deepEqual(Object.keys(GLOSSARIO).filter((k) => !ids.has(dica(k).manual)), []);
+});

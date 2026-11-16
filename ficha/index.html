@@ -21,8 +21,8 @@
     </nav>
     <span class="espaco"></span>
     <div class="acoes">
-      <label class="chave"><input type="checkbox" id="modo-jogador"> Modo jogador</label>
-      <label class="chave"><input type="checkbox" id="propostos"> Aprimoramentos propostos</label>
+      <label class="chave"><input type="checkbox" id="modo-jogador"> <span class="termo" data-dica="modo-jogador">Modo jogador</span></label>
+      <label class="chave"><input type="checkbox" id="propostos"> <span class="termo" data-dica="aprimoramentos-propostos">Aprimoramentos propostos</span></label>
       <details class="menu">
         <summary>Ficha ▾</summary>
         <div class="menu-itens">
@@ -49,8 +49,11 @@
     </aside>
   </div>
 
+  <footer id="rodape" class="rodape"></footer>
+
   <div id="aviso" class="toast" role="status" hidden></div>
 
   <script type="module" src="ficha.js"></script>
+  <script type="module" src="../assets/rodape.js"></script>
 </body>
 </html>

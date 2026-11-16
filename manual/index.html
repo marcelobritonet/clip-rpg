@@ -40,7 +40,7 @@
     :is(h2, h3, h4, h5, h6):hover .ancora-link { opacity: 1; }
 
     /* Dentro da ficha (iframe): só o texto */
-    .embutido .topo, .embutido .sumario { display: none; }
+    .embutido .topo, .embutido .sumario, .embutido .rodape { display: none; }
     .embutido .layout { display: block; }
     .embutido article { padding: 4px 18px 60vh; }
 
@@ -72,61 +72,14 @@
     </nav>
     <article id="conteudo"><p class="estado">Carregando o manual…</p></article>
   </div>
+  <footer id="rodape" class="rodape"></footer>
 
   <script src="https://cdn.jsdelivr.net/npm/marked@12.0.2/marked.min.js"></script>
   <script type="module">
     import { slug } from '../motor/clip.js';
+    import { renderizar, irParaHash } from '../assets/markdown.js';
 
     if (window.self !== window.top) document.documentElement.classList.add('embutido');
-
-    // Local (servidor estático) lê o README do próprio repositório; no GitHub
-    // Pages o Jekyll transforma o .md em página, então lê a versão publicada.
-    const FONTES = ['../README.md', 'https://raw.githubusercontent.com/marcelobritonet/clip-rpg/master/README.md'];
-
-    async function carregar() {
-      for (const url of FONTES) {
-        try {
-          const r = await fetch(url, { cache: 'no-cache' });
-          const tipo = r.headers.get('content-type') || '';
-          if (r.ok && !tipo.includes('html')) return await r.text();
-        } catch { /* tenta a próxima fonte */ }
-      }
-      throw new Error('README indisponível');
-    }
-
-    /** Texto do próprio item de lista, sem as sublistas. */
-    function textoProprio(el) {
-      let t = '';
-      for (const n of el.childNodes) {
-        if (n.nodeType === 1 && /^(UL|OL)$/.test(n.tagName)) continue;
-        t += n.textContent;
-      }
-      return t.trim();
-    }
-
-    function ancorar(raiz) {
-      const usados = new Set();
-      const unico = (base) => {
-        let id = base, i = 2;
-        while (usados.has(id)) id = `${base}-${i++}`;
-        usados.add(id);
-        return id;
-      };
-      for (const el of raiz.querySelectorAll('h1, h2, h3, h4, h5, h6, li')) {
-        const texto = el.tagName === 'LI' ? textoProprio(el) : el.textContent.trim();
-        const base = slug(texto);
-        if (!base) continue;
-        el.id = unico(base);
-        if (el.tagName !== 'LI') {
-          const a = document.createElement('a');
-          a.href = `#${el.id}`;
-          a.className = 'ancora-link';
-          a.textContent = '#';
-          a.setAttribute('aria-label', `Link para ${texto}`);
-          el.append(a);
-        }
-      }
-    }
 
     function montarSumario(raiz) {
       const alvo = document.getElementById('sumario');
@@ -152,32 +105,16 @@
       for (const [, h] of links) obs.observe(h);
     }
 
-    function irParaHash() {
-      const id = decodeURIComponent(location.hash.slice(1));
-      const el = id && document.getElementById(id);
-      if (!el) return;
-      el.scrollIntoView({ block: 'start' });
-      el.classList.add('destaque');
-      setTimeout(() => el.classList.remove('destaque'), 1600);
-    }
-
+    const conteudo = document.getElementById('conteudo');
     try {
-      const md = await carregar();
-      const conteudo = document.getElementById('conteudo');
-      conteudo.innerHTML = marked.parse(md);
-      // Links relativos do README apontam para a raiz do repositório.
-      for (const a of conteudo.querySelectorAll('a[href]')) {
-        const href = a.getAttribute('href');
-        if (/^\.?\/?[\w-]+\.md$/.test(href)) a.href = `https://github.com/marcelobritonet/clip-rpg/blob/master/${href.replace(/^\.?\//, '')}`;
-      }
-      ancorar(conteudo);
+      await renderizar('README.md', conteudo);
       montarSumario(conteudo);
       irParaHash();
       window.addEventListener('hashchange', irParaHash);
-    } catch (e) {
-      document.getElementById('conteudo').innerHTML =
-        '<p class="estado">Não foi possível carregar o manual. <a href="https://github.com/marcelobritonet/clip-rpg#readme">Leia no GitHub</a>.</p>';
+    } catch {
+      conteudo.innerHTML = '<p class="estado">Não foi possível carregar o manual. <a href="https://github.com/marcelobritonet/clip-rpg#readme">Leia no GitHub</a>.</p>';
     }
   </script>
+  <script type="module" src="../assets/rodape.js"></script>
 </body>
 </html>

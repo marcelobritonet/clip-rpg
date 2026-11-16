@@ -122,3 +122,43 @@ button.primario { background: var(--accent); border-color: var(--accent); color:
 .topo nav a { text-decoration: none; color: var(--ink-2); }
 .topo nav a[aria-current='page'] { color: var(--ink); font-weight: 600; }
 .topo .espaco { flex: 1; }
+
+/* Rodapé com versões */
+.rodape {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 18px;
+  justify-content: center;
+  padding: 18px 16px 28px;
+  border-top: 1px solid var(--line);
+  color: var(--ink-2);
+  font-size: 0.88rem;
+}
+.rodape b { color: var(--ink); font-weight: 600; }
+.rodape a { color: var(--ink-2); }
+.rodape a:hover { color: var(--accent); }
+
+/* Dicas ao passar o mouse */
+.termo { text-decoration: underline dotted; text-decoration-color: var(--ink-2); text-underline-offset: 3px; cursor: help; }
+.dica {
+  position: fixed;
+  z-index: 40;
+  padding: 12px 14px;
+  background: var(--surface);
+  color: var(--ink);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  box-shadow: 0 6px 24px rgb(40 25 5 / 0.18);
+  font-size: 0.92rem;
+  line-height: 1.45;
+  animation: dica-entra 120ms ease-out;
+}
+.dica[hidden] { display: none; }
+.dica-termo { display: block; font-family: var(--serif); font-size: 1.05rem; margin-bottom: 4px; }
+.dica p { margin: 0 0 8px; }
+.dica-regra { padding: 6px 8px; border-radius: 6px; background: var(--surface-2); font-size: 0.86rem; }
+.dica-link { font-weight: 600; text-decoration: none; }
+.dica-link:hover { text-decoration: underline; }
+@keyframes dica-entra { from { opacity: 0; transform: translateY(-2px); } }
+@media (prefers-reduced-motion: reduce) { .dica { animation: none; } }
+@media print { .dica, .rodape { display: none !important; } }
