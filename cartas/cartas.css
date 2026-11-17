@@ -1,0 +1,281 @@
+/* Travessia: jogo de cartas do Sistema Clip. Usa as cores de assets/clip.css. */
+
+.jogo {
+  max-width: 1120px;
+  margin: 0 auto;
+  padding: 16px;
+}
+
+.nota { color: var(--ink-2); font-size: 0.86rem; font-weight: 400; }
+.ok { color: var(--ok); }
+.ruim { color: var(--erro); }
+.selo {
+  display: inline-block;
+  padding: 0 6px;
+  border-radius: 999px;
+  background: var(--surface-2);
+  color: var(--ink-2);
+  font-size: 0.75rem;
+  font-weight: 500;
+  letter-spacing: 0;
+  text-transform: none;
+}
+
+/* Cores por Caminho: --c é a cor da carta */
+.c-corpo { --c: var(--corpo); }
+.c-mente { --c: var(--mente); }
+.c-espirito { --c: var(--espirito); }
+.c-neutro, .c-final { --c: var(--accent); }
+
+/* Abertura e desfecho ---------------------------------------------------- */
+
+.abertura, .desfecho { max-width: 760px; margin: 0 auto; }
+.abertura h1, .desfecho h1 { font-size: 2.4rem; margin: 8px 0 4px; }
+.lema { font-size: 1.1rem; color: var(--ink-2); margin-top: 0; }
+.recorde { margin: 0 0 12px; }
+
+.regras {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 10px 16px;
+  margin: 16px 0;
+}
+.regras summary { cursor: pointer; font-family: var(--serif); font-weight: 700; font-size: 1.1rem; }
+.regras ol { padding-left: 20px; margin: 8px 0 4px; }
+.regras li { margin: 6px 0; }
+
+.origens {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 12px;
+}
+.origem { text-align: left; cursor: pointer; }
+.origem:hover { transform: translateY(-2px); }
+
+.renome { font-size: 1.3rem; }
+.renome b { font-family: var(--serif); font-size: 1.8rem; }
+.botoes { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+.botao {
+  display: inline-block;
+  padding: 6px 12px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: var(--surface-2);
+  color: var(--ink);
+  text-decoration: none;
+}
+.botao:hover { border-color: var(--accent); }
+
+.tabela { overflow-x: auto; max-width: 100%; }
+.tabela table { border-collapse: collapse; width: 100%; font-size: 0.92rem; }
+.tabela th, .tabela td { text-align: left; padding: 6px 8px; border-bottom: 1px solid var(--line); }
+.tabela th { color: var(--ink-2); font-weight: 500; }
+
+/* Barra de estado -------------------------------------------------------- */
+
+.barra {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 8px;
+  margin-bottom: 14px;
+}
+.recurso {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  padding: 8px 10px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  min-width: 0;
+}
+.recurso-nome { font-size: 0.8rem; color: var(--ink-2); }
+.recurso-valor { font-size: 0.95rem; color: var(--ink-2); }
+.recurso-valor b { font-family: var(--serif); font-size: 1.35rem; color: var(--ink); }
+.recurso-desc { font-size: 0.8rem; color: var(--ink-2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.medidor { height: 4px; border-radius: 2px; background: var(--surface-2); overflow: hidden; margin-top: 3px; }
+.medidor span { display: block; height: 100%; background: var(--ok); transition: width 300ms ease; }
+.r-sanidade .medidor span { background: var(--espirito); }
+@media (prefers-reduced-motion: reduce) { .medidor span { transition: none; } }
+
+/* Mesa ------------------------------------------------------------------- */
+
+.mesa {
+  display: grid;
+  grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr);
+  grid-template-areas: 'centro personagem' 'mao mao';
+  gap: 16px;
+  align-items: start;
+}
+.centro { grid-area: centro; display: flex; flex-direction: column; gap: 12px; min-width: 0; }
+.mao { grid-area: mao; min-width: 0; }
+.personagem { grid-area: personagem; min-width: 0; }
+.mao h3, .personagem h3 { margin: 0 0 8px; font-size: 1.15rem; }
+
+.desafio {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-top: 5px solid var(--c);
+  border-radius: var(--radius);
+  padding: 12px 16px 14px;
+  box-shadow: var(--shadow);
+}
+.desafio h2 { margin: 2px 0 6px; font-size: 1.5rem; }
+.desafio p { margin: 0 0 8px; }
+.mestre { font-style: italic; color: var(--ink-2); font-size: 0.92rem; }
+.rotulo { font-weight: 700; margin-top: 10px !important; }
+
+.abordagens { list-style: none; padding: 0; margin: 0 0 8px; display: grid; gap: 6px; }
+.abordagem {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 4px 12px;
+  width: 100%;
+  text-align: left;
+  padding: 8px 10px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--surface-2);
+}
+button.abordagem:hover { border-color: var(--accent); }
+.ab-nome { font-weight: 700; color: var(--c); }
+.ab-dados { font-family: var(--serif); font-weight: 700; }
+.ab-dif { color: var(--ink-2); }
+.chave { display: inline-flex; gap: 6px; align-items: center; }
+
+.acao {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 12px 16px;
+}
+.acao p { margin: 0 0 10px; }
+.resultado-titulo { font-family: var(--serif); font-size: 1.35rem; font-weight: 700; }
+
+.dados { display: inline-flex; gap: 3px; vertical-align: middle; flex-wrap: wrap; }
+.dado {
+  display: inline-grid;
+  place-items: center;
+  width: 1.6em;
+  height: 1.6em;
+  border: 1px solid var(--ink-2);
+  border-radius: 5px;
+  background: var(--surface);
+  font-weight: 700;
+  font-size: 0.9rem;
+  animation: rola 260ms ease-out;
+}
+@keyframes rola { from { transform: rotate(-90deg) scale(0.6); opacity: 0; } }
+@media (prefers-reduced-motion: reduce) { .dado { animation: none; } }
+
+/* Conflito */
+.oponente { display: flex; flex-direction: column; gap: 2px; margin-bottom: 10px; }
+.oponente strong { font-family: var(--serif); font-size: 1.2rem; }
+.estado-op { font-weight: 600; }
+.frentes {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+}
+.frente {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+  text-align: left;
+  padding: 8px 10px;
+  border-left: 4px solid var(--c, var(--line));
+  min-width: 0;
+}
+.frente span { font-size: 0.88rem; color: var(--ink-2); }
+.log { margin: 10px 0 0; padding-left: 20px; font-size: 0.92rem; }
+.log li { margin: 3px 0; }
+.log-oponente { color: var(--ink-2); }
+
+/* Cartas ----------------------------------------------------------------- */
+
+.cartas {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
+  gap: 10px;
+}
+.carta {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 10px 12px 12px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-top: 5px solid var(--c);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  min-width: 0;
+  transition: transform 120ms ease, opacity 120ms ease;
+}
+.carta.travada { opacity: 0.62; }
+.carta.jogavel { border-color: var(--c); border-top-width: 5px; }
+.carta-tipo {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 2px 6px;
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--c);
+  font-weight: 700;
+}
+.custo { margin-left: auto; white-space: nowrap; color: var(--ink-2); text-transform: none; letter-spacing: 0; font-weight: 500; }
+.carta-nome { font-family: var(--serif); font-size: 1.1rem; line-height: 1.2; }
+.carta-req { font-size: 0.84rem; color: var(--ink-2); }
+.carta-texto { font-size: 0.88rem; }
+.carta-pes { display: flex; gap: 6px; margin-top: auto; padding-top: 6px; }
+.carta-pes button { padding: 4px 10px; }
+.carta.jogavel .carta-pes button:first-child { background: var(--c); border-color: var(--c); color: var(--bg); font-weight: 600; }
+.discreto { background: transparent; color: var(--ink-2); }
+.motivo { font-size: 0.8rem; color: var(--aviso); }
+@media (prefers-reduced-motion: reduce) { .carta, .origem:hover { transition: none; transform: none; } }
+
+/* Personagem (o terreno) ------------------------------------------------- */
+
+.personagem {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 12px 14px;
+}
+.caminhos { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
+.caminho { border-top: 3px solid var(--c); padding-top: 6px; min-width: 0; }
+.caminho h4 { margin: 0 0 4px; color: var(--c); font-size: 1rem; }
+.atributos { list-style: none; padding: 0; margin: 0; }
+.atributo { display: flex; align-items: center; gap: 4px; font-size: 0.92rem; padding: 2px 0; white-space: nowrap; }
+.atributo .termo { overflow: hidden; text-overflow: ellipsis; min-width: 0; }
+.pips { color: var(--c); font-size: 0.7rem; flex-shrink: 0; }
+.mais { margin-left: auto; padding: 0 7px; line-height: 1.4; font-weight: 700; flex-shrink: 0; }
+.aprim { font-size: 0.84rem; margin: 6px 0 0; }
+.resumo { font-size: 0.88rem; color: var(--ink-2); margin: 10px 0 0; }
+
+/* Celular ---------------------------------------------------------------- */
+
+@media (max-width: 820px) {
+  .mesa { grid-template-columns: minmax(0, 1fr); grid-template-areas: 'centro' 'mao' 'personagem'; }
+}
+
+@media (max-width: 560px) {
+  .jogo { padding: 12px; }
+  .barra { grid-template-columns: repeat(6, minmax(0, 1fr)); }
+  .barra .recurso { grid-column: span 2; }
+  .barra .r-vida, .barra .r-sanidade { grid-column: span 3; }
+  .barra .recurso.r-vida, .barra .recurso.r-sanidade { order: -1; }
+  .frentes { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .cartas { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .caminhos { grid-template-columns: minmax(0, 1fr); }
+  .atributos { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0 8px; }
+  .atributo { flex-wrap: wrap; white-space: normal; gap: 0 4px; }
+  .atributo .termo { flex-basis: 100%; }
+  .abertura h1, .desfecho h1 { font-size: 2rem; }
+  .topo nav { gap: 10px; }
+}

@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Travessia — cartas do Sistema Clip</title>
+  <meta name="description" content="Protótipo de jogo de cartas solo do Sistema Clip: monte o personagem carta a carta e atravesse sete cenas com Corpo, Mente e Espírito.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Alegreya:wght@500;700&family=Alegreya+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../assets/clip.css">
+  <link rel="stylesheet" href="cartas.css">
+</head>
+<body>
+  <header class="topo">
+    <a class="marca" href="../">Clip</a>
+    <nav>
+      <a href="../manual/">Manual</a>
+      <a href="../ficha/">Ficha digital</a>
+      <a href="./" aria-current="page">Cartas</a>
+    </nav>
+    <span class="espaco"></span>
+    <button type="button" id="recomecar" hidden>Recomeçar</button>
+  </header>
+
+  <main id="jogo" class="jogo"></main>
+
+  <footer id="rodape" class="rodape"></footer>
+
+  <script type="module" src="ui.js"></script>
+  <script type="module" src="../assets/rodape.js"></script>
+</body>
+</html>
