@@ -1,0 +1,118 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Arena do Clip</title>
+  <meta name="description" content="Protótipo de duelos rápidos com o combate do Sistema Clip e simulador de equilíbrio.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Alegreya:wght@500;700&family=Alegreya+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../assets/clip.css">
+  <link rel="stylesheet" href="arena.css">
+</head>
+<body>
+  <header class="topo">
+    <a class="marca" href="../">Clip</a>
+    <nav>
+      <a href="../manual/">Manual</a>
+      <a href="../ficha/">Ficha digital</a>
+      <a href="./" aria-current="page">Arena</a>
+      <a href="../novidades/">Novidades</a>
+    </nav>
+  </header>
+
+  <main class="arena">
+    <div class="cabeca">
+      <h1>Arena</h1>
+      <p class="sub">Duelos rápidos com o combate do Clip. Protótipo: onde o manual não diz como a luta anda, a arena usa as propostas de <a href="https://github.com/marcelobritonet/clip-rpg/blob/master/PENDENCIAS.md">PENDENCIAS.md</a> e deixa cada uma como opção.</p>
+    </div>
+
+    <div class="abas" role="tablist">
+      <button role="tab" id="aba-duelo" aria-controls="painel-duelo" aria-selected="true">Duelo</button>
+      <button role="tab" id="aba-sim" aria-controls="painel-sim" aria-selected="false">Simulador de equilíbrio</button>
+    </div>
+
+    <section id="painel-duelo" role="tabpanel" aria-labelledby="aba-duelo">
+      <div id="montagem">
+        <div class="cartao opcoes">
+          <h2>Regras do duelo</h2>
+          <div class="grade-opcoes">
+            <label>Modo
+              <select id="modo">
+                <option value="ia">Contra a IA</option>
+                <option value="dois">Dois jogadores</option>
+              </select>
+            </label>
+            <label><span class="termo" data-dica="distribuicao-de-pontos" tabindex="0">Pontos de Evolução</span>
+              <input id="orcamento" type="number" min="3" max="40" value="15" inputmode="numeric">
+            </label>
+            <label>Distância inicial
+              <select id="distancia">
+                <option value="longa">Longa</option>
+                <option value="curta">Curta</option>
+              </select>
+            </label>
+          </div>
+          <div class="chaves" id="chaves-duelo"></div>
+        </div>
+        <div class="lados">
+          <div class="cartao lado" id="lado-0"></div>
+          <div class="cartao lado" id="lado-1"></div>
+        </div>
+        <div class="acoes-montagem">
+          <button class="primario grande" id="lutar">Lutar</button>
+          <span id="aviso-montagem" class="aviso"></span>
+        </div>
+      </div>
+
+      <div id="duelo" hidden>
+        <div class="placar" id="placar"></div>
+        <div class="faixa" id="faixa"></div>
+        <div class="cartao comandos" id="comandos"></div>
+        <ol class="registro" id="registro" aria-live="polite"></ol>
+      </div>
+    </section>
+
+    <section id="painel-sim" role="tabpanel" aria-labelledby="aba-sim" hidden>
+      <div class="cartao opcoes">
+        <h2>Simulador</h2>
+        <p class="sub">A IA luta contra ela mesma com as builds prontas, milhares de vezes. A mesma semente dá sempre o mesmo resultado.</p>
+        <div class="grade-opcoes">
+          <label>Duelos por confronto
+            <select id="sim-n">
+              <option>200</option>
+              <option>500</option>
+              <option selected>1000</option>
+              <option>2000</option>
+            </select>
+          </label>
+          <label><span class="termo" data-dica="distribuicao-de-pontos" tabindex="0">Pontos de Evolução</span>
+            <input id="sim-orcamento" type="number" min="3" max="40" value="15" inputmode="numeric">
+          </label>
+          <label>Distância inicial
+            <select id="sim-distancia">
+              <option value="longa">Longa</option>
+              <option value="curta">Curta</option>
+            </select>
+          </label>
+          <label>Semente
+            <input id="sim-semente" type="number" value="42" inputmode="numeric">
+          </label>
+        </div>
+        <div class="chaves" id="chaves-sim"></div>
+        <div class="acoes-montagem">
+          <button class="primario" id="sim-rodar">Rodar simulação</button>
+          <button id="sim-variantes">Comparar variantes de regra</button>
+          <span id="sim-estado" class="aviso"></span>
+        </div>
+      </div>
+      <div id="sim-saida"></div>
+    </section>
+  </main>
+
+  <footer id="rodape" class="rodape"></footer>
+  <script type="module" src="ui.js"></script>
+  <script type="module" src="../assets/rodape.js"></script>
+</body>
+</html>

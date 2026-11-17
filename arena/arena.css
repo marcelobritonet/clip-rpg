@@ -1,0 +1,112 @@
+/* Arena de duelos: complementa assets/clip.css */
+
+.arena { max-width: 1040px; margin: 0 auto; padding: 8px 16px 48px; }
+.cabeca h1 { font-size: 2.2rem; margin: 16px 0 4px; }
+.sub { color: var(--ink-2); margin: 4px 0 12px; }
+.aviso { color: var(--aviso); }
+small { color: var(--ink-2); }
+
+.abas { display: flex; gap: 4px; border-bottom: 1px solid var(--line); margin: 8px 0 16px; flex-wrap: wrap; }
+.abas button { border: 0; border-bottom: 3px solid transparent; border-radius: 0; background: none; padding: 8px 12px; color: var(--ink-2); }
+.abas button[aria-selected='true'] { color: var(--ink); border-bottom-color: var(--accent); font-weight: 600; }
+
+.cartao {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 14px 16px;
+  margin-bottom: 16px;
+  min-width: 0;
+}
+.cartao h2 { margin: 0 0 10px; font-size: 1.3rem; }
+.quem { font-family: var(--sans); font-weight: 400; font-size: 0.85rem; margin-left: 6px; }
+
+.grade-opcoes { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px 16px; }
+.grade-opcoes label, .escolha { display: flex; flex-direction: column; gap: 4px; font-weight: 500; }
+.chaves { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 8px 16px; margin-top: 14px; }
+.chave { display: flex; gap: 8px; align-items: flex-start; }
+.chave input { margin-top: 5px; }
+.chave small { display: block; line-height: 1.3; }
+
+.lados { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 16px; }
+.lado .escolha { margin-bottom: 8px; }
+.lado fieldset { border: 1px solid var(--line); border-radius: 8px; margin: 10px 0; padding: 6px 10px 10px; display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 6px 10px; }
+.lado legend { font-weight: 600; padding: 0 4px; color: var(--ink-2); font-size: 0.9rem; }
+.campo { display: flex; justify-content: space-between; align-items: center; gap: 6px; font-size: 0.92rem; }
+.campo input { width: 3.4em; text-align: center; }
+.campo.erro input { border-color: var(--erro); outline: 1px solid var(--erro); }
+.gasto { margin: 6px 0; }
+.erros { color: var(--erro); margin: 6px 0; padding-left: 20px; font-size: 0.92rem; }
+
+.stats { display: grid; grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); gap: 6px; margin: 10px 0 6px; }
+.stats div { background: var(--surface-2); border-radius: 6px; padding: 4px 8px; display: flex; justify-content: space-between; gap: 6px; }
+.stats dt { font-size: 0.88rem; color: var(--ink-2); }
+.stats dd { margin: 0; font-weight: 700; }
+.equip { margin: 4px 0 0; font-size: 0.92rem; }
+
+.acoes-montagem { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; margin-top: 12px; }
+button.grande { font-size: 1.1rem; padding: 10px 28px; }
+button.link { background: none; border: 0; padding: 0; color: var(--ink-2); text-decoration: underline; }
+
+/* Duelo */
+.placar { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.lutador { margin-bottom: 0; transition: border-color 0.2s; }
+.lutador h2 { font-size: 1.15rem; }
+.lutador.davez { border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent); }
+.lutador.venceu { border-color: var(--ok); box-shadow: 0 0 0 1px var(--ok); }
+.barra { margin: 6px 0; }
+.barra-rotulo { font-size: 0.88rem; color: var(--ink-2); }
+.barra-rotulo b { color: var(--ink); }
+.barra-trilho { height: 8px; background: var(--surface-2); border-radius: 4px; overflow: hidden; }
+.barra-cheio { height: 100%; border-radius: 4px; transition: width 0.3s; }
+.vida .barra-cheio { background: var(--corpo); }
+.pm .barra-cheio { background: var(--mente); }
+.san .barra-cheio { background: var(--espirito); }
+.estados { margin: 4px 0 0; min-height: 1.4em; display: flex; flex-wrap: wrap; gap: 4px; }
+.selo { font-size: 0.8rem; padding: 1px 8px; border-radius: 99px; background: var(--surface-2); border: 1px solid var(--line); }
+.selo.ruim { color: var(--erro); }
+
+.faixa { display: flex; justify-content: center; gap: 20px; flex-wrap: wrap; margin: 12px 0; color: var(--ink-2); }
+.faixa b { color: var(--ink); }
+.distancia { font-weight: 600; color: var(--ink); }
+
+.comandos .vez { margin: 0 0 8px; }
+.botoes { display: flex; flex-wrap: wrap; gap: 8px; }
+.botoes.acoes { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); }
+.botoes.acoes button { text-align: left; padding: 8px 12px; }
+.botoes.acoes small { display: block; font-size: 0.8rem; }
+.fim { font-family: var(--serif); font-size: 1.25rem; margin: 0 0 10px; }
+
+.registro { list-style: none; margin: 0; padding: 0; }
+.entrada { border-left: 4px solid var(--line); background: var(--surface); border-radius: 0 8px 8px 0; padding: 8px 12px; margin-bottom: 8px; }
+.entrada.lado-a { border-left-color: var(--corpo); }
+.entrada.lado-b { border-left-color: var(--mente); }
+.entrada:first-child { box-shadow: var(--shadow); }
+.rod { font-size: 0.78rem; color: var(--ink-2); background: var(--surface-2); border-radius: 4px; padding: 1px 6px; }
+.conta { margin: 6px 0 0; display: grid; gap: 2px; }
+.conta div { display: grid; grid-template-columns: 9.5em 1fr; gap: 8px; font-size: 0.92rem; }
+.conta dt { color: var(--ink-2); }
+.conta dd { margin: 0; font-variant-numeric: tabular-nums; overflow-wrap: anywhere; }
+.nota { margin: 6px 0 0; font-size: 0.88rem; color: var(--ink-2); font-style: italic; }
+
+/* Simulador */
+.rolagem { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+.tabela { border-collapse: collapse; width: 100%; font-variant-numeric: tabular-nums; }
+.tabela th, .tabela td { border: 1px solid var(--line); padding: 6px 8px; text-align: center; }
+.tabela tbody th { text-align: left; font-weight: 600; white-space: nowrap; }
+.tabela thead th { font-size: 0.88rem; color: var(--ink-2); }
+.tabela td small { display: block; font-size: 0.72rem; }
+.tabela tr.resumo th, .tabela tr.resumo td { background: var(--surface-2); font-size: 0.9rem; }
+
+@media (max-width: 560px) {
+  .placar { gap: 8px; }
+  .lutador { padding: 10px; }
+  .lutador h2 { font-size: 1rem; }
+  .lutador .quem { display: block; margin: 2px 0 0; }
+  .conta div { grid-template-columns: 1fr; gap: 0; }
+  .conta dd { padding-left: 8px; }
+  .lados { grid-template-columns: 1fr; }
+  .botoes.acoes { grid-template-columns: 1fr 1fr; }
+  .tabela th, .tabela td { padding: 4px 5px; font-size: 0.85rem; }
+}
