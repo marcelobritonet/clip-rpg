@@ -170,3 +170,14 @@ kbd {
   .topo { position: static; }
   .palco { min-height: 0; }
 }
+
+/* 0.3.0: o fio do andar, as peças do caminho e o fio da escolha */
+.estado .pecas { letter-spacing: 3px; color: #c9a43a; }
+.fio-hud { grid-column: 1 / -1; height: 4px; background: rgba(0,0,0,0.12); border-radius: 2px; overflow: hidden; margin-top: 4px; }
+.fio-hud span { display: block; height: 100%; background: #c9a43a; transform-origin: left; }
+.fio-hud.curto span { background: #d0603a; }
+.fio-hud.sem-fio { background: #b8323a; }
+.fio-escolha { height: 4px; background: rgba(0,0,0,0.12); border-radius: 2px; overflow: hidden; margin: 6px 0 2px; }
+.fio-escolha span { display: block; height: 100%; background: #c9a43a; transform-origin: left; }
+.fio-escolha span.acabando { background: #d0603a; }
+.registro .t-peca { color: #9a7a1a; font-weight: 600; }

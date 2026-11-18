@@ -26,6 +26,7 @@ página. Não mexe na versão das regras nem das ferramentas do Clip.
 |---|---|---|
 | 0.1.0 | 18/11/2026 | Primeira versão jogável: três temas, três origens, cinco andares, a Sanidade distorce a percepção, diário entre tentativas, robô e simulador. |
 | 0.2.0 | 18/11/2026 | Três medidas, três jeitos de errar. **Vida** baixa: sangue no chão que as bestas seguem, perna arrastada (passo de dois turnos), mãos que tremem, pulso vermelho na tela. **Consciência** (medida nova, só do jogo): o espaço mente (portas pintadas, buracos que não existem, corredores sem fim, vultos, miragens), a vista fecha e dobra, os olhos piscam; em zero, desmaio; descansar quieto devolve. **Sanidade** baixa: quem e o que as coisas são (aliado ↔ monstro, itens com cara de bicho parado, sussurros, palavras que mentem). Fotografias, cartas e corpos fazem mal de olhar, mas mostram o caminho, dão item ou âncora. Buraco de verdade é atalho com tombo. Item de fôlego. Seis pistas novas. |
+| 0.3.0 | 18/11/2026 | **Urgência**: cada andar tem um fio que queima (linha na base da tela e no painel); quando acaba, a ronda do tema chega (não cai, só dá para fugir ou atrasar) e a cabeça pesa o dobro. A escolha entre andares tem 15 segundos; se acabar, o lugar escolhe. **Combate**: golpe preparado com aviso (!), Defender (com contra-golpe), Empurrar (tonto contra a parede, derruba no buraco), Fechar porta (bichos não abrem). **Janelas**: algo passa lá fora; às vezes bate e entra, a não ser que você segure a janela; com a cabeça ruim, há batidas que ninguém dá. **Caminho**: uma peça por andar do meio (prontuário, selo, rádio) devolve fio e mostra a saída; com as três, o fim é inteiro. "Ancorar" virou "Ancorar-se", com explicação. |
 
 ## Como se joga
 
@@ -89,6 +90,28 @@ propõe.
 **Buraco de verdade** (andares 2 a 4, às vezes): o primeiro passo só chega à
 beira; o segundo pula. Cai no andar de baixo com −3 de Vida, sem o fôlego da
 escada. É atalho, e é aposta: o buraco falso só derruba você de joelhos.
+
+## O fio, o combate, as janelas e o caminho (desde a 0.3.0)
+
+**Âncora**, para não haver dúvida: ancorar-se é segurar algo seu (o nome dito
+em voz alta, uma lembrança, uma oração) para lembrar quem você é. Pela tecla Q,
+é um teste de Vontade ou Fé; os itens "âncora" (fotografia de casa, medalha,
+rádio) fazem o mesmo sem teste. Recupera um pouco de Sanidade e, por 12 turnos,
+apaga o que é falso à vista e impede disfarces novos. Os ◆ do painel são as
+vezes que ainda dá neste andar; fotografias e altares dão mais.
+
+| Peça | O que faz | Por quê |
+|---|---|---|
+| Fio do andar | 260 a 340 turnos (cresce com o andar). Avisos do tema na metade, a um quarto e a um décimo. Quando acaba, a ronda chega pela entrada do andar | Urgência sem relógio de verdade: o turno continua sendo a unidade, e a linha que queima é a única medida |
+| A ronda | Enfermeiro-chefe, carrasco ou horda. Sabe onde você está, não cai, anda dois de cada três turnos. Golpe forte a deixa tonta; encarar faz recuar 4 turnos; empurrar deixa tonta. Sem fio, a Sanidade cai no dobro do ritmo | É a ameaça que obriga a escolher entre explorar e sair |
+| Escolha entre andares | 15 segundos de verdade (pausa com a aba escondida); se acabar, escolhe uma das opções pela semente | Pedido: "até as escolhas precisam ser rápidas" |
+| Golpe preparado | Monstro colado com arma ou força às vezes recua e prepara (aviso no registro e ! vermelho). No turno seguinte: +2 no ataque e +2 no dano, se você ainda estiver colado | Combate com leitura: sair, defender ou empurrar |
+| Defender (Z) | +2 de Defesa até o próximo turno (+4 contra golpe preparado). Se o golpe errar, quem luta devolve na hora | Dá ao Corpo um verbo além de bater |
+| Empurrar (G) | Força (+ Ataque Corporal ou Agilidade) contra 2 + Defesa do alvo (+2 na ronda). Tira de perto e deixa tonto 1 turno; contra parede ou porta, 2 turnos; para dentro de buraco de verdade, derruba de vez | Usa o mapa: buraco, parede, corredor |
+| Fechar porta (C) | Fecha uma porta aberta ao lado. Bestas não abrem portas; gente e a ronda abrem | Fuga com cabeça, não só com pernas |
+| Janelas | 2 a 4 por andar, na parede de cima das salas. Algo passa lá fora (6% por turno por janela à vista). Às vezes algo bate (mais perto do fim do fio); depois de 3 batidas, o vidro cede e um monstro entra. Andar contra a janela que bate a segura de vez. Com a cabeça Perturbada ou pior, há batidas que ninguém dá | "Janelas com coisas passando, talvez entrando" |
+| Peças do caminho | Uma nos andares 2, 3 e 4, longe da entrada. Cada uma: +50 de fio, +2 de Sanidade, o caminho até a saída do andar marcado. Com a cabeça cansada, aparecem peças falsas | "Os itens dão o caminho para fechar o jogo" |
+| Finais | Sair com as três peças: fim inteiro (o prontuário, o selo, o rádio respondem). Sair sem elas: fuga pela metade. Morte e loucura continuam | O objetivo deixa de ser só fugir: é fugir sabendo quem você é |
 
 ## Decisões de design
 
@@ -162,6 +185,66 @@ lembradas fora da vista (Memória ≥ 1 protege). O nome da sala pode mentir
 Tudo em `localStorage` (chave `clip-desvario-diario`), com `try/catch`: sem
 armazenamento, o jogo funciona igual. Não há desbloqueio de poder, para não
 virar grind.
+
+## Números do simulador — 0.3.0
+
+`node crawler/simular.mjs 200`, mesmas sementes. "Fuga inteira" é sair com as
+três peças do caminho.
+
+### Robô atento (0.3.0)
+
+
+| Tema | Origem | Fuga | Fuga inteira | Morte | Loucura | Limite | Andar médio | Turnos (fuga) | Turnos (todas) | Enganos/partida | Revelados/partida | Surtos | % turnos Abalado ou pior |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| sanatorio | corpo | 13% | 7% | 45% | 43% | 0% | 4,4 | 774 | 736 | 23,7 | 5,8 | 1,6 | 44% |
+| sanatorio | mente | 15% | 9% | 81% | 5% | 0% | 4,5 | 794 | 719 | 24,1 | 8,3 | 0,5 | 45% |
+| sanatorio | espirito | 33% | 24% | 51% | 17% | 0% | 4,7 | 893 | 885 | 30,1 | 12,5 | 0,7 | 35% |
+| masmorra | corpo | 16% | 9% | 44% | 40% | 0% | 4,4 | 816 | 800 | 26,2 | 5,5 | 1,6 | 43% |
+| masmorra | mente | 14% | 8% | 84% | 3% | 0% | 4,5 | 820 | 728 | 23,3 | 7,7 | 0,3 | 34% |
+| masmorra | espirito | 37% | 27% | 53% | 11% | 0% | 4,7 | 886 | 866 | 29,6 | 12,0 | 0,6 | 29% |
+| zumbi | corpo | 20% | 12% | 19% | 62% | 0% | 4,6 | 741 | 812 | 28,9 | 6,5 | 2,1 | 48% |
+| zumbi | mente | 21% | 16% | 72% | 7% | 0% | 4,6 | 842 | 766 | 28,0 | 8,7 | 0,5 | 42% |
+
+### Robô ingênuo (0.3.0)
+
+
+| Tema | Origem | Fuga | Fuga inteira | Morte | Loucura | Limite | Andar médio | Turnos (fuga) | Turnos (todas) | Enganos/partida | Revelados/partida | Surtos | % turnos Abalado ou pior |
+| sanatorio | corpo | 3% | 2% | 64% | 34% | 0% | 4,0 | 856 | 633 | 23,9 | 1,1 | 1,4 | 46% |
+| sanatorio | mente | 3% | 1% | 95% | 3% | 0% | 4,0 | 693 | 553 | 20,9 | 0,4 | 0,3 | 46% |
+| sanatorio | espirito | 16% | 10% | 73% | 12% | 0% | 4,4 | 929 | 847 | 30,0 | 11,0 | 0,6 | 35% |
+| masmorra | corpo | 5% | 3% | 68% | 28% | 0% | 4,2 | 778 | 678 | 25,8 | 1,2 | 1,1 | 43% |
+| masmorra | mente | 3% | 2% | 94% | 3% | 0% | 3,9 | 708 | 547 | 20,3 | 0,3 | 0,3 | 36% |
+| masmorra | espirito | 19% | 11% | 70% | 11% | 0% | 4,4 | 898 | 842 | 29,3 | 11,3 | 0,5 | 31% |
+| zumbi | corpo | 11% | 6% | 32% | 57% | 0% | 4,5 | 797 | 781 | 32,6 | 1,4 | 2,0 | 54% |
+| zumbi | mente | 5% | 2% | 89% | 7% | 0% | 4,1 | 834 | 606 | 25,3 | 0,4 | 0,5 | 45% |
+| zumbi | espirito | 30% | 18% | 55% | 16% | 0% | 4,6 | 929 | 909 | 31,6 | 13,2 | 0,7 | 36% |
+
+### Fio, combate e janelas (robô atento, média por partida, todos os temas)
+
+| Engano (média por partida) | Valor |
+|---|---|
+| Vezes que a ronda chegou | 0,4 |
+| Turnos sem fio | 48,6 |
+| Golpes preparados | 4,8 |
+| Golpes pesados recebidos | 0,6 |
+| Golpes pesados evitados | 1,4 |
+| Defender | 0,2 |
+| Contra-golpes | 0,0 |
+| Empurrões certos | 10,9 |
+| Monstros empurrados no buraco | 0,0 |
+| Invasões pela janela | 1,1 |
+| Janelas seguradas | 1,1 |
+| Batidas que ninguém deu | 0,3 |
+
+### Leitura (0.3.0)
+
+| Achado | O que fazer |
+|---|---|
+| Fuga do robô atento: Corpo 13–20%, Mente 14–21%, Espírito 33–44% (na 0.2.0: 12–17%, 13–26%, 48–59%). A distância entre os Caminhos diminuiu | Manter |
+| A ronda chega em 4 de cada 10 partidas; quando chega, mata ou enlouquece com frequência (sem fio, a Sanidade cai no dobro) | É o objetivo. Se ficar cruel para pessoas, alongar `PARAM.fio.turnos` |
+| O robô ingênuo caiu muito (Mente 3–5%): não lê golpe preparado, não segura janela, não foge da ronda | O jogo agora premia quem lê sinais. Ver com gente se a curva de aprendizado é justa |
+| Mente morre de 72% a 84% (atento): frágil de perto, e janelas e golpes pesados trazem o perigo para perto | Candidato a ajuste: Defender com bônus maior para quem não luta, ou fogo que empurra |
+| Fuga inteira em 7% a 31%: as peças estão longe da entrada e competem com o fio | Bom: é a escolha que o fio cria |
 
 ## Números do simulador — 0.2.0
 
@@ -375,6 +458,9 @@ Todos ficam em `PARAM` (`crawler/jogo.js`) ou em `temas.js`; o motor não foi al
 | 17 | **Consciência**, medida nova | Máximo 10 + 2 × (Físico + Percepção + Sabedoria); cai com o tempo, pancadas e sangue; volta descansando; em zero, desmaio de 5 turnos | Separar "cansado" de "louco": o espaço mente pelo cansaço, as identidades pela Sanidade. Não existe no Clip | — |
 | 18 | Ferimento muda o corpo | Muito ferido: 20% dos passos custam dois turnos; À beira do colapso: 40% e −1 no Ataque | O manual não tem penalidade por Vida baixa | PENDENCIAS 1 |
 | 19 | Coisas perturbadoras | Carta −1, fotografia −2, corpo −1 ao ver e −1 ao revistar (o Corpo não perde ao ver) | Mais um jeito de a Sanidade cair, agora por escolha do jogador | Sanidade |
+| 20 | A ronda é invencível | Vida 999; só atrasa (tonta, recua) | Urgência; não há regra de criatura invencível no Clip | — |
+| 21 | Defender | +2 de Defesa (+4 contra golpe preparado) e contra-golpe se errar | O manual não tem defesa total nem contra-ataque | Combate |
+| 22 | Empurrar | Teste de Força contra 2 + Defesa do alvo | O manual não tem manobras | Combate |
 
 ## Dúvidas de regra que o protótipo levantou
 
@@ -392,6 +478,7 @@ Todos ficam em `PARAM` (`crawler/jogo.js`) ou em `temas.js`; o motor não foi al
 | 10 | Aliados e Unindo forças | A companhia luta sozinha, ao lado, com números fixos, e faz o tempo pesar menos | O manual soma Atributos ao unir forças; aqui é outra coisa | Testes, Situação 5 |
 | 11 | Cansaço e atenção | Consciência como terceiro recurso (ver desvio 17) | O Clip tem Vida, Magia e Sanidade. Vale um recurso de fadiga, ou isso cabe nos Pontos de Magia? | Pontos de Magia, PENDENCIAS 1 |
 | 12 | Penalidade por ferimento | Lentidão e tremor com Vida baixa | O manual não diz se o personagem ferido luta pior | Combate, PENDENCIAS 1 |
+| 13 | Manobras de combate | Defender, empurrar, golpe preparado | Vale ter manobras no Clip (defesa total, empurrar, preparar)? Com que teste? | Combate |
 
 ## Próximos passos possíveis
 

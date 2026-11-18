@@ -88,15 +88,42 @@ function decidirBruto(robo, e) {
   if (CANSADO.includes(p.estado.consciencia)) { const a = usar('folego'); if (a) return fim(robo, p, a); }
 
   const vistos = p.entidades.map((x) => ({ ...x, d: distancia(x, eu), fe: crê(robo, p, x) }));
-  const hostis = vistos.filter((x) => (x.categoria === 'hostil' || x.fe.emboscada) && !x.fugindo).sort((a, b) => a.d - b.d);
+  const hostis = vistos.filter((x) => (x.categoria === 'hostil' || x.fe.emboscada) && !x.fugindo && !x.ameaca).sort((a, b) => a.d - b.d);
+  const ronda = vistos.find((x) => x.ameaca);
+  const saidaVista = p.objetos.find((o) => o.tipo === 'escada' || o.tipo === 'saida');
+
+  // A ronda não cai: correr para a saída; se colar, atrasar.
+  if (ronda) {
+    if (ronda.d === 1 && ronda.preparando) { const f = fugirDe(p, ronda); if (f) return fim(robo, p, f); }
+    if (ronda.d <= 3 && e.origem === 'espirito') return fim(robo, p, { tipo: 'encarar', alvo: ronda.id });
+    if (ronda.d === 1 && e.origem === 'corpo') return fim(robo, p, { tipo: 'empurrar', alvo: ronda.id });
+    if (saidaVista) { const a = irPara(robo, p, (x, y) => x === saidaVista.x && y === saidaVista.y); if (a) return fim(robo, p, a); }
+    if (ronda.d <= 2) { const f = fugirDe(p, ronda); if (f) return fim(robo, p, f); }
+  }
+
+  // Golpe preparado: o atento sai de perto (ou empurra, se for do Corpo).
+  const prep = vistos.find((x) => x.preparando && x.d === 1 && !x.ameaca);
+  if (prep && robo.perfil === 'atento') {
+    if (e.origem === 'corpo') return fim(robo, p, { tipo: 'empurrar', alvo: prep.id });
+    const f = fugirDe(p, prep);
+    return fim(robo, p, f ?? { tipo: 'defender' });
+  }
+
+  // Janela batendo por perto: o atento segura.
+  const bate = robo.perfil === 'atento' && p.janelas.find((j) => j.estado === 'batendo' && distancia(j, eu) <= 5);
+  if (bate) {
+    if (distancia(bate, eu) === 1) return fim(robo, p, { tipo: 'mover', dx: bate.x - eu.x, dy: bate.y - eu.y });
+    const a = irPara(robo, p, (x, y) => x === bate.x && y === bate.y + 1);
+    if (a) return fim(robo, p, a);
+  }
   const imoveis = hostis.filter((x) => x.fe.imovel && !x.fe.falso);
   const reaisHostis = hostis.filter((x) => !x.fe.falso && !x.fe.imovel);
   const falsos = hostis.filter((x) => x.fe.falso);
 
   // Descansar: cansado e sem nada hostil à vista (o atento descansa mais cedo, se a cabeça aguenta).
-  const cansado = CANSADO.includes(p.estado.consciencia) || (robo.perfil === 'atento' && p.estado.consciencia === 'Cansado' && p.lucidez <= 1);
+  const cansado = (p.fio >= 0.4 || p.estado.consciencia === 'Apagando') && CANSADO.includes(p.estado.consciencia) || (robo.perfil === 'atento' && p.estado.consciencia === 'Cansado' && p.lucidez <= 1);
   if (!reaisHostis.some((x) => x.d <= 8) && (cansado || (robo.descansando && !['Alerta', 'Desperto'].includes(p.estado.consciencia)))) {
-    robo.descansando = p.lucidez <= 2;
+    robo.descansando = p.lucidez <= 2 && p.fio >= 0.4;
     if (robo.descansando || CANSADO.includes(p.estado.consciencia)) return fim(robo, p, { tipo: 'esperar' });
   } else robo.descansando = false;
 
@@ -145,6 +172,11 @@ function decidirBruto(robo, e) {
     if (a) return fim(robo, p, a);
   }
 
+  // Fio curto: só a peça do andar segura o robô longe da saída.
+  if (p.fio < 0.3 && saidaVista && !p.objetos.some((o) => o.tipo === 'peca')) {
+    const a = irPara(robo, p, (x, y) => x === saidaVista.x && y === saidaVista.y);
+    if (a) return fim(robo, p, a);
+  }
   // Objetos: itens, altar e, na hora certa, a saída.
   const cheio = inv.length >= 5;
   if (cheio && p.lucidez >= 2) { const a = usar('calma'); if (a) return fim(robo, p, a); }
@@ -156,12 +188,12 @@ function decidirBruto(robo, e) {
     if (o.perturbador === 'corpo') return !cheio && p.lucidez <= 1;
     return p.lucidez <= 1; // foto
   };
-  const objs = p.objetos.filter((o) => (o.tipo === 'item' && !(cheio && ['cura', 'calma', 'ancora', 'folego'].includes(o.item)) && !robo.ignorar?.has(o.id)) || (o.tipo === 'altar' && p.lucidez >= 1) || querPerturbador(o));
-  const perto = objs.map((o) => ({ ...o, d: distancia(o, eu) })).filter((o) => o.d <= 10).sort((a, b) => a.d - b.d)[0];
+  const objs = p.objetos.filter((o) => o.tipo === 'peca' || (o.tipo === 'item' && !(cheio && ['cura', 'calma', 'ancora', 'folego'].includes(o.item)) && !robo.ignorar?.has(o.id)) || (o.tipo === 'altar' && p.lucidez >= 1) || querPerturbador(o));
+  const perto = objs.map((o) => ({ ...o, d: distancia(o, eu) - (o.tipo === 'peca' ? 20 : 0) })).filter((o) => o.d <= 10).sort((a, b) => a.d - b.d)[0];
   if (perto) { const a = irPara(robo, p, (x, y) => x === perto.x && y === perto.y); if (a) return fim(robo, p, a); }
 
   const saida = p.objetos.find((o) => o.tipo === 'escada' || o.tipo === 'saida');
-  const pressa = robo.turnosNoAndar > 220 || p.lucidez >= 3;
+  const pressa = robo.turnosNoAndar > 220 || p.lucidez >= 3 || p.fio < 0.5;
   if (saida && pressa) { const a = irPara(robo, p, (x, y) => x === saida.x && y === saida.y); if (a) return fim(robo, p, a); }
 
   // Explorar: ir até a borda do que se conhece.

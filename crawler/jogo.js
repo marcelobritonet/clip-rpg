@@ -67,6 +67,22 @@ export const PARAM = {
     faro: 6,
     sangueDura: 60,
   },
+  /**
+   * Fio do andar (0.3.0): o tempo antes de a ronda chegar. Acaba → a ronda
+   * entra pela porta por onde você entrou, caça você sem parar e o tempo pesa
+   * o dobro na cabeça. Cada peça do caminho devolve um pedaço do fio.
+   */
+  fio: { turnos: (a) => 240 + 20 * a, peca: 50, avisos: [0.5, 0.25, 0.1] },
+  /** A ronda anda dois de cada três turnos: quem corre escapa; quem para, não. */
+  ronda: { ataque: 1, defesa: 2, arma: 1, vontade: 6, passo: 3 },
+  /** Golpe preparado: chance de o monstro colado preparar, e o que o golpe pesado soma. */
+  preparo: { chance: 0.3, ataque: 2, dano: 2, intervalo: 3 },
+  /** Defender: soma à Defesa no turno do mundo (mais contra golpe preparado). */
+  defender: { defesa: 2, contraPesado: 2 },
+  /** Empurrar: Força (+ Ataque Corporal) contra 2 + Defesa do alvo. */
+  empurrar: { base: 2, tontoParede: 2, tonto: 1 },
+  /** Janelas: quantas por andar, chance de algo passar e de algo tentar entrar (por turno, por janela à vista). */
+  janela: { porAndar: (a) => 2 + Math.min(2, a - 1), passa: 0.06, invasao: (a) => 0.002 + 0.002 * a, batidas: 3 },
   /** Coisas que fazem mal de olhar: perda de Sanidade ao examinar (e ao ver o corpo). */
   perturbador: { foto: 2, carta: 1, corpo: 1, verCorpo: 1 },
   perturbadoresPorAndar: (a) => (a === 1 ? 1 : 2),
@@ -177,12 +193,15 @@ export const PISTAS = {
   parede: 'Com a cabeça ruim, as paredes também mentem. A memória mente mais ainda.',
   palavras: 'As palavras mentem antes da imagem. Quando a cor some, você está pior do que diz.',
   ancora: 'Ancorar-se apaga o que é falso à vista e segura o mundo por um tempo.',
-  porta: 'Cansado, você vê portas onde há parede. A porta de verdade tem luz por baixo.',
   buraco: 'Nem todo buraco é buraco. O de verdade sopra ar frio de baixo.',
   infinito: 'Quando o corredor não acaba, é a cabeça cansada. Pare e descanse.',
   imovel: 'Bicho que nunca se mexe talvez nem seja bicho. Olhe de novo antes de quebrar.',
   sangue: 'Sangrando, você deixa rastro. As bestas seguem o rastro.',
   descanso: 'Esperar quieto, sem nada à vista, devolve a atenção. Mas o tempo pesa na cabeça.',
+  preparo: 'Quem prepara um golpe pesado avisa. Saia de perto, defenda ou empurre antes.',
+  janela: 'Janela que bate pode virar porta. Segure antes de o vidro ceder.',
+  fio: 'O fio não espera. Cada peça do caminho devolve um pouco dele.',
+  porta: 'Cansado, você vê portas onde há parede. A porta de verdade tem luz por baixo.',
 };
 
 const soma = (l) => l.reduce((a, b) => a + b, 0);
@@ -281,6 +300,8 @@ export function novaPartida({ semente, tema = 'sanatorio', origem = 'corpo', dep
     ancorado: 0,
     desmaio: 0,
     descanso: 0,
+    pecas: [],
+    defendendo: false,
     stats: {
       turnos: 0, golpesNoVazio: 0, aliadosFeridos: 0, aliadosMortos: 0, emboscadas: 0, miragensPisadas: 0,
       paredesFalsas: 0, fantasmasRevelados: 0, disfarcesRevelados: 0, miragensReveladas: 0, fantasmasGolpes: 0,
@@ -289,6 +310,8 @@ export function novaPartida({ semente, tema = 'sanatorio', origem = 'corpo', dep
       turnosPorConsciencia: [0, 0, 0, 0, 0, 0], turnosPorVida: [0, 0, 0, 0, 0, 0], cansaco: {},
       desmaios: 0, portasFalsas: 0, buracosFalsos: 0, quedas: 0, passosPerdidos: 0, passosArrastados: 0, farejado: 0,
       itensQuebrados: 0, itensDisfarcados: 0, itensRevelados: 0, perturbadores: 0,
+      rondas: 0, preparos: 0, pesadosRecebidos: 0, pesadosEvitados: 0, defesas: 0, contraGolpes: 0, empurroes: 0, empurroesCertos: 0,
+      quedasDeMonstro: 0, portasFechadas: 0, invasoes: 0, janelasBarradas: 0, batidasFalsas: 0, turnosSemFio: 0,
     },
   };
   const d = derivados(e);
@@ -379,7 +402,28 @@ export function gerarConteudoDoAndar(semente, tema, a) {
       }
     }
   }
-  return { mapa, inicio, entidades, objetos };
+  // Peça do caminho (andares 2 a 4), numa sala longe da entrada.
+  if (a >= 2 && a <= 4) {
+    const p = livre(longe);
+    if (p) objetos.push({ tipo: 'peca', indice: a - 2, ...p, real: true });
+  }
+  // Janelas na parede de cima das salas.
+  const janelas = [];
+  const candidatas = [];
+  for (const q of mapa.salas.slice(1)) {
+    for (let x = q.x + 1; x < q.x + q.w - 1; x++) {
+      const y = q.y - 1;
+      if (tile(mapa, x, y) !== T.PAREDE || tile(mapa, x, y - 1) !== T.PAREDE || tile(mapa, x, y + 1) !== T.CHAO) continue;
+      if (tile(mapa, x - 1, y) !== T.PAREDE || tile(mapa, x + 1, y) !== T.PAREDE) continue;
+      candidatas.push({ x, y });
+    }
+  }
+  for (const c of embaralhar(r, candidatas)) {
+    if (janelas.length >= PARAM.janela.porAndar(a)) break;
+    if (janelas.some((j) => Math.abs(j.x - c.x) + Math.abs(j.y - c.y) < 4)) continue;
+    janelas.push({ ...c, estado: 'fechada' });
+  }
+  return { mapa, inicio, entidades, objetos, janelas };
 }
 
 function criarMonstro(m, p, esc) {
@@ -421,6 +465,11 @@ function entrarNoAndar(e, a) {
   e.beira = null;
   e.salaAtual = -1;
   e.cargasAncora = derivados(e).cargasAncora;
+  e.janelas = c.janelas.map((j) => ({ ...j }));
+  e.entrada = { ...c.inicio };
+  e.fioMax = PARAM.fio.turnos(a);
+  e.fio = e.fioMax;
+  e.avisosFio = 0;
   atualizarVisao(e);
 }
 
@@ -446,9 +495,12 @@ const idx = (e, x, y) => y * e.mapa.w + x;
 const rng = (e) => comoFuncao(e.rDados);
 const temaDe = (e) => TEMAS[e.tema];
 
+/** Espécie por id: monstros, aliados e a ronda do tema. */
+const catalogo = (th, id) => (id === 'ronda' ? { id: 'ronda', ...th.ronda } : th.monstros.find((m) => m.id === id) ?? th.aliados.find((m) => m.id === id));
+
 export function especie(e, ent) {
   const th = temaDe(e);
-  return th.monstros.find((m) => m.id === ent.especie) ?? th.aliados.find((m) => m.id === ent.especie);
+  return catalogo(th, ent.especie);
 }
 
 const vivos = (e) => e.entidades.filter((x) => x.vida > 0 || x.tipo === 'fantasma');
@@ -509,7 +561,7 @@ function nomeAparente(e, ent) {
   const ap = aparencia(e, ent);
   const th = temaDe(e);
   if (ap.categoria === 'item') return ent.item.nome;
-  return (th.monstros.find((m) => m.id === ap.especie) ?? th.aliados.find((m) => m.id === ap.especie))?.nome ?? 'vulto';
+  return catalogo(th, ap.especie)?.nome ?? 'vulto';
 }
 
 const Maiuscula = (s) => s.charAt(0).toUpperCase() + s.slice(1);
@@ -581,6 +633,7 @@ export function agir(e, acao) {
   else if (e.surto > 0) a = acaoDoSurto(e);
   e.arrastou = false;
   e.descansou = false;
+  e.defendendo = false;
   // No surto e no desmaio, o tempo passa mesmo que o corpo não faça nada útil.
   const gastou = executar(e, a) || e.surto > 0 || e.desmaio > 0;
   if (gastou && !e.fim && !e.escolha) mundo(e);
@@ -600,6 +653,9 @@ function executar(e, a) {
     case 'magia': return magia(e, a.alvo);
     case 'ancorar': return ancorar(e);
     case 'usar': return usar(e, a.indice);
+    case 'defender': e.defendendo = true; e.stats.defesas++; return true;
+    case 'empurrar': return empurrar(e, a.alvo);
+    case 'fechar': return fecharPorta(e);
     default: return false;
   }
 }
@@ -649,6 +705,8 @@ function mover(e, dx, dy, forcarAtaque) {
   const k = idx(e, x, y);
   const real = tile(e.mapa, x, y);
   const ilusao = e.ilusaoParedes.get(k);
+  const janela = e.janelas.find((j) => j.x === x && j.y === y);
+  if (real === T.PAREDE && janela) return mexerNaJanela(e, janela);
   if (real === T.PAREDE) {
     if (ilusao === T.CHAO) {
       e.ilusaoParedes.delete(k);
@@ -717,6 +775,153 @@ function mover(e, dx, dy, forcarAtaque) {
   return true;
 }
 
+/** Empurrar (Força): tira de perto; contra a parede deixa tonto; num buraco, derruba. */
+function empurrar(e, alvoId) {
+  const alvo = alvoPorId(e, alvoId);
+  if (!alvo || !(alvo.especie || alvo.aparencia)) { msg(e, 'Não há o que empurrar.'); return false; }
+  if (distancia(alvo, e.jogador) !== 1) { msg(e, 'Precisa estar colado para empurrar.'); return false; }
+  const nome = nomeAparente(e, alvo);
+  e.stats.empurroes++;
+  if (alvo.tipo === 'fantasma') {
+    e.stats.golpesNoVazio++;
+    perderSan(e, PARAM.perda.golpeNoVazio, { motivo: 'vazio' });
+    msg(e, `Suas mãos atravessam ${artigoDe(nome)}. Não havia nada ali.`, 'mentira');
+    removerFantasma(e, alvo);
+    ganharPista(e, 'vazio');
+    return true;
+  }
+  if (alvo.item) {
+    msg(e, `Você empurra ${artigoDe(nome)} e ele tomba, leve demais. É ${artigo(alvo.item.nome)}.`, 'mentira');
+    alvo.aparencia = null;
+    alvo.confirmado = true;
+    e.stats.itensRevelados++;
+    ganharPista(e, 'imovel');
+    return true;
+  }
+  const dx = Math.sign(alvo.x - e.jogador.x), dy = Math.sign(alvo.y - e.jogador.y);
+  const t = clip.testar({
+    nivel: n(e, 'forca'), objeto: Math.max(n(e, 'ataqueCorporal'), n(e, 'agilidade')),
+    dificuldade: PARAM.empurrar.base + (alvo.defesa ?? 1) + (alvo.ronda ? 2 : 0), rng: rng(e),
+  });
+  if (alvo.tipo === 'aliado') {
+    msg(e, `Você empurra ${artigoDe(nome)}. “Ei! O que é isso?”`, 'perigo');
+    if (alvo.aparencia) { alvo.aparencia = null; e.stats.disfarcesRevelados++; }
+    perderSan(e, 1, { motivo: 'aliado' });
+    return true;
+  }
+  if (!t.sucesso) {
+    msg(e, `Você empurra ${artigoDe(nome)}, que finca o pé e não sai do lugar.`);
+    if (alvo.tipo === 'monstro') alvo.estado = 'cacando';
+    return true;
+  }
+  e.stats.empurroesCertos++;
+  alvo.preparando = false;
+  const x = alvo.x + dx, y = alvo.y + dy;
+  if (tile(e.mapa, x, y) === T.BURACO && !alvo.ronda) {
+    alvo.vida = 0;
+    e.stats.quedasDeMonstro++;
+    e.stats.vencidos++;
+    msg(e, `Você empurra ${artigoDe(nome)} para dentro do buraco. Um baque lá embaixo, e silêncio.`, 'golpe');
+    return true;
+  }
+  const livre = tile(e.mapa, x, y) !== T.PAREDE && tile(e.mapa, x, y) !== T.PORTA && tile(e.mapa, x, y) !== T.BURACO && !reaisEm(e, x, y);
+  if (livre) {
+    alvo.x = x;
+    alvo.y = y;
+    alvo.tonto = PARAM.empurrar.tonto;
+    msg(e, `Você empurra ${artigoDe(nome)} para longe.`, 'golpe');
+  } else {
+    alvo.tonto = PARAM.empurrar.tontoParede;
+    msg(e, `Você joga ${artigoDe(nome)} contra a parede. Fica tonto.`, 'golpe');
+  }
+  if (alvo.tipo === 'monstro') alvo.estado = 'cacando';
+  return true;
+}
+
+/** Fechar uma porta aberta ao lado: as bestas não abrem portas. */
+function fecharPorta(e) {
+  for (const [dx, dy] of VIZINHOS) {
+    const x = e.jogador.x + dx, y = e.jogador.y + dy;
+    if (tile(e.mapa, x, y) !== T.ABERTA || reaisEm(e, x, y)) continue;
+    por(e.mapa, x, y, T.PORTA);
+    e.stats.portasFechadas++;
+    msg(e, 'Você fecha a porta. Bichos não abrem portas; gente abre.', 'info');
+    return true;
+  }
+  msg(e, 'Não há porta aberta ao seu lado.');
+  return false;
+}
+
+/** Andar contra uma janela: olhar lá fora, ou segurar se algo está batendo. */
+function mexerNaJanela(e, j) {
+  const th = temaDe(e);
+  if (j.estado === 'batendo') {
+    j.estado = 'barrada';
+    e.stats.janelasBarradas++;
+    msg(e, th.janela.barra, 'bom');
+    ganharPista(e, 'janela');
+    return true;
+  }
+  if (j.estado === 'barrada') { msg(e, 'A janela está escorada.'); return false; }
+  if (j.estado === 'quebrada') {
+    j.estado = 'barrada';
+    e.stats.janelasBarradas++;
+    msg(e, 'Você tapa o buraco da janela com o que encontra.', 'info');
+    return true;
+  }
+  msg(e, th.janela.fora);
+  return false;
+}
+
+/** Janelas: algo passa lá fora; às vezes algo bate e entra. */
+function janelas(e) {
+  const th = temaDe(e);
+  const J = PARAM.janela;
+  const lv = nivelCabeca(e);
+  for (const j of e.janelas) {
+    const k = idx(e, j.x, j.y);
+    const perto = e.vis.has(k) || e.vis.has(idx(e, j.x, j.y + 1));
+    if (j.estado === 'batendo') {
+      j.batidas++;
+      if (j.batidas < J.batidas) { if (perto) msg(e, th.janela.bate, 'perigo', j.falsa ? { mentira: true } : {}); continue; }
+      if (j.falsa) {
+        j.estado = 'fechada';
+        e.stats.batidasFalsas++;
+        if (perto) msg(e, th.janela.falsa, 'mentira', { mentira: true });
+        continue;
+      }
+      const dentro = { x: j.x, y: j.y + 1 };
+      j.estado = 'quebrada';
+      if (perto) msg(e, th.janela.quebra, 'perigo');
+      if (!livreParaAndar(e, dentro.x, dentro.y, null)) continue;
+      const comuns = th.monstros.filter((q) => q.andar <= Math.max(2, e.andar) && q.andar < 5 && q.categoria !== 'assombro');
+      const m = criarMonstro(escolher(e.rIA, comuns), dentro, PARAM.escala(e.andar));
+      m.id = 'e' + e.proximoId++;
+      m.estado = 'cacando';
+      m.ultimo = { ...e.jogador };
+      e.entidades.push(m);
+      e.stats.invasoes++;
+      continue;
+    }
+    if (j.estado !== 'fechada' || !perto) continue;
+    if (chance(e.rIA, J.passa)) {
+      j.passou = e.turno;
+      j.quem = escolher(e.rIA, th.monstros.filter((q) => q.andar < 5)).id;
+      if (!e.viuPassar) { e.viuPassar = true; msg(e, th.janela.passa, 'sussurro'); }
+    }
+    // Mais perto do fim do fio, mais vontade de entrar. Com a cabeça ruim, há batidas que ninguém dá.
+    const urgencia = 1 + 2 * (1 - e.fio / e.fioMax);
+    const real = chance(e.rIA, J.invasao(e.andar) * urgencia);
+    const falsa = !real && lv >= 3 && chance(e.rAlu, J.invasao(e.andar) * (lv - 2));
+    if (real || falsa) {
+      j.estado = 'batendo';
+      j.batidas = 0;
+      j.falsa = falsa;
+      msg(e, th.janela.bate, 'perigo', falsa ? { mentira: true } : {});
+    }
+  }
+}
+
 /** Cair pelo buraco de verdade: atalho para o andar de baixo, com tombo. */
 function cair(e) {
   const dano = PARAM.buraco.dano;
@@ -739,16 +944,21 @@ function pisar(e) {
       e.stats.miragensPisadas++;
       // Item falso só decepciona; escada ou saída falsa abala.
       const q = o.tipo === 'item' ? 0 : perderSan(e, PARAM.perda.miragem, { motivo: 'miragem' });
-      const oque = { item: 'Você estende a mão e', escada: 'Você pisa no primeiro degrau e', saida: 'Você corre para a saída e', altar: 'Você se ajoelha e' }[o.tipo];
+      if (o.tipo === 'peca') ganharPista(e, 'sombra');
+      const oque = { item: 'Você estende a mão e', escada: 'Você pisa no primeiro degrau e', saida: 'Você corre para a saída e', altar: 'Você se ajoelha e', peca: 'Você se abaixa para pegar e' }[o.tipo];
       msg(e, `${oque} não há nada ali.${q ? ' Sua cabeça lateja.' : ''}`, 'mentira');
       continue;
     }
     if (o.tipo === 'item') pegar(e, o);
     else if (o.tipo === 'perturbador') examinar(e, o);
     else if (o.tipo === 'escada') descer(e);
+    else if (o.tipo === 'peca') pegarPeca(e, o);
     else if (o.tipo === 'saida') {
-      e.fim = { tipo: 'fuga', turno: e.turno, andar: e.andar };
+      const inteira = e.pecas.length >= 3;
+      e.fim = { tipo: 'fuga', turno: e.turno, andar: e.andar, pecas: e.pecas.length, inteira };
       msg(e, temaDe(e).fuga, 'fim');
+      msg(e, inteira ? temaDe(e).pecas.inteiro : temaDe(e).pecas.falta, 'fim');
+      anotar(e, inteira ? 'Saiu com o caminho inteiro.' : `Saiu com ${['nenhuma', 'uma', 'duas'][e.pecas.length]} das três peças do caminho.`);
     } else if (o.tipo === 'altar') {
       o.usado = true;
       ganharSan(e, PARAM.itens.altar + n(e, 'esperanca'), 'altar');
@@ -756,6 +966,24 @@ function pisar(e) {
       msg(e, temaDe(e).altarTexto, 'bom');
     }
   }
+}
+
+/** Peça do caminho: devolve fio, acalma e mostra a saída do andar. */
+function pegarPeca(e, o) {
+  const th = temaDe(e);
+  o.usado = true;
+  if (!e.pecas.includes(o.indice)) e.pecas.push(o.indice);
+  e.fio += PARAM.fio.peca;
+  ganharSan(e, 2, 'peca');
+  msg(e, `Você encontra ${artigo(th.pecas.nomes[o.indice])}. ${th.pecas.textos[o.indice]}`, 'peca');
+  anotar(e, `Achou ${artigo(th.pecas.nomes[o.indice])}.`);
+  const saida = e.objetos.find((x) => x.real && (x.tipo === 'escada' || x.tipo === 'saida'));
+  if (saida) {
+    for (const c of caminhoReal(e, e.jogador, saida)) e.visto[idx(e, c.x, c.y)] = 1;
+    e.visto[idx(e, saida.x, saida.y)] = 1;
+    msg(e, 'Junto da peça, um rabisco mostra o caminho até a saída deste andar. O fio parece mais longo.', 'bom');
+  }
+  ganharPista(e, 'fio');
 }
 
 /** Fotografia, carta, corpo: examinar custa Sanidade e dá alguma coisa. */
@@ -894,6 +1122,11 @@ function golpearObjeto(e, o) {
 }
 
 function ferir(e, ent, dano, nome, prefixo = '') {
+  if (ent.ronda) {
+    if (dano >= 3) { ent.tonto = 1; msg(e, `${prefixo}Você acerta ${artigoDe(nome)} com força. Ele cambaleia, mas não cai.`, 'golpe'); }
+    else msg(e, `${prefixo}Você acerta ${artigoDe(nome)}. Ele nem sente.`, 'golpe');
+    return;
+  }
   ent.vida -= dano;
   const forte = dano >= 4;
   if (ent.tipo === 'aliado') {
@@ -980,6 +1213,7 @@ function nomeObjeto(e, o) {
   if (o.tipo === 'saida') return th.saida;
   if (o.tipo === 'altar') return th.altar;
   if (o.tipo === 'perturbador') return th.perturbadores[o.tipoP].nome;
+  if (o.tipo === 'peca') return th.pecas.nomes[o.indice ?? 0];
   return 'coisa';
 }
 
@@ -1061,6 +1295,7 @@ function conversar(e, ent) {
       return true;
     }
     const nome = especie(e, ent).nome;
+    if (ent.ronda) { msg(e, `${Maiuscula(artigoDe(nome))} não para para ouvir.`); return true; }
     if (ent.categoria !== 'humano') {
       msg(e, ent.categoria === 'besta' ? `Não há o que conversar com ${artigoDe(nome)}.` : `${Maiuscula(artigoDe(nome))} não ouve palavras.`);
       return true;
@@ -1177,6 +1412,14 @@ function encarar(e, alvoId) {
   if (alvo.tipo === 'aliado') {
     if (alvo.aparencia) { revelar(e, alvo, 'encarar'); msg(e, 'Ele não foge. Só te olha, assustado.', 'bom'); }
     else msg(e, `${Maiuscula(artigoDe(nome))} estranha o seu olhar.`);
+    return true;
+  }
+  if (alvo.ronda) {
+    if (t.sucesso) {
+      alvo.estado = 'fugindo';
+      alvo.fugaTtl = 4;
+      msg(e, `${Maiuscula(artigoDe(nome))} hesita diante do seu olhar e recua alguns passos. Vai voltar.`, 'bom');
+    } else { perderSan(e, PARAM.perda.encararFalhou, { motivo: 'encarar' }); msg(e, `${Maiuscula(artigoDe(nome))} encara você de volta.`, 'dano'); }
     return true;
   }
   if (alvo.categoria === 'humano') {
@@ -1318,11 +1561,22 @@ function mundo(e) {
   const companhia = e.entidades.some((x) => x.estado === 'seguindo' && distancia(x, e.jogador) <= 2);
   // O intervalo cresce com a Sanidade máxima: o tempo tira a mesma fração de todos.
   const ritmo = Math.max(6, Math.round((PARAM.drenagem[e.andar - 1] * PARAM.sanidadeReferencia) / derivados(e).sanMax * (companhia ? PARAM.drenagemCompanhia : 1)));
-  if (e.turno % ritmo === 0) perderSan(e, 1, { reduzivel: false, motivo: 'tempo' });
+  if (e.turno % (e.fio > 0 ? ritmo : Math.max(3, Math.round(ritmo / 2))) === 0) perderSan(e, 1, { reduzivel: false, motivo: 'tempo' });
   const d = derivados(e);
   if (e.turno % PARAM.regenVida === 0 && e.vida < d.vidaMax) e.vida++;
   if (e.turno % PARAM.regenPM === 0 && e.pm < d.pmMax) e.pm++;
   if (e.ancorado > 0) e.ancorado--;
+  // O fio do andar.
+  if (e.fio > 0) {
+    e.fio--;
+    const A = PARAM.fio.avisos;
+    while (e.avisosFio < A.length && e.fio <= e.fioMax * A[e.avisosFio]) {
+      msg(e, temaDe(e).ronda.avisos[e.avisosFio], 'perigo');
+      e.avisosFio++;
+    }
+    if (e.fio === 0) chamarRonda(e);
+  } else e.stats.turnosSemFio++;
+  janelas(e);
   // O cansaço pesa; o sangue perdido pesa mais.
   const C = PARAM.consciencia;
   const sangrando = ferimento(e) >= 3;
@@ -1410,8 +1664,10 @@ function acaoDoSurto(e) {
   return { tipo: 'mover', dx, dy };
 }
 
+// Bestas não abrem portas fechadas (a ronda abre tudo).
 const livreParaAndar = (e, x, y, quem) =>
-  tile(e.mapa, x, y) !== T.PAREDE && tile(e.mapa, x, y) !== T.BURACO && !(e.jogador.x === x && e.jogador.y === y) && !e.entidades.some((o) => o !== quem && o.tipo !== 'fantasma' && o.vida > 0 && o.x === x && o.y === y);
+  tile(e.mapa, x, y) !== T.PAREDE && tile(e.mapa, x, y) !== T.BURACO &&
+  !(quem?.categoria === 'besta' && !quem.ronda && tile(e.mapa, x, y) === T.PORTA) && !(e.jogador.x === x && e.jogador.y === y) && !e.entidades.some((o) => o !== quem && o.tipo !== 'fantasma' && o.vida > 0 && o.x === x && o.y === y);
 
 function passoPara(e, ent, alvo, afastar = false) {
   if (!afastar) {
@@ -1446,6 +1702,8 @@ function vagar(e, ent) {
 }
 
 function agirMonstro(e, m) {
+  if (m.tonto > 0) { m.tonto--; m.preparando = false; return; }
+  if (m.ronda) return agirRonda(e, m);
   // Assombros flutuam devagar: dá para fugir deles.
   if (m.categoria === 'assombro' && e.turno % 2 === 0 && distancia(m, e.jogador) > 1) return;
   const ve = e.vis.has(idx(e, m.x, m.y)) && distancia(m, e.jogador) <= 8;
@@ -1472,7 +1730,12 @@ function agirMonstro(e, m) {
   if (!ve && m.categoria === 'besta' && (m.estado !== 'cacando' || !m.ultimo)) farejar(e, m);
   if (m.estado === 'cacando') {
     const companheiro = e.entidades.find((x) => x.estado === 'seguindo' && x.vida > 0 && distancia(x, m) === 1);
-    if (distancia(m, e.jogador) === 1) { ataqueDoMonstro(e, m, 0); return; }
+    if (m.preparando) { golpePesado(e, m); return; }
+    if (distancia(m, e.jogador) === 1) {
+      if (prepara(e, m)) return;
+      ataqueDoMonstro(e, m, 0);
+      return;
+    }
     if (companheiro && chance(e.rIA, 0.6)) { ataqueAoCompanheiro(e, m, companheiro); return; }
     if (m.ultimo) {
       passoPara(e, m, m.ultimo);
@@ -1487,6 +1750,74 @@ function agirMonstro(e, m) {
     return;
   }
   vagar(e, m);
+}
+
+/** Monstro colado, com arma ou força, às vezes prepara um golpe pesado: avisa um turno antes. */
+function prepara(e, m) {
+  if (m.categoria === 'assombro' || (m.arma < 1 && m.ataque < 2)) return false;
+  if (m.ultimoPreparo && e.turno - m.ultimoPreparo < PARAM.preparo.intervalo) return false;
+  if (!chance(e.rIA, PARAM.preparo.chance)) return false;
+  m.preparando = true;
+  m.ultimoPreparo = e.turno;
+  e.stats.preparos++;
+  msg(e, `${Maiuscula(artigoDe(nomeAparente(e, m)))} recua meio passo e prepara um golpe pesado.`, 'perigo');
+  return true;
+}
+
+function golpePesado(e, m) {
+  m.preparando = false;
+  if (distancia(m, e.jogador) > 1) {
+    e.stats.pesadosEvitados++;
+    msg(e, `O golpe pesado ${emArtigo(nomeAparente(e, m)).replace(/^n/, 'd')} corta o ar onde você estava.`, 'bom');
+    ganharPista(e, 'preparo');
+    return;
+  }
+  ataqueDoMonstro(e, m, PARAM.preparo.ataque, true);
+}
+
+/** A ronda: sabe onde você está, não se cansa e não cai. Só dá para atrasá-la. */
+function agirRonda(e, m) {
+  if (m.estado === 'fugindo') {
+    m.fugaTtl--;
+    passoPara(e, m, e.jogador, true);
+    if (m.fugaTtl <= 0) m.estado = 'cacando';
+    return;
+  }
+  m.estado = 'cacando';
+  if (m.preparando) { golpePesado(e, m); return; }
+  if (distancia(m, e.jogador) === 1) {
+    if (prepara(e, m)) return;
+    ataqueDoMonstro(e, m, 0);
+    return;
+  }
+  if (e.turno % PARAM.ronda.passo === 0) return; // ela não corre
+  passoPara(e, m, e.jogador);
+}
+
+function chamarRonda(e) {
+  const th = temaDe(e);
+  const p = (livreParaAndar(e, e.entrada.x, e.entrada.y, null) && distancia(e.entrada, e.jogador) > 3) ? e.entrada : (() => {
+    // Longe de você, numa casa livre.
+    let melhor = null, md = -1;
+    for (let y = 0; y < e.mapa.h; y++) for (let x = 0; x < e.mapa.w; x++) {
+      if (!livreParaAndar(e, x, y, null)) continue;
+      const d = distancia({ x, y }, e.jogador);
+      if (d > md && d < 30) { md = d; melhor = { x, y }; }
+    }
+    return melhor;
+  })();
+  if (!p) return;
+  const R = PARAM.ronda;
+  const esc = PARAM.escala(e.andar);
+  e.entidades.push({
+    id: 'e' + e.proximoId++, tipo: 'monstro', ronda: true, especie: 'ronda', categoria: th.ronda.categoria, x: p.x, y: p.y,
+    ataque: R.ataque + esc.combate, defesa: R.defesa + esc.combate, vida: 999, vidaMax: 999, arma: R.arma, armadura: 0,
+    vontade: R.vontade, mental: 0, rapido: false, estado: 'cacando',
+  });
+  e.stats.rondas++;
+  msg(e, th.ronda.chegada, 'surto');
+  efeito(e, 'surto');
+  anotar(e, `${Maiuscula(artigo(th.ronda.nome))} alcançou você em ${th.andares[e.andar - 1]}.`);
 }
 
 /** Besta acha sangue fresco por perto e segue o rastro, do mais velho para o mais novo. */
@@ -1508,7 +1839,7 @@ function farejar(e, m) {
   m.ultimo = { x: melhor.x, y: melhor.y };
 }
 
-function ataqueDoMonstro(e, m, bonus) {
+function ataqueDoMonstro(e, m, bonus, pesado = false) {
   const d = derivados(e);
   const nome = nomeAparente(e, m);
   if (m.aparencia?.categoria === 'aliado') {
@@ -1530,15 +1861,29 @@ function ataqueDoMonstro(e, m, bonus) {
     } else msg(e, `${Maiuscula(artigoDe(nome))} tenta entrar na sua cabeça. Você não deixa.`);
     return;
   }
-  const r = clip.resolverAtaque({ ataque: m.ataque, defesa: d.defesa, arma: m.arma, armadura: d.armadura, outrosAtaque: bonus, rng: rng(e) });
+  const def = e.defendendo ? PARAM.defender.defesa + (pesado ? PARAM.defender.contraPesado : 0) : 0;
+  const r = clip.resolverAtaque({ ataque: m.ataque, defesa: d.defesa, arma: m.arma + (pesado ? PARAM.preparo.dano : 0), armadura: d.armadura, outrosAtaque: bonus, outrosDefesa: def, rng: rng(e) });
+  if (pesado) {
+    if (r.acertou) e.stats.pesadosRecebidos++; else e.stats.pesadosEvitados++;
+    ganharPista(e, 'preparo');
+  }
   if (r.acertou) {
     e.vida -= r.dano;
     e.ultimoGolpe = artigoDe(especie(e, m).nome);
     efeito(e, 'golpe');
     if (r.dano >= PARAM.consciencia.pancada) perderCons(e, 1, 'pancada');
     if (ferimento(e) >= PARAM.corpo.sangra) e.sangue.set(idx(e, e.jogador.x, e.jogador.y), e.turno);
-    msg(e, `${Maiuscula(artigoDe(nome))} acerta você${r.dano >= 4 ? ' em cheio' : ''}.`, 'dano');
-  } else msg(e, `${Maiuscula(artigoDe(nome))} erra você.`);
+    msg(e, `${Maiuscula(artigoDe(nome))} acerta você${pesado ? ' com o golpe pesado' : r.dano >= 4 ? ' em cheio' : ''}.`, 'dano');
+  } else if (e.defendendo) {
+    msg(e, `Você apara ${pesado ? 'o golpe pesado ' : ''}${emArtigo(nome).replace(/^n/, 'd')}.`, 'bom');
+    // Defendendo, quem luta devolve na hora.
+    if (d.ataque > 0 || d.arma > 0) {
+      e.stats.contraGolpes++;
+      e.defendendo = false;
+      msg(e, 'E devolve.', 'golpe');
+      golpear(e, m);
+    }
+  } else msg(e, `${Maiuscula(artigoDe(nome))} erra você${pesado ? ' por pouco' : ''}.`);
 }
 
 function ataqueAoCompanheiro(e, m, c) {
@@ -1728,9 +2073,10 @@ function criarMiragem(e) {
   if (!casas.length) return;
   const p = escolher(e.rAlu, casas);
   const final = e.andar === PARAM.andares;
-  const tipo = ponderado(e.rAlu, [['item', 3], [final ? 'saida' : 'escada', 2], ['altar', 0.6]]);
+  const pecaFalta = e.andar >= 2 && e.andar <= 4 && !e.pecas.includes(e.andar - 2);
+  const tipo = ponderado(e.rAlu, [['item', 3], [final ? 'saida' : 'escada', 2], ['altar', 0.6], ['peca', pecaFalta ? 0.8 : 0]]);
   const th = temaDe(e);
-  const o = { id: 'o' + e.proximoId++, tipo, x: p.x, y: p.y, real: false };
+  const o = { id: 'o' + e.proximoId++, tipo, x: p.x, y: p.y, real: false, indice: e.andar - 2 };
   if (tipo === 'item') {
     const t = ponderado(e.rAlu, [['cura', 2], ['calma', 3], ['folego', 1.5], ['ancora', 1]]);
     o.item = { tipo: t, nome: escolher(e.rAlu, t === 'folego' ? th.folego : th.itens[t]) };
@@ -1924,13 +2270,14 @@ export function percebido(e) {
     if (ent.tipo !== 'fantasma' && ent.vida <= 0) continue;
     if (!e.vis.has(idx(e, ent.x, ent.y))) continue;
     const ap = aparencia(e, ent);
-    const esp = th.monstros.find((m) => m.id === ap.especie) ?? th.aliados.find((m) => m.id === ap.especie);
+    const esp = catalogo(th, ap.especie);
     const real = ent.tipo !== 'fantasma';
     entidades.push({
       id: ent.id, x: ent.x, y: ent.y, sprite: esp.sprite, cores: esp.cores, nome: esp.nome,
       categoria: ap.categoria === 'aliado' ? 'aliado' : 'hostil', especie: ap.categoria,
       sombra: real, respira: !real,
       companheiro: ent.estado === 'seguindo' && !ent.aparencia,
+      preparando: !!ent.preparando, tonto: ent.tonto > 0, ameaca: !!ent.ronda,
       fugindo: ent.estado === 'fugindo' || ent.estado === 'pacificado',
       marca: ent.suspeito ? 'suspeito' : ent.revelado ? 'real' : null,
       ...(e.depurar ? { verdade: { tipo: ent.tipo, especie: ent.especie, vida: ent.vida, disfarce: !!ent.aparencia } } : {}),
@@ -1968,6 +2315,9 @@ export function percebido(e) {
     w, h, tiles, visivel, sinais, tema: e.tema, andar: e.andar, nomeAndar: th.andares[e.andar - 1],
     sangue,
     turno: e.turno,
+    fio: e.fioMax ? Math.round((e.fio / e.fioMax) * 100) / 100 : 1,
+    pecas: [0, 1, 2].map((i) => (e.pecas.includes(i) ? th.pecas.nomes[i] : null)),
+    janelas: e.janelas.filter((j) => e.visto[idx(e, j.x, j.y)]).map((j) => ({ x: j.x, y: j.y, estado: j.estado, passou: j.passou ?? -99, quem: j.quem ? catalogo(th, j.quem) : null })),
     atencao: lc,
     ferimento: ferimento(e),
     desmaio: e.desmaio > 0,
@@ -2028,6 +2378,6 @@ export function resumo(e) {
     semente: e.semente, tema: e.tema, origem: e.origem,
     resultado: e.fim?.tipo ?? 'andando', andar: e.andar, turnos: s.turnos,
     enganos, revelados: s.fantasmasRevelados + s.disfarcesRevelados + s.miragensReveladas + s.itensRevelados,
-    stats: { ...s }, pistas: [...e.pistas], diario: [...e.diario],
+    stats: { ...s }, pistas: [...e.pistas], diario: [...e.diario], pecas: e.pecas.length, inteira: !!e.fim?.inteira,
   };
 }

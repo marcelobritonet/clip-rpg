@@ -462,3 +462,143 @@ test('sem Consciência você desmaia; descansar sem perigo à vista devolve a at
   assert.ok(e.cons >= Math.floor(D.consMax * J.PARAM.consciencia.desmaio.depois) - 1, 'acorda com metade');
   assert.ok(J.percebido(e).estado.consciencia);
 });
+
+/* Versão 0.3: o fio, o combate com mais verbos, as janelas e o caminho. */
+
+const monstroAo = (e, especie, dx, extra = {}) => {
+  const base = TEMAS.sanatorio.monstros.find((m) => m.id === especie);
+  const m = { id: 'm-' + dx, tipo: 'monstro', especie, categoria: base.categoria, x: e.jogador.x + dx, y: e.jogador.y, ataque: base.ataque, defesa: base.defesa, vida: base.vida, vidaMax: base.vida, arma: base.arma, armadura: 0, vontade: base.vontade, mental: 0, estado: 'cacando', ...extra };
+  e.entidades.push(m);
+  return m;
+};
+
+test('quando o fio acaba, a ronda chega, não cai e a cabeça pesa o dobro', () => {
+  const { e } = salaLimpa();
+  e.fio = 2;
+  J.agir(e, { tipo: 'esperar' });
+  J.agir(e, { tipo: 'esperar' });
+  const r = e.entidades.find((x) => x.ronda);
+  assert.ok(r, 'a ronda chegou');
+  assert.equal(e.stats.rondas, 1);
+  assert.equal(e.avisosFio, J.PARAM.fio.avisos.length, 'os avisos vieram antes');
+  r.x = e.jogador.x + 1; r.y = e.jogador.y; r.tonto = 5;
+  J.agir(e, { tipo: 'esperar' });
+  assert.ok(J.percebido(e).entidades.some((x) => x.ameaca), 'a ronda aparece como ameaça');
+  for (let i = 0; i < 10; i++) J.agir(e, { tipo: 'atacar', dx: 1, dy: 0 });
+  assert.ok(r.vida > 900, 'não cai');
+});
+
+test('golpe preparado avisa; sair de perto faz o golpe cortar o ar', () => {
+  const { e } = salaLimpa();
+  const m = monstroAo(e, 'guarda', 1, { preparando: true });
+  J.agir(e, { tipo: 'mover', dx: -1, dy: 0 });
+  assert.equal(m.preparando, false);
+  assert.ok(e.stats.pesadosEvitados >= 1);
+  assert.ok(e.pistas.includes('preparo'));
+  // E aparece na percepção enquanto prepara.
+  m.preparando = true;
+  assert.ok(J.percebido(e).entidades.find((x) => x.id === m.id)?.preparando);
+});
+
+test('defender segura golpes e devolve quando o golpe erra', () => {
+  let contra = 0, acertos = 0;
+  for (let s = 0; s < 40; s++) {
+    const { e } = salaLimpa({ semente: 'defesa-' + s });
+    monstroAo(e, 'guarda', 1);
+    e.rDados = fluxo('d', s);
+    const vida = e.vida;
+    J.agir(e, { tipo: 'defender' });
+    contra += e.stats.contraGolpes;
+    acertos += e.vida < vida;
+  }
+  assert.ok(contra > 0, 'houve contra-golpe');
+  assert.ok(acertos < 30, 'defendendo, apanha menos');
+});
+
+test('empurrar contra a parede deixa tonto; para dentro do buraco, derruba', () => {
+  let tonto = false, caiu = false;
+  for (let s = 0; s < 30 && !(tonto && caiu); s++) {
+    const { e, k } = salaLimpa({ semente: 'empurra-' + s });
+    e.rDados = fluxo('e', s);
+    const m = monstroAo(e, 'enfermeiro', 1);
+    e.mapa.tiles[k(2)] = T.PAREDE;
+    J.agir(e, { tipo: 'empurrar', alvo: m.id });
+    if (e.stats.empurroesCertos) tonto ||= m.tonto > 0 || m.vida <= 0;
+    const b = salaLimpa({ semente: 'buraco-' + s });
+    b.e.rDados = fluxo('b', s);
+    const m2 = monstroAo(b.e, 'enfermeiro', 1);
+    b.e.mapa.tiles[b.k(2)] = T.BURACO;
+    J.agir(b.e, { tipo: 'empurrar', alvo: m2.id });
+    caiu ||= b.e.stats.quedasDeMonstro === 1 && m2.vida <= 0;
+  }
+  assert.ok(tonto, 'ficou tonto contra a parede');
+  assert.ok(caiu, 'caiu no buraco');
+});
+
+test('bestas não abrem porta fechada', () => {
+  const { e, x, y, k } = salaLimpa();
+  e.mapa.tiles[k(1)] = T.ABERTA;
+  const rato = monstroAo(e, 'rato', 2);
+  assert.ok(J.agir(e, { tipo: 'fechar' }));
+  assert.equal(e.mapa.tiles[k(1)], T.PORTA);
+  for (let i = 0; i < 6; i++) J.agir(e, { tipo: 'esperar' });
+  assert.equal(e.mapa.tiles[k(1)], T.PORTA, 'a porta continua fechada');
+  assert.ok(!(rato.x === x + 1 && rato.y === y), 'o rato não entrou na porta');
+});
+
+test('janela que bate: se ninguém segura, algo entra; segurada, não', () => {
+  const { e, x, y } = salaLimpa();
+  // Janela logo acima do jogador.
+  e.mapa.tiles[(y - 1) * e.mapa.w + x] = T.PAREDE;
+  const j = { x, y: y - 1, estado: 'batendo', batidas: 0, falsa: false };
+  e.janelas = [j];
+  const antes = e.entidades.length;
+  // Sai de baixo dela para a invasão ter onde entrar.
+  J.agir(e, { tipo: 'mover', dx: 1, dy: 0 });
+  for (let i = 0; i < 4; i++) J.agir(e, { tipo: 'esperar' });
+  assert.equal(j.estado, 'quebrada');
+  assert.equal(e.stats.invasoes, 1);
+  assert.ok(e.entidades.length > antes);
+  // Outra janela, segurada a tempo.
+  const s2 = salaLimpa({ semente: 'janela-2' });
+  s2.e.mapa.tiles[(s2.y - 1) * s2.e.mapa.w + s2.x] = T.PAREDE;
+  const j2 = { x: s2.x, y: s2.y - 1, estado: 'batendo', batidas: 0, falsa: false };
+  s2.e.janelas = [j2];
+  J.agir(s2.e, { tipo: 'mover', dx: 0, dy: -1 });
+  assert.equal(j2.estado, 'barrada');
+  assert.ok(s2.e.pistas.includes('janela'));
+});
+
+test('as peças do caminho devolvem fio e decidem o fim', () => {
+  const { e, x, y } = salaLimpa();
+  e.objetos.push({ id: 'p0', tipo: 'peca', indice: 0, x: x + 1, y, real: true });
+  e.fio = 10;
+  J.agir(e, { tipo: 'mover', dx: 1, dy: 0 });
+  assert.deepEqual(e.pecas, [0]);
+  assert.ok(e.fio > 10 + J.PARAM.fio.peca - 3, 'devolveu fio');
+  // Saída com uma peça: fuga pela metade.
+  e.andar = J.PARAM.andares;
+  e.objetos.push({ id: 's', tipo: 'saida', x: x + 2, y, real: true });
+  J.agir(e, { tipo: 'mover', dx: 1, dy: 0 });
+  assert.equal(e.fim.tipo, 'fuga');
+  assert.equal(e.fim.inteira, false);
+  // Com as três: inteira.
+  const b = salaLimpa({ semente: 'inteira' });
+  b.e.pecas = [0, 1, 2];
+  b.e.andar = J.PARAM.andares;
+  b.e.objetos.push({ id: 's', tipo: 'saida', x: b.x + 1, y: b.y, real: true });
+  J.agir(b.e, { tipo: 'mover', dx: 1, dy: 0 });
+  assert.equal(b.e.fim.inteira, true);
+  assert.equal(J.resumo(b.e).inteira, true);
+});
+
+test('cada andar do meio tem uma peça do caminho; o primeiro e o último, não', () => {
+  for (const tema of LISTA_TEMAS) {
+    for (let a = 1; a <= 5; a++) {
+      const c = J.gerarConteudoDoAndar('pecas', tema, a);
+      const pecas = c.objetos.filter((o) => o.tipo === 'peca');
+      assert.equal(pecas.length, a >= 2 && a <= 4 ? 1 : 0, `${tema} andar ${a}`);
+      assert.ok(c.janelas.length >= 1, 'há janelas');
+    }
+  }
+});

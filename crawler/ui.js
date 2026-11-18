@@ -98,6 +98,8 @@ function montarComo() {
       <tr><td><b>Consciência</b> (atenção)</td><td>A vista escurece, a imagem dobra e os olhos piscam devagar</td><td>Você enxerga menos. O espaço mente: portas pintadas na parede, buracos que não existem, corredores sem fim, vultos e miragens. Em zero, você desmaia. Descanse quieto, sem nada à vista, para voltar.</td></tr>
       <tr><td><b>Cabeça</b> (Sanidade)</td><td>A cor desbota, aparece grão e as cores se separam</td><td>Mente sobre quem e o que as coisas são: aliado com cara de monstro e o contrário, itens que parecem bichos parados, sussurros. As palavras do painel também mentem. Em zero, você perde o controle.</td></tr>
     </table>
+    <p><b>O fio.</b> Cada andar tem um fio que queima (a linha na base da tela). Quando acaba, a ronda chega pela porta por onde você entrou: não cai, não se cansa, só dá para fugir dela ou atrasá-la. E a cabeça pesa o dobro. Quem prepara um golpe pesado avisa um turno antes (<b>!</b> vermelho): saia de perto, defenda ou empurre. Janelas mostram o que passa lá fora; quando algo bate, segure a janela (ande contra ela) antes de o vidro ceder.</p>
+    <p><b>O caminho.</b> Nos andares 2, 3 e 4 há uma peça do caminho. Cada uma devolve fio e mostra a saída do andar. Com as três, você sai inteiro; sem elas, também dá para sair, mas o fim é outro.</p>
     <p>Fotografias, cartas e corpos fazem mal de olhar, mas mostram coisas: o caminho, um item, algo em que se agarrar. Pisar em cima examina.</p>
     <table>
       <tr><th>Ação</th><th>Quem faz bem</th><th>O que faz</th></tr>
@@ -106,7 +108,10 @@ function montarComo() {
       <tr><td>Falar <kbd>T</kbd></td><td>Espírito (Presença)</td><td>Convence gente a ir embora. Com um aliado, ganha ajuda. Falar antes de bater desmascara aliados com cara de monstro.</td></tr>
       <tr><td>Encarar <kbd>E</kbd></td><td>Espírito (Vontade, Fé)</td><td>Espanta bestas, desfaz assombros e vultos. Falhar abala.</td></tr>
       <tr><td>Fogo <kbd>F</kbd></td><td>Mente (Mágica de Ataque Físico)</td><td>Ataque à distância com Pontos de Magia.</td></tr>
-      <tr><td>Ancorar <kbd>Q</kbd></td><td>Espírito (Vontade, Fé)</td><td>Recupera um pouco de Sanidade e apaga o que é falso à vista. Poucas vezes por andar.</td></tr>
+      <tr><td>Ancorar-se <kbd>Q</kbd></td><td>Espírito (Vontade, Fé)</td><td>Você se agarra a algo seu (seu nome, uma lembrança, uma oração) para lembrar quem é. Acalma a cabeça e, por alguns turnos, apaga o que é falso à vista. Os ◆ do painel dizem quantas vezes ainda dá neste andar; fotografias e altares dão mais. Os itens "âncora" (fotografia de casa, medalha, rádio) fazem o mesmo sem teste.</td></tr>
+      <tr><td>Defender <kbd>Z</kbd></td><td>Corpo</td><td>Guarda alta por um turno. Contra golpe preparado, vale mais. Se o golpe errar, você devolve na hora.</td></tr>
+      <tr><td>Empurrar <kbd>G</kbd></td><td>Corpo (Força)</td><td>Tira de perto e deixa tonto; contra a parede, mais tonto. Perto de um buraco de verdade, derruba de vez. Única coisa que segura a ronda, além de encarar.</td></tr>
+      <tr><td>Fechar porta <kbd>C</kbd></td><td>Todos</td><td>Bichos não abrem porta; gente e a ronda abrem.</td></tr>
       <tr><td>Esperar <kbd>Espaço</kbd></td><td>Todos</td><td>Sem monstro à vista, é descanso: a atenção volta devagar. O tempo continua pesando na cabeça.</td></tr>
       <tr><td>Pular</td><td>Todos</td><td>Andar duas vezes contra um buraco. O de verdade leva ao andar de baixo, com tombo; o falso só derruba você de joelhos.</td></tr>
     </table>
@@ -268,7 +273,8 @@ document.addEventListener('keydown', (ev) => {
   }
   const mapa = {
     x: () => acaoNoAlvo('olhar'), t: () => acaoNoAlvo('falar'), e: () => acaoNoAlvo('encarar'), f: () => acaoNoAlvo('magia'),
-    o: () => (viagem ? pararViagem() : viajar('explorar')), q: () => fazer({ tipo: 'ancorar' }), ' ': () => fazer({ tipo: 'esperar' }), '.': () => fazer({ tipo: 'esperar' }), Tab: () => trocarAlvo(),
+    o: () => (viagem ? pararViagem() : viajar('explorar')), q: () => fazer({ tipo: 'ancorar' }),
+    z: () => fazer({ tipo: 'defender' }), g: () => acaoNoAlvo('empurrar'), c: () => fazer({ tipo: 'fechar' }), ' ': () => fazer({ tipo: 'esperar' }), '.': () => fazer({ tipo: 'esperar' }), Tab: () => trocarAlvo(),
   };
   if (mapa[k]) { ev.preventDefault(); mapa[k](); return; }
   const i = Number(k) - 1;
@@ -309,7 +315,7 @@ function viajar(destino) {
     const explorando = viagem.destino === 'explorar';
     if (!explorando && eu.x === viagem.destino.x && eu.y === viagem.destino.y) return pararViagem();
     const novo = p.entidades.some((q) => !viagem.vistos.has(q.id) && !q.companheiro) || (explorando && p.objetos.some((q) => q.visivel && !viagem.objetos.has(q.id)));
-    const algo = e.log.slice(viagem.log).some((m) => ['dano', 'perigo', 'surto', 'golpe', 'fala', 'mentira', 'pista', 'bom'].includes(m.tipo));
+    const algo = e.log.slice(viagem.log).some((m) => ['dano', 'perigo', 'surto', 'golpe', 'fala', 'mentira', 'pista', 'bom', 'peca'].includes(m.tipo));
     if (viagem.passos > 0 && (novo || algo)) return pararViagem();
     const passa = (xx, yy) => [T.CHAO, T.PORTA, T.ABERTA].includes(p.tiles[yy * p.w + xx]) && !p.entidades.some((q) => q.x === xx && q.y === yy && !q.companheiro);
     const d = viagem.destino;
@@ -372,7 +378,7 @@ function atualizar() {
   desenharItens(p);
   desenharRegistro();
   $('faixa').innerHTML = `<span>${TEMAS[e.tema].curto} · ${p.nomeAndar} (${p.andar}/5)</span><span class="semente">${e.semente}</span>`;
-  if (e.escolha) mostrarEvolucao(); else $('evolucao').hidden = true;
+  if (e.escolha) mostrarEvolucao(); else { $('evolucao').hidden = true; pararRelogioEscolha(); }
   if (e.fim && $('fim').hidden) setTimeout(terminar, 700);
 }
 
@@ -405,7 +411,9 @@ function desenharEstado(p) {
     <dt>Consciência</dt><dd class="${p.atencao >= 3 ? 'apagando' : ''}">${apagarTexto(s.consciencia, p.atencao)}</dd>
     <dt>Cabeça</dt><dd>${embaralharTexto(s.sanidade, p.lucidez)}</dd>
     ${s.magia ? `<dt>Magia</dt><dd>${s.magia}</dd>` : ''}
-    <dt>Âncoras</dt><dd class="ancoras" title="Vezes que ainda dá para se ancorar neste andar">${ancoras}</dd>
+    <dt>Âncoras</dt><dd class="ancoras" title="Vezes que ainda dá para se ancorar neste andar (Q). Ancorar-se: segurar uma lembrança sua para lembrar quem você é; acalma e apaga o que é falso à vista">${ancoras}</dd>
+    <dt>Caminho</dt><dd class="pecas" title="${p.pecas.map((x) => x ?? '?').join(' · ')}">${p.pecas.map((x) => (x ? '◆' : '◇')).join('')}</dd>
+    <div class="fio-hud${p.fio <= 0 ? ' sem-fio' : p.fio < 0.25 ? ' curto' : ''}" title="O fio do andar: quando acaba, ${TEMAS[e.tema].ronda.nome.replace(/^./, (c) => c)} chega"><span style="transform: scaleX(${Math.max(0, p.fio).toFixed(3)})"></span></div>
     ${depurar && n ? `<div class="numeros">Vida ${n.vida}/${n.vidaMax} · Cons ${n.cons}/${n.consMax} · San ${n.san}/${n.sanMax} · PM ${n.pm}/${n.pmMax} · lucidez ${p.lucidez} · atenção ${p.atencao} · corpo ${p.ferimento} · turno ${n.turno}${s.mentindo ? ' · palavras mentindo' : ''}</div>` : ''}`;
 }
 
@@ -419,6 +427,9 @@ function desenharAlvo(p) {
     jeito = a.companheiro ? 'está com você' : a.categoria === 'aliado' ? 'parece um aliado' : a.fugindo ? 'está se afastando' : 'parece hostil';
     if (a.marca === 'suspeito') jeito += '; algo nele não está certo';
     if (a.marca === 'real') jeito += '; você confirmou que é real';
+    if (a.preparando) jeito += '; <b>prepara um golpe pesado</b>';
+    if (a.tonto) jeito += '; está tonto';
+    if (a.ameaca) jeito += '; não dá para derrubar';
   } else jeito = a.confirmado ? 'é real' : '';
   const verdade = depurar && a.verdade ? ` <span class="nota">[${JSON.stringify(a.verdade)}]</span>` : '';
   $('alvo').innerHTML = `Alvo: <b>${a.nome}</b>, ${dist}${jeito ? ', ' + jeito : ''}.${verdade}`;
@@ -431,7 +442,10 @@ function desenharAcoes(p) {
     botao('Olhar de novo', 'X', () => acaoNoAlvo('olhar'), !a),
     botao('Falar', 'T', () => acaoNoAlvo('falar'), !ent || ent.d > 1),
     botao('Encarar', 'E', () => acaoNoAlvo('encarar'), !ent || ent.d > 4),
-    botao('Ancorar', 'Q', () => fazer({ tipo: 'ancorar' }), p.cargasAncora <= 0),
+    botao('Ancorar-se', 'Q', () => fazer({ tipo: 'ancorar' }), p.cargasAncora <= 0),
+    botao('Defender', 'Z', () => fazer({ tipo: 'defender' }), false),
+    botao('Empurrar', 'G', () => acaoNoAlvo('empurrar'), !ent || ent.d !== 1),
+    botao('Fechar porta', 'C', () => fazer({ tipo: 'fechar' }), false),
   ];
   if (p.temMagia) lista.splice(3, 0, botao('Fogo', 'F', () => acaoNoAlvo('magia'), !ent || ent.d > 6));
   lista.push(botao('Trocar alvo', 'Tab', trocarAlvo, false));
@@ -465,10 +479,39 @@ function desenharRegistro() {
   ultimoLog = e.log.length;
 }
 
+/** A escolha entre andares tem fio próprio: se acabar, o lugar escolhe por você. */
+const TEMPO_ESCOLHA = 15000;
+let relogioEscolha = null;
+function pararRelogioEscolha() { if (relogioEscolha) cancelAnimationFrame(relogioEscolha.raf); relogioEscolha = null; }
+function relogioDaEscolha() {
+  pararRelogioEscolha();
+  relogioEscolha = { resta: TEMPO_ESCOLHA, antes: performance.now(), raf: 0 };
+  const barra = $('fio-escolha');
+  const passo = (agora) => {
+    if (!relogioEscolha || !e?.escolha) return pararRelogioEscolha();
+    // Com a aba escondida, o tempo não corre.
+    if (!document.hidden) relogioEscolha.resta -= agora - relogioEscolha.antes;
+    relogioEscolha.antes = agora;
+    const f = Math.max(0, relogioEscolha.resta / TEMPO_ESCOLHA);
+    barra.style.transform = `scaleX(${f.toFixed(3)})`;
+    barra.classList.toggle('acabando', f < 0.3);
+    if (f <= 0) {
+      const i = hash(e.semente + e.andar) % e.escolha.opcoes.length;
+      pararRelogioEscolha();
+      e.log.push({ texto: 'Você hesitou. O lugar escolheu por você.', tipo: 'perigo', turno: e.turno });
+      fazer({ tipo: 'escolher', indice: i });
+      return;
+    }
+    relogioEscolha.raf = requestAnimationFrame(passo);
+  };
+  relogioEscolha.raf = requestAnimationFrame(passo);
+}
+
 function mostrarEvolucao() {
   const caixa = $('evolucao');
   if (!caixa.hidden && caixa.dataset.andar === String(e.andar)) return;
   caixa.dataset.andar = String(e.andar);
+  relogioDaEscolha();
   $('opcoes').replaceChildren(...e.escolha.opcoes.map((o, i) => {
     const b = document.createElement('button');
     b.type = 'button';
@@ -485,13 +528,17 @@ function terminar() {
   if (!e?.fim || !$('fim').hidden) return;
   const r = J.resumo(e);
   const th = TEMAS[e.tema];
-  const titulo = { fuga: 'Você saiu', morte: 'Você caiu', loucura: 'Você se perdeu', desistiu: 'Você desistiu', limite: 'Fim' }[r.resultado];
+  const titulo = r.resultado === 'fuga' ? (r.inteira ? 'Você saiu inteiro' : 'Você saiu, pela metade') : { morte: 'Você caiu', loucura: 'Você se perdeu', desistiu: 'Você desistiu', limite: 'Fim' }[r.resultado];
   $('fim-titulo').textContent = titulo;
-  $('fim-texto').textContent = { fuga: th.fuga, morte: th.morte, loucura: th.loucura, desistiu: 'Você senta no chão e espera. Talvez outra noite.' }[r.resultado] ?? '';
+  $('fim-texto').textContent = { fuga: `${th.fuga} ${r.inteira ? th.pecas.inteiro : th.pecas.falta}`, morte: th.morte, loucura: th.loucura, desistiu: 'Você senta no chão e espera. Talvez outra noite.' }[r.resultado] ?? '';
   const s = r.stats;
   const linhas = [
     ['Onde parou', `${th.andares[e.andar - 1]} (andar ${e.andar} de 5)`],
     ['Turnos', s.turnos],
+    ['Peças do caminho', `${r.pecas} de 3`],
+    ['Vezes que a ronda alcançou você', s.rondas],
+    ['Golpes pesados que você evitou', s.pesadosEvitados],
+    ['Janelas que você segurou', s.janelasBarradas],
     ['Golpes no vazio', s.golpesNoVazio],
     ['Aliados feridos por engano', s.aliadosFeridos + (s.aliadosMortos ? ` (${s.aliadosMortos} não levantaram)` : '')],
     ['Falsos aliados que pegaram você', s.emboscadas],
@@ -608,6 +655,7 @@ function desenharMapa(agora) {
   }
   const naTela = (x, y) => x >= vista.x0 && y >= vista.y0 && x < vista.x0 + cols && y < vista.y0 + rows;
   const pos = (x, y) => [(x - vista.x0) * TAM, (y - vista.y0) * TAM];
+  for (const j of p.janelas) if (naTela(j.x, j.y)) desenharJanela(ctx, j, ...pos(j.x, j.y), agora, reduz, p);
   // Onde você caiu da outra vez, nesta mesma semente.
   const queda = diario.quedas[`${e.semente}|${e.tema}|${e.andar}`];
   if (queda && naTela(queda.x, queda.y) && p.tiles[queda.y * p.w + queda.x] >= 0) {
@@ -638,6 +686,7 @@ function desenharMapa(agora) {
     if (o.sombra) { ctx.fillStyle = 'rgba(0,0,0,0.45)'; ctx.fillRect(px + 2, py + 10, 8, 2); }
     else if (respira) py -= 1;
     if (o.tipo === 'item') ctx.drawImage(icone(criarCanvas, o.item), px, py);
+    else if (o.tipo === 'peca') desenharPeca(ctx, px, py, agora, reduz);
     else desenharObjeto(ctx, o.tipo, px, py, pal, e.tema);
     if (!o.visivel) { ctx.fillStyle = 'rgba(8,6,12,0.5)'; ctx.fillRect(px, py, TAM, TAM); }
     if (depurar && !o.verdade?.real) marcaDepura(ctx, px, py, '#ff3060');
@@ -650,6 +699,9 @@ function desenharMapa(agora) {
     else if (respira) py -= 1;
     ctx.drawImage(sprite(criarCanvas, ent.sprite, ent.cores), px, py);
     if (ent.companheiro) { ctx.fillStyle = COR_CAMINHO[e.origem].r; ctx.fillRect(px + 5, py - 1, 2, 1); }
+    if (ent.preparando) { ctx.fillStyle = '#ff3a2a'; ctx.fillRect(px + 5, py - 4, 2, 3); ctx.fillRect(px + 5, py, 2, 1); }
+    if (ent.tonto) { ctx.fillStyle = '#f0e070'; const f = reduz ? 0 : Math.floor(agora / 200) % 3; ctx.fillRect(px + 2 + f * 3, py - 1, 1, 1); ctx.fillRect(px + 8 - f * 2, py - 2, 1, 1); }
+    if (ent.ameaca) { ctx.fillStyle = 'rgba(200,20,20,0.5)'; ctx.fillRect(px, py + 11, TAM, 1); }
     if (ent.marca === 'suspeito') { ctx.fillStyle = pal.luz; ctx.fillRect(px + 9, py, 2, 1); ctx.fillRect(px + 10, py + 1, 1, 1); ctx.fillRect(px + 9, py + 3, 1, 1); }
     if (depurar && ent.verdade) {
       if (ent.verdade.tipo === 'fantasma') marcaDepura(ctx, px, py, '#ff3060');
@@ -708,12 +760,79 @@ function desenharMapa(agora) {
     t.fillRect(0, 0, tela.width, tela.height);
   }
   if (p.desmaio) { t.fillStyle = 'rgba(0,0,0,0.94)'; t.fillRect(0, 0, tela.width, tela.height); }
+  // O fio: uma linha que queima na base da tela. Acabou: risco vermelho pulsando.
+  {
+    const alt = Math.max(3, vista.escala);
+    const y0 = tela.height - alt;
+    if (p.fio > 0) {
+      const larg = Math.round(tela.width * p.fio);
+      t.fillStyle = p.fio < 0.25 ? '#e0603a' : TEMAS[e.tema].paleta.luz;
+      t.globalAlpha = p.fio < 0.1 && !reduz ? 0.55 + 0.45 * Math.abs(Math.sin(agora / 160)) : 0.85;
+      t.fillRect(0, y0, larg, alt);
+      t.globalAlpha = 1;
+      // a brasa na ponta
+      t.fillStyle = '#fff2c0';
+      t.fillRect(Math.max(0, larg - alt * 2), y0, alt * 2, alt);
+    } else {
+      t.fillStyle = `rgba(200,20,20,${reduz ? 0.8 : (0.45 + 0.4 * Math.abs(Math.sin(agora / 300))).toFixed(2)})`;
+      t.fillRect(0, y0, tela.width, alt);
+    }
+  }
   if (lampejo.cor && agora < lampejo.ate) {
     const falta = (lampejo.ate - agora) / 170;
     t.fillStyle = `${lampejo.cor}${Math.min(0.45, falta * 0.4).toFixed(3)})`;
     t.fillRect(0, 0, tela.width, tela.height);
   }
 }
+
+/** Peça do caminho: um brilho no chão. */
+function desenharPeca(ctx, px, py, agora, reduz) {
+  const b = reduz ? 1 : 0.7 + 0.3 * Math.sin(agora / 300);
+  ctx.fillStyle = `rgba(255,220,120,${(0.25 * b).toFixed(2)})`;
+  ctx.fillRect(px + 1, py + 3, 10, 8);
+  ctx.fillStyle = '#e8c860';
+  ctx.fillRect(px + 4, py + 4, 4, 5);
+  ctx.fillStyle = '#fff4c8';
+  ctx.fillRect(px + 5, py + 5, 1, 2);
+}
+
+/** Janela na parede: vidro escuro; algo passa; batidas tremem o vidro; quebrada; escorada. */
+function desenharJanela(ctx, j, px, py, agora, reduz, p) {
+  const k = j.y * p.w + j.x;
+  if (p.tiles[k] < 0) return;
+  const pal = TEMAS[e.tema].paleta;
+  ctx.fillStyle = '#2a2a30';
+  ctx.fillRect(px + 2, py + 2, 8, 8);
+  ctx.fillStyle = j.estado === 'quebrada' ? '#050508' : '#141a24';
+  ctx.fillRect(px + 3, py + 3, 6, 6);
+  // Algo passando lá fora (desenha por ~1 s depois do turno em que passou).
+  const idade = p.turno - j.passou;
+  if (j.estado === 'fechada' && idade >= 0 && idade <= 1 && j.quem) {
+    const vistaEm = passagens.get(k);
+    if (!vistaEm || vistaEm.turno !== j.passou) passagens.set(k, { turno: j.passou, t0: agora });
+    const t0 = passagens.get(k).t0;
+    const f = reduz ? 0.5 : Math.min(1, (agora - t0) / 1100);
+    if (f < 1) {
+      const sx = Math.round(-6 + f * 18);
+      ctx.save();
+      ctx.beginPath();
+      ctx.rect(px + 3, py + 3, 6, 6);
+      ctx.clip();
+      ctx.fillStyle = 'rgba(10,8,12,0.95)';
+      ctx.fillRect(px + 3 + sx, py + 4, 3, 5);
+      ctx.fillRect(px + 3 + sx + 1, py + 3, 2, 1);
+      ctx.restore();
+    }
+  }
+  if (j.estado === 'batendo' && !reduz && Math.floor(agora / 140) % 2 === 0) { ctx.fillStyle = 'rgba(230,230,240,0.35)'; ctx.fillRect(px + 3, py + 3, 6, 6); }
+  if (j.estado === 'batendo' || j.estado === 'quebrada') { ctx.fillStyle = '#c8ccd4'; ctx.fillRect(px + 4, py + 4, 1, 1); ctx.fillRect(px + 5, py + 5, 1, 1); ctx.fillRect(px + 7, py + 4, 1, 2); }
+  // Caixilho.
+  ctx.fillStyle = pal.parede2;
+  ctx.fillRect(px + 5, py + 3, 1, 6);
+  ctx.fillRect(px + 3, py + 6, 6, 1);
+  if (j.estado === 'barrada') { ctx.fillStyle = '#6a4a2a'; ctx.fillRect(px + 1, py + 4, 10, 2); ctx.fillRect(px + 1, py + 8, 10, 1); }
+}
+const passagens = new Map();
 
 function marcaDepura(ctx, px, py, cor) {
   ctx.fillStyle = cor;

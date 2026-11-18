@@ -14,8 +14,8 @@ const f1 = (x) => x.toFixed(1).replace('.', ',');
 
 for (const perfil of perfis) {
   console.log(`\n### Robô ${perfil} (${N} partidas por tema e origem)\n`);
-  console.log('| Tema | Origem | Fuga | Morte | Loucura | Limite | Andar médio | Turnos (fuga) | Turnos (todas) | Enganos/partida | Revelados/partida | Surtos | % turnos Abalado ou pior |');
-  console.log('|---|---|---|---|---|---|---|---|---|---|---|---|---|');
+  console.log('| Tema | Origem | Fuga | Fuga inteira | Morte | Loucura | Limite | Andar médio | Turnos (fuga) | Turnos (todas) | Enganos/partida | Revelados/partida | Surtos | % turnos Abalado ou pior |');
+  console.log('|---|---|---|---|---|---|---|---|---|---|---|---|---|---|');
   const total = [];
   for (const tema of LISTA_TEMAS) {
     for (const origem of origens) {
@@ -24,7 +24,7 @@ for (const perfil of perfis) {
       total.push(...rs);
       const c = (t) => rs.filter((r) => r.resultado === t).length / rs.length;
       const ruim = med(rs.map((r) => { const t = r.stats.turnosPorLucidez; const s = t.reduce((a, b) => a + b, 0) || 1; return (t[2] + t[3] + t[4] + t[5]) / s; }));
-      console.log(`| ${tema} | ${origem} | ${pct(c('fuga'))} | ${pct(c('morte'))} | ${pct(c('loucura'))} | ${pct(c('limite'))} | ${f1(med(rs.map((r) => r.andar)))} | ${Math.round(med(rs.filter((r) => r.resultado === 'fuga').map((r) => r.turnos)))} | ${Math.round(med(rs.map((r) => r.turnos)))} | ${f1(med(rs.map((r) => r.enganos)))} | ${f1(med(rs.map((r) => r.revelados)))} | ${f1(med(rs.map((r) => r.stats.surtos)))} | ${pct(ruim)} |`);
+      console.log(`| ${tema} | ${origem} | ${pct(c('fuga'))} | ${pct(rs.filter((r) => r.inteira).length / rs.length)} | ${pct(c('morte'))} | ${pct(c('loucura'))} | ${pct(c('limite'))} | ${f1(med(rs.map((r) => r.andar)))} | ${Math.round(med(rs.filter((r) => r.resultado === 'fuga').map((r) => r.turnos)))} | ${Math.round(med(rs.map((r) => r.turnos)))} | ${f1(med(rs.map((r) => r.enganos)))} | ${f1(med(rs.map((r) => r.revelados)))} | ${f1(med(rs.map((r) => r.stats.surtos)))} | ${pct(ruim)} |`);
     }
   }
   // De onde vem e para onde vai a Sanidade, e como as partidas acabam.
@@ -48,7 +48,7 @@ for (const perfil of perfis) {
   for (const [k, nome] of Object.entries({ tempo: 'O tempo', sangue: 'Sangue perdido', pancada: 'Pancadas', buraco: 'Buracos falsos' })) console.log(`| −${nome} | ${origens.map((o) => f1(med(porOrigem(o).map((r) => r.stats.cansaco[k] ?? 0)))).join(' | ')} |`);
   const s = (k) => f1(med(total.map((r) => r.stats[k])));
   console.log('\n| Engano (média por partida) | Valor |\n|---|---|');
-  for (const [k, nome] of [['desmaios', 'Desmaios'], ['passosPerdidos', 'Passos no corredor sem fim'], ['portasFalsas', 'Portas pintadas empurradas'], ['buracosFalsos', 'Buracos falsos pulados'], ['quedas', 'Quedas por buraco de verdade'], ['passosArrastados', 'Passos arrastados'], ['farejado', 'Bestas que farejaram sangue'], ['itensDisfarcados', 'Itens com cara de monstro'], ['itensQuebrados', 'Itens quebrados por engano'], ['itensRevelados', 'Itens desmascarados'], ['perturbadores', 'Coisas perturbadoras examinadas'], ['golpesNoVazio', 'Golpes no vazio'], ['fantasmasGolpes', 'Golpes de vulto recebidos'], ['aliadosFeridos', 'Aliados feridos'], ['aliadosMortos', 'Aliados mortos'], ['emboscadas', 'Emboscadas de falso aliado'], ['miragensPisadas', 'Miragens pisadas'], ['paredesFalsas', 'Paredes falsas'], ['fantasmasCriados', 'Vultos criados'], ['disfarcesCriados', 'Disfarces criados'], ['miragensCriadas', 'Miragens criadas'], ['fantasmasRevelados', 'Vultos desfeitos'], ['disfarcesRevelados', 'Disfarces desfeitos'], ['olhares', 'Olhar de novo'], ['pacificados', 'Convencidos'], ['espantados', 'Espantados com fé'], ['vencidos', 'Derrubados']]) {
+  for (const [k, nome] of [['rondas', 'Vezes que a ronda chegou'], ['turnosSemFio', 'Turnos sem fio'], ['preparos', 'Golpes preparados'], ['pesadosRecebidos', 'Golpes pesados recebidos'], ['pesadosEvitados', 'Golpes pesados evitados'], ['defesas', 'Defender'], ['contraGolpes', 'Contra-golpes'], ['empurroesCertos', 'Empurrões certos'], ['quedasDeMonstro', 'Monstros empurrados no buraco'], ['invasoes', 'Invasões pela janela'], ['janelasBarradas', 'Janelas seguradas'], ['batidasFalsas', 'Batidas que ninguém deu'], ['desmaios', 'Desmaios'], ['passosPerdidos', 'Passos no corredor sem fim'], ['portasFalsas', 'Portas pintadas empurradas'], ['buracosFalsos', 'Buracos falsos pulados'], ['quedas', 'Quedas por buraco de verdade'], ['passosArrastados', 'Passos arrastados'], ['farejado', 'Bestas que farejaram sangue'], ['itensDisfarcados', 'Itens com cara de monstro'], ['itensQuebrados', 'Itens quebrados por engano'], ['itensRevelados', 'Itens desmascarados'], ['perturbadores', 'Coisas perturbadoras examinadas'], ['golpesNoVazio', 'Golpes no vazio'], ['fantasmasGolpes', 'Golpes de vulto recebidos'], ['aliadosFeridos', 'Aliados feridos'], ['aliadosMortos', 'Aliados mortos'], ['emboscadas', 'Emboscadas de falso aliado'], ['miragensPisadas', 'Miragens pisadas'], ['paredesFalsas', 'Paredes falsas'], ['fantasmasCriados', 'Vultos criados'], ['disfarcesCriados', 'Disfarces criados'], ['miragensCriadas', 'Miragens criadas'], ['fantasmasRevelados', 'Vultos desfeitos'], ['disfarcesRevelados', 'Disfarces desfeitos'], ['olhares', 'Olhar de novo'], ['pacificados', 'Convencidos'], ['espantados', 'Espantados com fé'], ['vencidos', 'Derrubados']]) {
     console.log(`| ${nome} | ${s(k)} |`);
   }
 }
