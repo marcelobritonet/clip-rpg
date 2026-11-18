@@ -10,6 +10,7 @@
 import { agir, percebido, novaPartida, resumo } from './jogo.js';
 import { T, primeiroPasso, distancia } from './mapa.js';
 import { fluxo, prox, chance, escolher } from './rng.js';
+import { TEMAS } from './temas.js';
 
 const PASSA = (t) => t === T.CHAO || t === T.PORTA || t === T.ABERTA;
 const VIDA_RUIM = ['Muito ferido', 'À beira do colapso'];
@@ -127,6 +128,9 @@ function decidirBruto(robo, e) {
     if (robo.descansando || CANSADO.includes(p.estado.consciencia)) return fim(robo, p, { tipo: 'esperar' });
   } else robo.descansando = false;
 
+  // Ofegante e sem perigo perto: o atento para um turno para segurar o fôlego.
+  if (robo.perfil === 'atento' && p.ofegante && !reaisHostis.some((x) => x.d <= 6) && (p.ofegante === 2 || p.fio > 0.3)) return fim(robo, p, { tipo: 'esperar' });
+
   // Bicho parado que não vem: olhar de novo (ou encarar) em vez de bater.
   const parado = imoveis.find((x) => x.d <= 4);
   if (parado && !reaisHostis.some((x) => x.d <= 2)) {
@@ -153,7 +157,7 @@ function decidirBruto(robo, e) {
       if (alvo.d === 1 && (especie === 'humano' || alvo.fe.emboscada)) return fim(robo, p, { tipo: 'falar', alvo: alvo.id });
       if (alvo.d <= 3 && (especie === 'besta' || especie === 'assombro')) return fim(robo, p, { tipo: 'encarar', alvo: alvo.id });
     }
-    if (e.origem === 'mente' && p.estado.magia !== 'Vazio' && alvo.d <= 6 && alvo.d >= 1) {
+    if (e.origem === 'mente' && !TEMAS[p.tema].dom.palavras.slice(4).includes(p.estado.magia) && alvo.d <= 6 && alvo.d >= 1) {
       if (robo.perfil === 'atento' && alvo.d <= 6 && !alvo.marca && chance(robo.r, 0.25)) return fim(robo, p, { tipo: 'olhar', alvo: alvo.id });
       return fim(robo, p, { tipo: 'magia', alvo: alvo.id });
     }

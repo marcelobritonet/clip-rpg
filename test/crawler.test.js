@@ -602,3 +602,38 @@ test('cada andar do meio tem uma peça do caminho; o primeiro e o último, não'
     }
   }
 });
+
+/* Versão 0.3.1: fôlego, retorno das perdas e o dom de cada tema. */
+
+test('correr sem parar deixa ofegante e cansa a vista; parar recupera o fôlego', () => {
+  const { e } = salaLimpa();
+  const cons = e.cons;
+  for (let i = 0; i < J.PARAM.folego.limite + 12; i++) J.agir(e, { tipo: 'mover', dx: i % 2 ? -1 : 1, dy: 0 });
+  assert.ok(J.percebido(e).ofegante >= 1, 'ofegante');
+  assert.ok(e.cons < cons, 'a vista cansou');
+  assert.ok(e.pistas.includes('folego'));
+  for (let i = 0; i < 12; i++) J.agir(e, { tipo: 'esperar' });
+  assert.equal(J.percebido(e).ofegante, 0, 'parado, o fôlego volta');
+});
+
+test('a percepção diz a direção de cada perda ou cura, sem números', () => {
+  const { e } = salaLimpa();
+  monstroAo(e, 'guarda', 1);
+  e.rDados = fluxo('apanha', 3);
+  let viu = false;
+  for (let i = 0; i < 20 && !viu; i++) {
+    J.agir(e, { tipo: 'esperar' });
+    viu = J.percebido(e).variacao.vida?.startsWith('perdeu');
+  }
+  assert.ok(viu, 'perdeu Vida e a percepção mostra');
+  assert.ok(!/"variacao":\{[^}]*\d/.test(JSON.stringify(J.percebido(e))), 'sem números na variação');
+});
+
+test('cada tema lê a magia da Mente de um jeito, com palavras próprias para o recurso', () => {
+  for (const tema of LISTA_TEMAS) {
+    const e = J.novaPartida({ semente: 'dom', tema, origem: 'mente' });
+    const p = J.percebido(e);
+    assert.ok(TEMAS[tema].dom.palavras.includes(p.estado.magia), tema);
+    assert.ok(TEMAS[tema].ancora.acao && TEMAS[tema].ancora.restam.length === 3);
+  }
+});

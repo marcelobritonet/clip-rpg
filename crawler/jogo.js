@@ -72,9 +72,16 @@ export const PARAM = {
    * entra pela porta por onde você entrou, caça você sem parar e o tempo pesa
    * o dobro na cabeça. Cada peça do caminho devolve um pedaço do fio.
    */
-  fio: { turnos: (a) => 240 + 20 * a, peca: 50, avisos: [0.5, 0.25, 0.1] },
+  fio: { turnos: (a) => 270 + 20 * a, peca: 50, avisos: [0.5, 0.25, 0.1] },
   /** A ronda anda dois de cada três turnos: quem corre escapa; quem para, não. */
   ronda: { ataque: 1, defesa: 2, arma: 1, vontade: 6, passo: 3 },
+  /**
+   * Fôlego (0.3.1): correr sem parar cansa. Cada passo soma 1; qualquer turno
+   * parado ou fazendo outra coisa tira 3. Acima de `limite`, cada tantos passos
+   * tiram 1 de Consciência; acima de `forte`, alguns passos custam dois turnos.
+   * Contrapeso do fio: a pressa tem preço.
+   */
+  folego: { limite: 22, forte: 38, custo: 5, passoDuplo: 0.3, recupera: 3 },
   /** Golpe preparado: chance de o monstro colado preparar, e o que o golpe pesado soma. */
   preparo: { chance: 0.3, ataque: 2, dano: 2, intervalo: 3 },
   /** Defender: soma à Defesa no turno do mundo (mais contra golpe preparado). */
@@ -172,7 +179,7 @@ export const ORIGENS = {
     aprimoramentos: { sentidos: 1, discernimento: 1, raciocinio: 1 },
     pericias: [{ id: 'magiaAtaqueFisico', nivel: 2 }],
     arma: false,
-    resumo: 'Olha de novo e quase sempre acerta. Lança fogo à distância com Pontos de Magia. Morre fácil de perto.',
+    resumo: 'Olha de novo e quase sempre acerta. Tem um dom que alcança longe e cansa a cabeça. Morre fácil de perto.',
   },
   espirito: {
     caminho: 'espirito',
@@ -197,6 +204,7 @@ export const PISTAS = {
   infinito: 'Quando o corredor não acaba, é a cabeça cansada. Pare e descanse.',
   imovel: 'Bicho que nunca se mexe talvez nem seja bicho. Olhe de novo antes de quebrar.',
   sangue: 'Sangrando, você deixa rastro. As bestas seguem o rastro.',
+  folego: 'Correr sem parar cansa a vista. Um passo parado de vez em quando segura o fôlego.',
   descanso: 'Esperar quieto, sem nada à vista, devolve a atenção. Mas o tempo pesa na cabeça.',
   preparo: 'Quem prepara um golpe pesado avisa. Saia de perto, defenda ou empurre antes.',
   janela: 'Janela que bate pode virar porta. Segure antes de o vidro ceder.',
@@ -302,6 +310,8 @@ export function novaPartida({ semente, tema = 'sanatorio', origem = 'corpo', dep
     descanso: 0,
     pecas: [],
     defendendo: false,
+    corrida: 0,
+    variacao: {},
     stats: {
       turnos: 0, golpesNoVazio: 0, aliadosFeridos: 0, aliadosMortos: 0, emboscadas: 0, miragensPisadas: 0,
       paredesFalsas: 0, fantasmasRevelados: 0, disfarcesRevelados: 0, miragensReveladas: 0, fantasmasGolpes: 0,
@@ -311,7 +321,7 @@ export function novaPartida({ semente, tema = 'sanatorio', origem = 'corpo', dep
       desmaios: 0, portasFalsas: 0, buracosFalsos: 0, quedas: 0, passosPerdidos: 0, passosArrastados: 0, farejado: 0,
       itensQuebrados: 0, itensDisfarcados: 0, itensRevelados: 0, perturbadores: 0,
       rondas: 0, preparos: 0, pesadosRecebidos: 0, pesadosEvitados: 0, defesas: 0, contraGolpes: 0, empurroes: 0, empurroesCertos: 0,
-      quedasDeMonstro: 0, portasFechadas: 0, invasoes: 0, janelasBarradas: 0, batidasFalsas: 0, turnosSemFio: 0,
+      ofegante: 0, quedasDeMonstro: 0, portasFechadas: 0, invasoes: 0, janelasBarradas: 0, batidasFalsas: 0, turnosSemFio: 0,
     },
   };
   const d = derivados(e);
@@ -634,11 +644,17 @@ export function agir(e, acao) {
   e.arrastou = false;
   e.descansou = false;
   e.defendendo = false;
+  const antes = { vida: e.vida, cons: e.cons, san: e.san, pm: e.pm, x: e.jogador.x, y: e.jogador.y, andar: e.andar };
   // No surto e no desmaio, o tempo passa mesmo que o corpo não faça nada útil.
   const gastou = executar(e, a) || e.surto > 0 || e.desmaio > 0;
   if (gastou && !e.fim && !e.escolha) mundo(e);
   // A perna arrastada: o mundo anda mais uma vez.
   if (gastou && e.arrastou && !e.fim && !e.escolha) mundo(e);
+  // Parou, ou fez outra coisa: o fôlego volta.
+  const andou = e.andar === antes.andar && (e.jogador.x !== antes.x || e.jogador.y !== antes.y);
+  if (gastou && !andou) e.corrida = Math.max(0, e.corrida - PARAM.folego.recupera);
+  // Quanto cada medida mudou neste turno (a tela mostra a direção, não o número).
+  e.variacao = { vida: e.vida - antes.vida, cons: e.cons - antes.cons, san: e.san - antes.san, pm: e.pm - antes.pm };
   return e;
 }
 
@@ -764,6 +780,19 @@ function mover(e, dx, dy, forcarAtaque) {
     e.stats.paredesFalsas++;
     msg(e, 'Você atravessa a parede. Ela nunca esteve ali.', 'mentira');
     ganharPista(e, 'parede');
+  }
+  // Fôlego: correr sem parar cobra da vista e, no limite, das pernas.
+  const F = PARAM.folego;
+  e.corrida++;
+  if (e.corrida === F.limite + 1) { msg(e, 'Você está ofegante. O corredor parece mais comprido.', 'perigo'); ganharPista(e, 'folego'); }
+  if (e.corrida > F.limite) {
+    e.stats.ofegante++;
+    if ((e.corrida - F.limite) % F.custo === 0) perderCons(e, 1, 'corrida');
+    if (e.corrida > F.forte && chance(e.rDados, F.passoDuplo)) {
+      e.arrastou = true;
+      if (!e.ultimoFolego || e.turno - e.ultimoFolego > 10) msg(e, 'Sem fôlego, você precisa parar a cada poucos passos.', 'dano');
+      e.ultimoFolego = e.turno;
+    }
   }
   if (chance(e.rDados, PARAM.corpo.lento[fv])) {
     e.arrastou = true;
@@ -1449,13 +1478,27 @@ function encarar(e, alvoId) {
 
 /* Magia (Mágicas de Ataque Físico) --------------------------------------- */
 
+/** Texto do dom do tema: {alvo}, {Alvo} e {item}. */
+function textoDom(modelo, nome, item) {
+  return modelo
+    .replace('{Alvo}', Maiuscula(artigoDe(nome)))
+    .replace('{alvo}', artigoDe(nome))
+    .replace('{item}', item ? artigo(item) : '');
+}
+
+/**
+ * O dom da Mente (regra: Mágicas de Ataque Físico). Cada tema o lê de um jeito:
+ * diagnóstico no sanatório, fórmula de fogo na masmorra, frasco incendiário no
+ * prédio. A regra é a mesma; muda a pele.
+ */
 function magia(e, alvoId) {
-  if (n(e, 'magiaAtaqueFisico') < 1) { msg(e, 'Você não sabe nenhuma mágica.'); return false; }
+  const dom = temaDe(e).dom;
+  if (n(e, 'magiaAtaqueFisico') < 1) { msg(e, 'Você não sabe fazer isso.'); return false; }
   const alvo = alvoPorId(e, alvoId);
   if (!alvo || !(alvo.especie || alvo.aparencia)) { msg(e, 'Sem alvo para a mágica.'); return false; }
   if (distancia(alvo, e.jogador) > PARAM.magia.alcance || !linhaLivre(e.mapa, e.jogador, alvo)) { msg(e, 'O alvo está fora de alcance.'); return false; }
   const m = clip.lancarMagia(e.ficha, { pericia: 'magiaAtaqueFisico', pm: PARAM.magia.custo, pmDisponivel: e.pm, rng: rng(e) });
-  if (m.falhou) { msg(e, 'Você está sem Pontos de Magia. Nada acontece.'); return false; }
+  if (m.falhou) { msg(e, dom.semRecurso); return false; }
   e.pm -= m.gasto;
   const nome = nomeAparente(e, alvo);
   efeito(e, 'magia');
@@ -1463,13 +1506,19 @@ function magia(e, alvoId) {
     alvo.usado = true;
     alvo.aparencia = null;
     e.stats.itensQuebrados++;
-    msg(e, `O fogo pega ${artigoDe(nome)}, que não foge. Era ${artigo(alvo.item.nome)}. Virou cinza.`, 'mentira');
+    msg(e, textoDom(dom.item, nome, alvo.item.nome), 'mentira');
+    if (!dom.quebraItem) {
+      alvo.usado = false;
+      alvo.confirmado = true;
+      e.stats.itensQuebrados--;
+      e.stats.itensRevelados++;
+    }
     ganharPista(e, 'imovel');
     return true;
   }
   if (alvo.tipo === 'fantasma') {
     e.stats.golpesNoVazio++;
-    msg(e, `O fogo atravessa ${artigoDe(nome)} e lambe a parede. Não havia nada ali.`, 'mentira');
+    msg(e, textoDom(dom.vazio, nome), 'mentira');
     removerFantasma(e, alvo);
     ganharPista(e, 'vazio');
     return true;
@@ -1478,23 +1527,24 @@ function magia(e, alvoId) {
   const r = clip.resolverAtaque({
     ataque: m.gasto + n(e, 'raciocinio'), dadoAtaque: m.dado, arma: m.gasto + n(e, 'raciocinio'), defesa: Math.max(0, alvo.defesa - (alvo.pontoFraco ?? 0)), armadura: alvo.armadura ?? 0, rng: rng(e),
   });
-  if (!r.acertou) { msg(e, `O fogo passa raspando ${artigoDe(nome)}.`); if (alvo.tipo === 'monstro') alvo.estado = 'cacando'; return true; }
-  ferir(e, alvo, r.dano, nome, 'Fogo! ');
+  if (!r.acertou) { msg(e, textoDom(dom.erra, nome)); if (alvo.tipo === 'monstro') alvo.estado = 'cacando'; return true; }
+  if (dom.acertaTexto) msg(e, textoDom(dom.acertaTexto, nome), 'golpe');
+  ferir(e, alvo, r.dano, nome, dom.acerta);
   return true;
 }
 
 /* Ancorar-se (Vontade ou Fé) --------------------------------------------- */
 
 function ancorar(e) {
-  if (e.cargasAncora <= 0) { msg(e, 'Você não tem mais em que se agarrar neste lugar.'); return false; }
+  if (e.cargasAncora <= 0) { msg(e, temaDe(e).ancora.restam[0] + '.'); return false; }
   const t = clip.testar({
     nivel: Math.max(n(e, 'vontade'), n(e, 'fe')), objeto: Math.max(n(e, 'autocontrole'), n(e, 'conviccao'), n(e, 'esperanca')),
     dificuldade: PARAM.ancora.dificuldade, rng: rng(e),
   });
-  if (!t.sucesso) { msg(e, 'Você tenta se agarrar a uma lembrança. Ela escorrega.'); return true; }
+  if (!t.sucesso) { msg(e, temaDe(e).ancora.falha); return true; }
   e.cargasAncora--;
   ancorarMundo(e, PARAM.ancora.ganho + n(e, 'esperanca'));
-  msg(e, 'Você respira, diz seu nome em voz alta e conta as paredes. O mundo para de mentir, por um tempo.', 'bom');
+  msg(e, temaDe(e).ancora.certo, 'bom');
   return true;
 }
 
@@ -2146,10 +2196,10 @@ export const EFEITO_NO_JOGO = {
   forca: 'Arma e armadura mais pesadas.',
   destreza: 'Libera Agilidade e Reflexo.',
   fisico: 'Libera Resistência e Saúde.',
-  inteligencia: 'Libera a mágica de fogo e Raciocínio.',
+  inteligencia: 'Libera o dom da Mente e Raciocínio.',
   percepcao: 'Olhar de novo com mais dados.',
   sabedoria: 'Olhar de novo; libera Serenidade e Discernimento.',
-  vontade: 'Mais Sanidade; ancorar e encarar.',
+  vontade: 'Mais Sanidade; ancorar-se e encarar.',
   presenca: 'Convencer gente e conversar melhor.',
   fe: 'Mais Sanidade; ancorar e encarar; o altar rende mais.',
   ataqueCorporal: 'Bate com mais precisão.',
@@ -2163,11 +2213,11 @@ export const EFEITO_NO_JOGO = {
   discernimento: 'Olhar de novo; nota sozinho o que está errado.',
   serenidade: 'Cada susto tira menos Sanidade.',
   memoria: 'O mapa lembrado não mente.',
-  raciocinio: 'O fogo acerta melhor.',
+  raciocinio: 'O dom da Mente acerta melhor.',
   autocontrole: 'Resiste a sussurros e ajuda a ancorar.',
   conviccao: 'Encarar e ancorar com mais dados.',
   esperanca: 'Ancorar e rezar devolvem mais Sanidade.',
-  magiaAtaqueFisico: 'Lança fogo à distância, gastando Pontos de Magia.',
+  magiaAtaqueFisico: 'O dom da Mente: ataque à distância que cansa a cabeça.',
   medicina: 'Curativos rendem mais.',
 };
 
@@ -2321,6 +2371,8 @@ export function percebido(e) {
     atencao: lc,
     ferimento: ferimento(e),
     desmaio: e.desmaio > 0,
+    ofegante: e.corrida > PARAM.folego.forte ? 2 : e.corrida > PARAM.folego.limite ? 1 : 0,
+    variacao: Object.fromEntries(Object.entries(e.variacao ?? {}).map(([k, v]) => [k, v < 0 ? (v <= -3 ? 'perdeu muito' : 'perdeu') : v > 0 ? (v >= 3 ? 'ganhou muito' : 'ganhou') : null])),
     jogador: { ...e.jogador, caminho: e.origem },
     entidades, objetos,
     lucidez: lv,
@@ -2364,7 +2416,7 @@ function palavras(e, d, lv) {
   return {
     vida: vidaDita,
     sanidade: san,
-    magia: n(e, 'magiaAtaqueFisico') > 0 ? clip.descrever('magia', e.pm, d.pmMax) : null,
+    magia: n(e, 'magiaAtaqueFisico') > 0 ? temaDe(e).dom.palavras[faixa(e.pm, d.pmMax)] : null,
     consciencia: NOMES_CONSCIENCIA[nivelConsciencia(e.cons, d.consMax)],
     mentindo: vidaDita !== vida || san !== clip.descrever('sanidade', e.san, d.sanMax),
   };

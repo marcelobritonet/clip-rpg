@@ -27,6 +27,7 @@ página. Não mexe na versão das regras nem das ferramentas do Clip.
 | 0.1.0 | 18/11/2026 | Primeira versão jogável: três temas, três origens, cinco andares, a Sanidade distorce a percepção, diário entre tentativas, robô e simulador. |
 | 0.2.0 | 18/11/2026 | Três medidas, três jeitos de errar. **Vida** baixa: sangue no chão que as bestas seguem, perna arrastada (passo de dois turnos), mãos que tremem, pulso vermelho na tela. **Consciência** (medida nova, só do jogo): o espaço mente (portas pintadas, buracos que não existem, corredores sem fim, vultos, miragens), a vista fecha e dobra, os olhos piscam; em zero, desmaio; descansar quieto devolve. **Sanidade** baixa: quem e o que as coisas são (aliado ↔ monstro, itens com cara de bicho parado, sussurros, palavras que mentem). Fotografias, cartas e corpos fazem mal de olhar, mas mostram o caminho, dão item ou âncora. Buraco de verdade é atalho com tombo. Item de fôlego. Seis pistas novas. |
 | 0.3.0 | 18/11/2026 | **Urgência**: cada andar tem um fio que queima (linha na base da tela e no painel); quando acaba, a ronda do tema chega (não cai, só dá para fugir ou atrasar) e a cabeça pesa o dobro. A escolha entre andares tem 15 segundos; se acabar, o lugar escolhe. **Combate**: golpe preparado com aviso (!), Defender (com contra-golpe), Empurrar (tonto contra a parede, derruba no buraco), Fechar porta (bichos não abrem). **Janelas**: algo passa lá fora; às vezes bate e entra, a não ser que você segure a janela; com a cabeça ruim, há batidas que ninguém dá. **Caminho**: uma peça por andar do meio (prontuário, selo, rádio) devolve fio e mostra a saída; com as três, o fim é inteiro. "Ancorar" virou "Ancorar-se", com explicação. |
+| 0.3.1 | 18/11/2026 | **O dom da Mente** deixa de ser "magia" na tela: diagnóstico no sanatório (dizer o nome exato do que o outro tem), fórmula de fogo na masmorra, frasco incendiário no prédio; o recurso vira Foco, Fórmulas ou Mistura, com palavras próprias. A regra continua Mágicas de Ataque Físico. **Âncora** vira cura para o espírito com gesto do tema (olhar a foto de casa, apertar a medalha, ouvir o recado no rádio), em frase no lugar das gemas. **Fôlego**: correr sem parar deixa ofegante, cansa a vista e, no limite, cada passo custa dois turnos; o fio ficou mais longo para compensar. **Perdas e curas visíveis**: cada estado tem uma frase curta ("sangrando", "pálpebras pesadas", "as coisas tremem"), setas ▼/▲ por alguns segundos quando algo muda e uma linha no registro quando a palavra muda. |
 
 ## Como se joga
 
@@ -112,6 +113,35 @@ vezes que ainda dá neste andar; fotografias e altares dão mais.
 | Janelas | 2 a 4 por andar, na parede de cima das salas. Algo passa lá fora (6% por turno por janela à vista). Às vezes algo bate (mais perto do fim do fio); depois de 3 batidas, o vidro cede e um monstro entra. Andar contra a janela que bate a segura de vez. Com a cabeça Perturbada ou pior, há batidas que ninguém dá | "Janelas com coisas passando, talvez entrando" |
 | Peças do caminho | Uma nos andares 2, 3 e 4, longe da entrada. Cada uma: +50 de fio, +2 de Sanidade, o caminho até a saída do andar marcado. Com a cabeça cansada, aparecem peças falsas | "Os itens dão o caminho para fechar o jogo" |
 | Finais | Sair com as três peças: fim inteiro (o prontuário, o selo, o rádio respondem). Sair sem elas: fuga pela metade. Morte e loucura continuam | O objetivo deixa de ser só fugir: é fugir sabendo quem você é |
+
+## Dom da Mente, âncora, fôlego e retorno (desde a 0.3.1)
+
+| Tema | Dom da Mente (botão, tecla F) | Recurso e palavras | Âncora (tecla Q) |
+|---|---|---|---|
+| Sanatório | Diagnosticar: dizer o nome exato do que o outro tem; não quebra itens, só os reconhece | Foco: Afiado, Atento, Disperso, Esgotado, Em branco | Olhar a foto de casa |
+| Masmorra | Fogo: uma das fórmulas do alquimista | Fórmulas: Na ponta da língua … Esquecidas | Apertar a medalha |
+| Zumbi | Arremessar: frasco incendiário improvisado | Mistura: Frascos cheios … Acabou | Ouvir o recado no rádio |
+
+A regra é a mesma nos três (Mágicas de Ataque Físico, Pontos de Magia): muda só
+a leitura, para que "magia" não pareça poder sobrenatural onde não cabe.
+
+**Fôlego.** Cada passo soma 1; qualquer turno parado ou fazendo outra coisa tira
+3. Acima de 22, você fica ofegante (palavra no painel) e a cada 5 passos perde 1
+de Consciência; acima de 38, 30% dos passos custam dois turnos. É o contrapeso do
+fio: a pressa custa a vista. O fio passou para 290 a 370 turnos.
+
+**Perdas e curas.** Sem números, mas sem vagueza:
+
+| Medida | Frases por estado |
+|---|---|
+| Corpo | sem um arranhão · cortes que ardem · sangrando · mal se aguenta em pé · mais um golpe e acabou |
+| Consciência | tudo nítido · atento, por enquanto · pálpebras pesadas · o chão balança · a vista falha |
+| Cabeça | o mundo é o que é · algo incomoda · as coisas tremem · nem tudo o que vê é real · quase nada é real |
+
+Cada perda ou cura mostra ▼ ou ▲ (dois, se foi grande) ao lado da palavra por
+alguns segundos. Quando a palavra muda, o registro diz a direção ("▼ Seu corpo
+piorou: agora, Ferido (sangrando)."). As setas seguem a verdade; as palavras
+da Cabeça ainda podem mentir.
 
 ## Decisões de design
 

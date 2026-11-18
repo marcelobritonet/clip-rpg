@@ -107,8 +107,8 @@ function montarComo() {
       <tr><td>Olhar de novo <kbd>X</kbd></td><td>Mente (Percepção, Sabedoria)</td><td>Teste contra a sua lucidez. Desfaz vultos e miragens e mostra o que um disfarce esconde. O Corpo insiste e paga com Vida.</td></tr>
       <tr><td>Falar <kbd>T</kbd></td><td>Espírito (Presença)</td><td>Convence gente a ir embora. Com um aliado, ganha ajuda. Falar antes de bater desmascara aliados com cara de monstro.</td></tr>
       <tr><td>Encarar <kbd>E</kbd></td><td>Espírito (Vontade, Fé)</td><td>Espanta bestas, desfaz assombros e vultos. Falhar abala.</td></tr>
-      <tr><td>Fogo <kbd>F</kbd></td><td>Mente (Mágica de Ataque Físico)</td><td>Ataque à distância com Pontos de Magia.</td></tr>
-      <tr><td>Ancorar-se <kbd>Q</kbd></td><td>Espírito (Vontade, Fé)</td><td>Você se agarra a algo seu (seu nome, uma lembrança, uma oração) para lembrar quem é. Acalma a cabeça e, por alguns turnos, apaga o que é falso à vista. Os ◆ do painel dizem quantas vezes ainda dá neste andar; fotografias e altares dão mais. Os itens "âncora" (fotografia de casa, medalha, rádio) fazem o mesmo sem teste.</td></tr>
+      <tr><td>${TEMAS[escolhaTema].dom.botao} <kbd>F</kbd></td><td>Mente (regra: Mágicas de Ataque Físico)</td><td>${TEMAS[escolhaTema].dom.nome}. ${TEMAS[escolhaTema].dom.descricao}</td></tr>
+      <tr><td>${TEMAS[escolhaTema].ancora.acao} <kbd>Q</kbd></td><td>Espírito (Vontade, Fé)</td><td>${TEMAS[escolhaTema].ancora.descricao} O painel diz quantas vezes ainda dá neste andar; fotografias e altares dão mais. Os itens de lembrança na bolsa fazem o mesmo sem teste.</td></tr>
       <tr><td>Defender <kbd>Z</kbd></td><td>Corpo</td><td>Guarda alta por um turno. Contra golpe preparado, vale mais. Se o golpe errar, você devolve na hora.</td></tr>
       <tr><td>Empurrar <kbd>G</kbd></td><td>Corpo (Força)</td><td>Tira de perto e deixa tonto; contra a parede, mais tonto. Perto de um buraco de verdade, derruba de vez. Única coisa que segura a ronda, além de encarar.</td></tr>
       <tr><td>Fechar porta <kbd>C</kbd></td><td>Todos</td><td>Bichos não abrem porta; gente e a ronda abrem.</td></tr>
@@ -144,6 +144,7 @@ function comecar(semente = $('semente').value.trim() || sementeNova(Date.now()))
   e = J.novaPartida({ semente, tema: escolhaTema, origem: escolhaOrigem, depurar });
   pistasAntes = [...diario.pistas];
   alvoId = null;
+  palavrasAntes = null;
   $('inicio').hidden = true;
   $('fim').hidden = true;
   $('partida').hidden = false;
@@ -166,8 +167,9 @@ function fazer(acao) {
   if (!e || e.fim) return;
   if (e.escolha && acao.tipo !== 'escolher') return;
   J.agir(e, acao);
+  anotarMudancas(J.percebido(e));
   for (const f of e.efeitos) {
-    const cor = { golpe: 'rgba(180,20,20,', mente: 'rgba(120,60,170,', surto: 'rgba(230,230,230,', magia: 'rgba(255,170,60,', desmaio: 'rgba(0,0,0,' }[f.tipo];
+    const cor = { golpe: 'rgba(180,20,20,', mente: 'rgba(120,60,170,', surto: 'rgba(230,230,230,', magia: TEMAS[e.tema].dom.cor, desmaio: 'rgba(0,0,0,' }[f.tipo];
     if (cor) lampejo = { cor, ate: performance.now() + (f.tipo === 'surto' || f.tipo === 'desmaio' ? 450 : 170) };
   }
   atualizar();
@@ -402,16 +404,76 @@ function apagarTexto(t, lc) {
   return [...t].map((ch, i) => (ch !== ' ' && (hash(t + i + quadro) % 7) < lc - 2 ? '·' : ch)).join('');
 }
 
+/*
+ * Estado sem números: cada palavra tem uma frase curta que diz como é estar
+ * assim, e cada mudança aparece como ▼ (perdeu) ou ▲ (ganhou) por alguns
+ * segundos, com uma linha no registro quando a palavra muda.
+ */
+const ESCALAS = {
+  vida: {
+    nomes: ['Intacto', 'Arranhado', 'Ferido', 'Muito ferido', 'À beira do colapso', 'Caído'],
+    frases: ['sem um arranhão', 'cortes que ardem', 'sangrando', 'mal se aguenta em pé', 'mais um golpe e acabou', 'no chão'],
+    piora: 'Seu corpo piorou', melhora: 'Seu corpo melhorou',
+  },
+  consciencia: {
+    nomes: ['Alerta', 'Desperto', 'Cansado', 'Zonzo', 'Apagando', 'Apagado'],
+    frases: ['tudo nítido', 'atento, por enquanto', 'pálpebras pesadas', 'o chão balança', 'a vista falha', 'escuro'],
+    piora: 'Sua atenção caiu', melhora: 'Sua atenção voltou',
+  },
+  sanidade: {
+    nomes: ['Lúcido', 'Inquieto', 'Abalado', 'Perturbado', 'Por um fio', 'Fora de si'],
+    frases: ['o mundo é o que é', 'algo incomoda', 'as coisas tremem', 'nem tudo o que vê é real', 'quase nada é real', 'perdido'],
+    piora: 'Sua cabeça piorou', melhora: 'Sua cabeça melhorou',
+  },
+};
+const MUDOU = { vida: 'vida', consciencia: 'cons', sanidade: 'san' };
+let palavrasAntes = null;
+const sinais = {}; // medida → { tipo, ate }
+
+/** Compara com o turno anterior: setas na tela e uma linha no registro quando a palavra muda. */
+function anotarMudancas(p) {
+  const agora = performance.now();
+  for (const [medida, chave] of Object.entries(MUDOU)) {
+    const v = p.variacao?.[chave];
+    if (v) sinais[medida] = { tipo: v, ate: agora + 2600 };
+  }
+  if (p.variacao?.pm) sinais.magia = { tipo: p.variacao.pm, ate: agora + 2600 };
+  if (palavrasAntes && e.turno > 0) {
+    for (const medida of Object.keys(ESCALAS)) {
+      const E = ESCALAS[medida];
+      const a = E.nomes.indexOf(palavrasAntes[medida]), b = E.nomes.indexOf(p.estado[medida]);
+      if (a < 0 || b < 0 || a === b) continue;
+      const pior = b > a;
+      e.log.push({ texto: `${pior ? '▼' : '▲'} ${pior ? E.piora : E.melhora}: agora, ${p.estado[medida]} (${E.frases[b]}).`, tipo: pior ? 'dano' : 'bom', turno: e.turno });
+    }
+  }
+  palavrasAntes = { ...p.estado };
+  clearTimeout(anotarMudancas.t);
+  anotarMudancas.t = setTimeout(() => { if (e && !$('partida').hidden) desenharEstado(J.percebido(e)); }, 2700);
+}
+
+function seta(medida) {
+  const s = sinais[medida];
+  if (!s || performance.now() > s.ate) return '';
+  const perdeu = s.tipo.startsWith('perdeu');
+  const muito = s.tipo.endsWith('muito');
+  return ` <span class="seta ${perdeu ? 'perdeu' : 'ganhou'}" title="${perdeu ? 'piorou agora' : 'melhorou agora'}">${(perdeu ? '▼' : '▲').repeat(muito ? 2 : 1)}</span>`;
+}
+const frase = (medida, palavra) => {
+  const i = ESCALAS[medida].nomes.indexOf(palavra);
+  return i >= 0 ? `<small class="frase">${ESCALAS[medida].frases[i]}</small>` : '';
+};
+
 function desenharEstado(p) {
   const s = p.estado;
-  const ancoras = '◆'.repeat(Math.max(0, p.cargasAncora)) || '—';
   const n = p.numeros;
+  const ofego = ['', ' <small class="frase ofego">ofegante</small>', ' <small class="frase ofego">sem fôlego</small>'][p.ofegante ?? 0];
   $('estado').innerHTML = `
-    <dt>Corpo</dt><dd class="${p.ferimento >= 3 ? 'ferido' : ''}">${embaralharTexto(s.vida, p.lucidez)}</dd>
-    <dt>Consciência</dt><dd class="${p.atencao >= 3 ? 'apagando' : ''}">${apagarTexto(s.consciencia, p.atencao)}</dd>
-    <dt>Cabeça</dt><dd>${embaralharTexto(s.sanidade, p.lucidez)}</dd>
-    ${s.magia ? `<dt>Magia</dt><dd>${s.magia}</dd>` : ''}
-    <dt>Âncoras</dt><dd class="ancoras" title="Vezes que ainda dá para se ancorar neste andar (Q). Ancorar-se: segurar uma lembrança sua para lembrar quem você é; acalma e apaga o que é falso à vista">${ancoras}</dd>
+    <dt>Corpo</dt><dd class="${p.ferimento >= 3 ? 'ferido' : ''}">${embaralharTexto(s.vida, p.lucidez)}${seta('vida')} ${frase('vida', s.vida)}</dd>
+    <dt>Consciência</dt><dd class="${p.atencao >= 3 ? 'apagando' : ''}">${apagarTexto(s.consciencia, p.atencao)}${seta('consciencia')} ${frase('consciencia', s.consciencia)}${ofego}</dd>
+    <dt>Cabeça</dt><dd>${embaralharTexto(s.sanidade, p.lucidez)}${seta('sanidade')} ${frase('sanidade', s.sanidade)}</dd>
+    ${s.magia ? `<dt>${TEMAS[e.tema].dom.recurso}</dt><dd title="${TEMAS[e.tema].dom.descricao}">${s.magia}${seta('magia')}</dd>` : ''}
+    <dt>Espírito</dt><dd class="ancoras" title="${TEMAS[e.tema].ancora.descricao}">${TEMAS[e.tema].ancora.restam[Math.min(2, Math.max(0, p.cargasAncora))]}</dd>
     <dt>Caminho</dt><dd class="pecas" title="${p.pecas.map((x) => x ?? '?').join(' · ')}">${p.pecas.map((x) => (x ? '◆' : '◇')).join('')}</dd>
     <div class="fio-hud${p.fio <= 0 ? ' sem-fio' : p.fio < 0.25 ? ' curto' : ''}" title="O fio do andar: quando acaba, ${TEMAS[e.tema].ronda.nome.replace(/^./, (c) => c)} chega"><span style="transform: scaleX(${Math.max(0, p.fio).toFixed(3)})"></span></div>
     ${depurar && n ? `<div class="numeros">Vida ${n.vida}/${n.vidaMax} · Cons ${n.cons}/${n.consMax} · San ${n.san}/${n.sanMax} · PM ${n.pm}/${n.pmMax} · lucidez ${p.lucidez} · atenção ${p.atencao} · corpo ${p.ferimento} · turno ${n.turno}${s.mentindo ? ' · palavras mentindo' : ''}</div>` : ''}`;
@@ -442,12 +504,12 @@ function desenharAcoes(p) {
     botao('Olhar de novo', 'X', () => acaoNoAlvo('olhar'), !a),
     botao('Falar', 'T', () => acaoNoAlvo('falar'), !ent || ent.d > 1),
     botao('Encarar', 'E', () => acaoNoAlvo('encarar'), !ent || ent.d > 4),
-    botao('Ancorar-se', 'Q', () => fazer({ tipo: 'ancorar' }), p.cargasAncora <= 0),
+    botao(TEMAS[e.tema].ancora.acao, 'Q', () => fazer({ tipo: 'ancorar' }), p.cargasAncora <= 0),
     botao('Defender', 'Z', () => fazer({ tipo: 'defender' }), false),
     botao('Empurrar', 'G', () => acaoNoAlvo('empurrar'), !ent || ent.d !== 1),
     botao('Fechar porta', 'C', () => fazer({ tipo: 'fechar' }), false),
   ];
-  if (p.temMagia) lista.splice(3, 0, botao('Fogo', 'F', () => acaoNoAlvo('magia'), !ent || ent.d > 6));
+  if (p.temMagia) lista.splice(3, 0, botao(TEMAS[e.tema].dom.botao, 'F', () => acaoNoAlvo('magia'), !ent || ent.d > 6));
   lista.push(botao('Trocar alvo', 'Tab', trocarAlvo, false));
   lista.push(botao('Explorar', 'O', () => (viagem ? pararViagem() : viajar('explorar')), false));
   $('acoes').replaceChildren(...lista);
@@ -462,7 +524,7 @@ function desenharItens(p) {
     const ic = criarCanvas(TAM, TAM);
     ic.getContext('2d').drawImage(icone(criarCanvas, it.tipo), 0, 0);
     b.append(ic, document.createTextNode(`${i + 1}. ${it.nome}`));
-    b.title = { cura: 'Cuida do corpo', calma: 'Acalma a cabeça', folego: 'Desperta: a vista clareia', ancora: 'Ancora você e apaga o que é falso à vista' }[it.tipo] ?? '';
+    b.title = { cura: 'Cuida do corpo', calma: 'Acalma a cabeça', folego: 'Desperta: a vista clareia', ancora: 'Lembrança sua: cura para o espírito; apaga o que é falso à vista' }[it.tipo] ?? '';
     b.onclick = () => fazer({ tipo: 'usar', indice: i });
     return b;
   }));
