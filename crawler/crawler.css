@@ -1,0 +1,169 @@
+/* Desvario: crawler do Sistema Clip. Usa as cores de assets/clip.css; o palco é sempre escuro. */
+
+.crawler { max-width: 1180px; margin: 0 auto; padding: 16px; }
+.nota { color: var(--ink-2); font-size: 0.88rem; }
+kbd {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 0.78em;
+  padding: 0 4px;
+  border: 1px solid var(--line);
+  border-bottom-width: 2px;
+  border-radius: 4px;
+  background: var(--surface);
+}
+
+/* Abertura ---------------------------------------------------------------- */
+.inicio h1 { font-family: var(--serif); font-size: 2.4rem; margin: 8px 0 4px; letter-spacing: 0.02em; }
+.inicio h2 { font-family: var(--serif); font-size: 1.2rem; margin: 22px 0 8px; }
+.sub { max-width: 68ch; color: var(--ink-2); margin: 0; }
+.escolhas { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 10px; }
+.escolha {
+  text-align: left;
+  display: grid;
+  grid-template-columns: 40px 1fr;
+  gap: 4px 12px;
+  align-items: start;
+  padding: 12px;
+  border-radius: var(--radius);
+  background: var(--surface);
+  border: 1px solid var(--line);
+  box-shadow: var(--shadow);
+}
+.escolha canvas { grid-row: span 2; width: 40px; height: 40px; image-rendering: pixelated; border-radius: 6px; background: #14110d; }
+.escolha b { font-family: var(--serif); font-size: 1.05rem; }
+.escolha span { color: var(--ink-2); font-size: 0.9rem; line-height: 1.35; }
+.escolha[aria-checked='true'] { border-color: var(--accent); outline: 2px solid var(--accent); outline-offset: -1px; }
+.escolha.c-corpo b { color: var(--corpo); }
+.escolha.c-mente b { color: var(--mente); }
+.escolha.c-espirito b { color: var(--espirito); }
+
+.semente-linha { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-top: 22px; }
+.semente-linha input { font-family: ui-monospace, Menlo, monospace; width: 13ch; }
+.semente-linha .primario { padding: 8px 22px; font-size: 1.05rem; }
+
+.como { margin-top: 18px; max-width: 78ch; }
+.como summary { cursor: pointer; font-weight: 600; }
+.como table, .diario table { border-collapse: collapse; width: 100%; margin: 8px 0; font-size: 0.92rem; }
+.como th, .como td, .diario th, .diario td { text-align: left; padding: 5px 8px; border-bottom: 1px solid var(--line); vertical-align: top; }
+.diario { margin-top: 26px; }
+.diario h2 { margin-top: 0; }
+.diario ul { padding-left: 18px; margin: 6px 0; }
+.diario li { margin: 3px 0; }
+.diario button.link { background: none; border: 0; padding: 0; color: var(--accent); text-decoration: underline; cursor: pointer; font: inherit; }
+.pista-nova { color: var(--accent); font-weight: 600; }
+
+/* Partida ----------------------------------------------------------------- */
+.partida { display: grid; grid-template-columns: minmax(0, 1fr) 340px; gap: 16px; align-items: start; }
+.palco {
+  position: relative;
+  background: #07060a;
+  border-radius: var(--radius);
+  overflow: hidden;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 240px;
+  touch-action: manipulation;
+}
+#tela { display: block; image-rendering: pixelated; image-rendering: crisp-edges; cursor: crosshair; }
+.faixa {
+  position: absolute;
+  left: 8px; top: 8px; right: 8px;
+  display: flex; justify-content: space-between; gap: 8px;
+  color: #d8d0bf;
+  font-size: 0.85rem;
+  text-shadow: 0 1px 2px #000;
+  pointer-events: none;
+}
+.faixa .semente { font-family: ui-monospace, Menlo, monospace; opacity: 0.6; }
+
+.painel { display: flex; flex-direction: column; gap: 10px; }
+.estado {
+  display: grid; grid-template-columns: auto 1fr; gap: 2px 10px;
+  padding: 10px 12px; border-radius: var(--radius); background: var(--surface); border: 1px solid var(--line);
+}
+.estado dt { color: var(--ink-2); font-size: 0.85rem; }
+.estado dd { margin: 0; font-family: var(--serif); font-weight: 700; }
+.estado .ancoras { letter-spacing: 2px; color: var(--espirito); }
+.numeros { grid-column: 1 / -1; font-family: ui-monospace, Menlo, monospace; font-size: 0.78rem; color: var(--aviso); }
+
+.alvo { min-height: 2.6em; font-size: 0.92rem; color: var(--ink-2); padding: 0 2px; }
+.alvo b { color: var(--ink); }
+
+.registro {
+  list-style: none; margin: 0; padding: 8px 10px; height: 11.5em; overflow-y: auto;
+  border-radius: var(--radius); background: var(--surface-2); font-size: 0.92rem; line-height: 1.35;
+}
+.registro li { margin: 2px 0; }
+.registro li.velho { opacity: 0.55; }
+.registro .t-dano, .registro .t-perigo { color: var(--erro); }
+.registro .t-bom { color: var(--ok); }
+.registro .t-pista { color: var(--accent); font-style: italic; }
+.registro .t-narra, .registro .t-fim { font-family: var(--serif); }
+.registro .t-surto { color: var(--espirito); font-weight: 700; }
+.registro .t-sala { color: var(--ink-2); font-variant: small-caps; letter-spacing: 0.04em; }
+.registro .depura { font-size: 0.75em; color: var(--aviso); margin-left: 4px; }
+
+.controles { display: grid; grid-template-columns: auto 1fr; gap: 10px; align-items: start; }
+.cruz { display: grid; grid-template-columns: repeat(3, 44px); grid-template-rows: repeat(3, 44px); gap: 4px; }
+.cruz button { padding: 0; font-size: 1.1rem; line-height: 1; touch-action: manipulation; }
+.acoes { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+.acoes button { padding: 8px 6px; text-align: center; touch-action: manipulation; }
+.acoes button small { display: block; color: var(--ink-2); font-size: 0.72rem; }
+.itens { display: flex; flex-wrap: wrap; gap: 6px; min-height: 36px; }
+.itens button { display: flex; align-items: center; gap: 6px; padding: 4px 8px; font-size: 0.85rem; }
+.itens canvas { width: 24px; height: 24px; image-rendering: pixelated; }
+.itens .vazio { color: var(--ink-2); font-size: 0.85rem; align-self: center; }
+
+/* Sobrepostos ------------------------------------------------------------- */
+.sobreposto {
+  position: fixed; inset: 0; z-index: 30;
+  background: rgb(5 4 8 / 0.72);
+  display: flex; align-items: center; justify-content: center; padding: 16px;
+}
+.sobreposto[hidden] { display: none; }
+.caixa {
+  max-width: 720px; width: 100%; max-height: calc(100vh - 32px); overflow-y: auto;
+  background: var(--surface); color: var(--ink); border-radius: var(--radius); padding: 20px; box-shadow: 0 10px 40px rgb(0 0 0 / 0.4);
+}
+.caixa h2 { font-family: var(--serif); margin: 0 0 6px; }
+.cartas-evolucao { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 10px; margin-top: 12px; }
+.cartas-evolucao button { text-align: left; padding: 12px; display: flex; flex-direction: column; gap: 6px; border-left: 4px solid var(--c, var(--accent)); }
+.cartas-evolucao b { font-family: var(--serif); font-size: 1.1rem; }
+.cartas-evolucao .efeito { font-weight: 600; }
+.cartas-evolucao .resumo { color: var(--ink-2); font-size: 0.86rem; }
+.c-corpo { --c: var(--corpo); }
+.c-mente { --c: var(--mente); }
+.c-espirito { --c: var(--espirito); }
+.fim-texto { font-family: var(--serif); font-size: 1.12rem; line-height: 1.5; }
+.botoes { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 16px; }
+#fim-resumo table { border-collapse: collapse; width: 100%; font-size: 0.92rem; }
+#fim-resumo td, #fim-resumo th { text-align: left; padding: 4px 8px; border-bottom: 1px solid var(--line); }
+
+/* Celular ----------------------------------------------------------------- */
+@media (max-width: 860px) {
+  .crawler { padding: 10px 16px; }
+  .partida { grid-template-columns: 1fr; gap: 10px; }
+  .registro { height: 7.6em; font-size: 0.88rem; }
+  .atalhos { display: none; }
+  .painel { gap: 8px; }
+  .estado { grid-template-columns: auto 1fr auto 1fr; font-size: 0.95rem; }
+}
+@media (max-width: 380px) {
+  .cruz { grid-template-columns: repeat(3, 40px); grid-template-rows: repeat(3, 40px); }
+}
+
+/* No celular, os controles ficam logo abaixo da imagem, ao alcance do polegar. */
+@media (max-width: 860px) {
+  .painel .estado { order: 1; }
+  .painel .controles { order: 2; }
+  .painel .itens { order: 3; }
+  .painel .alvo { order: 4; }
+  .painel .registro { order: 5; }
+}
+
+/* No celular o cabeçalho não fica grudado no topo: a tela do jogo precisa do espaço. */
+@media (max-width: 860px) {
+  .topo { position: static; }
+  .palco { min-height: 0; }
+}

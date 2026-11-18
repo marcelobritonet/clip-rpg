@@ -1,0 +1,105 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Desvario — crawler do Sistema Clip</title>
+  <meta name="description" content="Protótipo de dungeon crawler do Sistema Clip em que a Sanidade distorce a percepção: quanto menos são, mais o jogo mente.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Alegreya:wght@500;700&family=Alegreya+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../assets/clip.css">
+  <link rel="stylesheet" href="crawler.css">
+</head>
+<body>
+  <header class="topo">
+    <a class="marca" href="../">Clip</a>
+    <nav>
+      <a href="../manual/">Manual</a>
+      <a href="../ficha/">Ficha digital</a>
+      <a href="../arena/">Arena</a>
+      <a href="../cartas/">Cartas</a>
+      <a href="./" aria-current="page">Crawler</a>
+      <a href="../novidades/">Novidades</a>
+    </nav>
+    <span class="espaco"></span>
+    <button type="button" id="desistir" hidden>Desistir</button>
+  </header>
+
+  <main id="app" class="crawler">
+    <!-- Abertura -->
+    <section id="inicio" class="inicio">
+      <h1>Desvario</h1>
+      <p class="sub">Um crawler do Sistema Clip em que a Sanidade distorce a percepção. Quanto menos são você está, mais o jogo mente: vultos onde não há nada, saídas falsas, aliados com cara de monstro. Protótipo; os números ficam escondidos.</p>
+
+      <h2>Onde</h2>
+      <div class="escolhas" id="temas" role="radiogroup" aria-label="Tema"></div>
+
+      <h2>Quem</h2>
+      <div class="escolhas" id="origens" role="radiogroup" aria-label="Personagem"></div>
+
+      <div class="semente-linha">
+        <label for="semente">Semente</label>
+        <input id="semente" autocomplete="off" spellcheck="false">
+        <button type="button" id="sortear">Sortear</button>
+        <button type="button" class="primario" id="comecar">Entrar</button>
+      </div>
+      <p class="nota">A mesma semente gera o mesmo lugar, as mesmas criaturas e as mesmas mentiras. Compartilhe para outra pessoa tentar o seu pesadelo.</p>
+
+      <details class="como">
+        <summary>Como jogar</summary>
+        <div id="como"></div>
+      </details>
+
+      <section class="diario" id="diario" aria-label="Diário"></section>
+    </section>
+
+    <!-- Partida -->
+    <section id="partida" class="partida" hidden>
+      <div class="palco" id="palco">
+        <canvas id="tela" aria-label="O lugar onde você está" role="img"></canvas>
+        <div class="faixa" id="faixa"></div>
+      </div>
+      <aside class="painel">
+        <div class="estado" id="estado" aria-live="polite"></div>
+        <div class="alvo" id="alvo"></div>
+        <ol class="registro" id="registro" aria-live="polite"></ol>
+        <div class="controles">
+          <div class="cruz" id="cruz" aria-label="Andar"></div>
+          <div class="acoes" id="acoes"></div>
+        </div>
+        <div class="itens" id="itens" aria-label="Bolsa"></div>
+        <p class="atalhos nota">Teclado: setas, WASD ou hjkl/yubn para andar (bater é andar contra); clique ou toque num ponto para ir até lá. Shift + direção força um ataque. <kbd>X</kbd> olhar de novo · <kbd>T</kbd> falar · <kbd>E</kbd> encarar · <kbd>F</kbd> fogo · <kbd>Q</kbd> ancorar · <kbd>Espaço</kbd> esperar · <kbd>Tab</kbd> trocar o alvo · <kbd>O</kbd> explorar sozinho · <kbd>1</kbd>–<kbd>5</kbd> itens.</p>
+      </aside>
+    </section>
+
+    <!-- Evolução entre andares -->
+    <section id="evolucao" class="sobreposto" hidden aria-modal="true" role="dialog" aria-labelledby="evolucao-titulo">
+      <div class="caixa">
+        <h2 id="evolucao-titulo">O que este lugar ensinou</h2>
+        <p class="nota">Escolha um nível para levar adiante. Segue as regras do Clip: Aprimoramento até o Atributo; Perícia até o menor requisito.</p>
+        <div class="cartas-evolucao" id="opcoes"></div>
+      </div>
+    </section>
+
+    <!-- Fim -->
+    <section id="fim" class="sobreposto" hidden aria-modal="true" role="dialog" aria-labelledby="fim-titulo">
+      <div class="caixa">
+        <h2 id="fim-titulo"></h2>
+        <p id="fim-texto" class="fim-texto"></p>
+        <div id="fim-resumo"></div>
+        <div class="botoes">
+          <button type="button" class="primario" id="denovo">Mesma semente</button>
+          <button type="button" id="outra">Outra partida</button>
+          <button type="button" id="copiar">Copiar link da semente</button>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer id="rodape" class="rodape"></footer>
+
+  <script type="module" src="ui.js"></script>
+  <script type="module" src="../assets/rodape.js"></script>
+</body>
+</html>
