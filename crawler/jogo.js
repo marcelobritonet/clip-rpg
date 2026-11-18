@@ -520,8 +520,8 @@ function mover(e, dx, dy, forcarAtaque) {
     return false;
   }
   if (real === T.PORTA) {
+    // A porta abrindo já aparece na imagem; o registro fica para o que importa.
     por(e.mapa, x, y, T.ABERTA);
-    msg(e, 'A porta range e abre.');
     return true;
   }
   e.jogador.x = x;
@@ -609,7 +609,7 @@ function descer(e) {
   if (e.andar >= PARAM.andares) return;
   e.vida = Math.min(derivados(e).vidaMax, e.vida + PARAM.folegoNaEscada);
   msg(e, temaDe(e).descida, 'narra');
-  anotar(e, `Chegou a ${temaDe(e).andares[e.andar]}.`);
+  anotar(e, `Novo andar: ${temaDe(e).andares[e.andar]}.`);
   entrarNoAndar(e, e.andar + 1);
   e.escolha = { opcoes: opcoesEvolucao(e) };
   if (!e.escolha.opcoes.length) e.escolha = null;

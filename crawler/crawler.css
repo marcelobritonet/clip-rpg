@@ -53,6 +53,7 @@ kbd {
 .pista-nova { color: var(--accent); font-weight: 600; }
 
 /* Partida ----------------------------------------------------------------- */
+.partida[hidden], .inicio[hidden] { display: none; }
 .partida { display: grid; grid-template-columns: minmax(0, 1fr) 340px; gap: 16px; align-items: start; }
 .palco {
   position: relative;
