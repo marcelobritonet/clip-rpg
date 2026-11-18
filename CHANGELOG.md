@@ -4,6 +4,18 @@ O Clip tem duas linhas de versão: as **regras** (o texto do Sistema Clip, no [R
 
 ## Ficha, manual e motor
 
+### 1.2.0 (18/11/2026)
+
+Um terceiro protótipo de jogo: **Desvario** (`/crawler/`), um dungeon crawler em que a Sanidade distorce a percepção.
+
+- Três temas (fuga do sanatório, masmorra, resistência zumbi) e três personagens, um por Caminho, com fichas do motor de 10 Pontos de Evolução. Cinco andares gerados por semente: a mesma semente repete o lugar e as mentiras.
+- Nenhum número na tela. Vida, Consciência e Sanidade aparecem em palavras e na imagem, e cada uma engana de um jeito: o corpo ferido sangra e arrasta a perna, a vista cansada vê portas pintadas e buracos que não existem, a cabeça abalada troca aliados por monstros e itens por bichos.
+- Ferramentas para duvidar em cada Caminho: olhar de novo (Percepção), falar (Presença), encarar e se ancorar (Vontade e Fé), o dom da Mente (Mágicas de Ataque Físico, lido de um jeito por tema). Gente comum só vigia; bater nela dá alarme e pesa na cabeça.
+- Urgência: cada andar tem um fio que queima; quando acaba, a ronda chega. Tarefas em ordem destrancam a passagem, e três peças do caminho decidem o fim.
+- Joga no desktop e no celular, com teclado ou toque. Diário de pistas entre tentativas, só no navegador.
+- Robô e simulador de equilíbrio, testes do motor do jogo e notas de design, desvios e dúvidas de regra em `crawler/NOTAS.md`.
+- Menu do topo com o Crawler em todas as páginas.
+
 ### 1.1.0 (18/11/2026)
 
 Dois protótipos de jogo, cada um na sua página, para testar ideias e medir as regras.
