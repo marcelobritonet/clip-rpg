@@ -1,8 +1,18 @@
 # Novidades
 
-O Clip tem duas linhas de versão: as **regras** (o texto do Sistema Clip, no [README](README.md)) e as **ferramentas** (ficha digital, manual navegável e motor de regras). A versão de cada uma aparece no rodapé das páginas.
+O Clip tem duas linhas de versão: as **regras** (o texto do Sistema Clip, no [README](README.md)) e as **ferramentas** (ficha digital, manual navegável, motor de regras e protótipos de jogo). A versão de cada uma aparece no rodapé das páginas.
 
 ## Ficha, manual e motor
+
+### 1.1.0 (18/11/2026)
+
+Dois protótipos de jogo, cada um na sua página, para testar ideias e medir as regras.
+
+- **Arena** (`/arena/`): duelos rápidos com o combate do Clip, contra a IA ou entre dois jogadores no mesmo aparelho. Há builds prontas de 15 pontos e uma montagem livre, e o registro explica cada passo do cálculo.
+- **Simulador de equilíbrio** na arena: roda milhares de duelos entre as builds e mostra a taxa de vitória e a duração média, com as variantes de regra em aberto (Resistência, críticos, Sanidade, distância inicial).
+- **Travessia** (`/cartas/`): jogo de cartas solo de 7 cenas em que o personagem é montado com cartas de Perícias e Aprimoramentos, liberadas pelos Atributos. O Mestre escolhe desafios no Caminho mais fraco do personagem, e ao final o personagem abre na ficha digital.
+- Menu do topo igual em todas as páginas: Manual, Ficha digital, Arena, Cartas e Novidades.
+- Os achados de equilíbrio e as dúvidas de regra dos protótipos estão em `arena/NOTAS.md` e `cartas/NOTAS.md`.
 
 ### 1.0.0 (16/11/2026)
 

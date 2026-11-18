@@ -7,7 +7,7 @@ if (rodape) {
   rodape.innerHTML = `
     <span>Sistema Clip</span>
     <span>Regras <b>v${VERSAO.regras}</b></span>
-    <span>Ficha e manual <b>v${VERSAO.ferramentas}</b> · ${d}/${m}/${a}</span>
+    <span>Ferramentas <b>v${VERSAO.ferramentas}</b> · ${d}/${m}/${a}</span>
     <a href="../novidades/">Novidades (changelog)</a>
     <a href="https://github.com/marcelobritonet/clip-rpg">Código no GitHub</a>`;
 }
