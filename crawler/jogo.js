@@ -43,7 +43,7 @@ export const PARAM = {
    * volta descansando, com fôlego e na escada. Em zero, você desmaia.
    */
   consciencia: {
-    maximo: (fisico, percepcao, sabedoria) => 10 + 2 * (fisico + percepcao + sabedoria),
+    maximo: (fisico, percepcao, sabedoria) => 13 + 2 * (fisico + percepcao + sabedoria),
     /** Turnos por −1, por andar. */
     cansaco: [40, 36, 32, 28, 24],
     /** Com o corpo Muito ferido ou pior, o cansaço vem duas vezes mais rápido. */
@@ -72,7 +72,7 @@ export const PARAM = {
    * entra pela porta por onde você entrou, caça você sem parar e o tempo pesa
    * o dobro na cabeça. Cada peça do caminho devolve um pedaço do fio.
    */
-  fio: { turnos: (a) => 270 + 20 * a, peca: 50, avisos: [0.5, 0.25, 0.1] },
+  fio: { turnos: (a) => 330 + 20 * a, peca: 50, avisos: [0.5, 0.25, 0.1] },
   /** A ronda anda dois de cada três turnos: quem corre escapa; quem para, não. */
   ronda: { ataque: 1, defesa: 2, arma: 1, vontade: 6, passo: 3 },
   /**
@@ -81,7 +81,16 @@ export const PARAM = {
    * tiram 1 de Consciência; acima de `forte`, alguns passos custam dois turnos.
    * Contrapeso do fio: a pressa tem preço.
    */
-  folego: { limite: 22, forte: 38, custo: 5, passoDuplo: 0.3, recupera: 3 },
+  folego: { limite: 22, forte: 38, custo: 7, passoDuplo: 0.3, recupera: 3 },
+  /**
+   * Gente que só vigia (0.4.0): humanos comuns começam vigiando. Não caçam; se
+   * você fica perto por `paciencia` turnos, mandam você embora (viram caça).
+   * Bater em quem vigia dá alarme (todos os humanos do andar caçam) e pesa.
+   * Ver a intenção pede Percepção `percepcao` ou olhar de novo.
+   */
+  vigia: { ativo: true, paciencia: 4, percepcao: 2, distancia: 2 },
+  /** Desfazer uma mentira devolve clareza (Sanidade). */
+  clareza: 1,
   /** Golpe preparado: chance de o monstro colado preparar, e o que o golpe pesado soma. */
   preparo: { chance: 0.3, ataque: 2, dano: 2, intervalo: 3 },
   /** Defender: soma à Defesa no turno do mundo (mais contra golpe preparado). */
@@ -119,7 +128,7 @@ export const PARAM = {
   folegoNaEscada: 5,
   itens: { cura: 6, calma: 4, ancora: 2, altar: 5, folego: 6 },
   /** Perdas de Sanidade por evento. */
-  perda: { golpeNoVazio: 1, miragem: 1, emboscada: 1, matarHumano: 1, ferirAliado: 2, matarAliado: 4, encararFalhou: 1, verAssombro: 1 },
+  perda: { golpeNoVazio: 1, miragem: 1, emboscada: 1, matarHumano: 1, ferirAliado: 2, matarAliado: 4, encararFalhou: 1, verAssombro: 1, atacarInocente: 1, matarInocente: 2, antipatia: 1 },
   /** Surto: turnos fora de controle; depois volta com metade da Sanidade e uma cicatriz. */
   surto: { turnos: 5, sanidadeDepois: 0.5, calmaDepois: 15, cicatriz: 3, maximo: 3 },
   ancora: { turnos: 12, dificuldade: 3, ganho: 2 },
@@ -205,6 +214,8 @@ export const PISTAS = {
   infinito: 'Quando o corredor não acaba, é a cabeça cansada. Pare e descanse.',
   imovel: 'Bicho que nunca se mexe talvez nem seja bicho. Olhe de novo antes de quebrar.',
   sangue: 'Sangrando, você deixa rastro. As bestas seguem o rastro.',
+  vigia: 'Nem todo mundo aqui quer te pegar. Quem só vigia não vem atrás; bater nele põe todos contra você.',
+  clareza: 'Desfazer uma mentira clareia a cabeça. Olhar de novo vale mais que bater.',
   folego: 'Correr sem parar cansa a vista. Um passo parado de vez em quando segura o fôlego.',
   descanso: 'Esperar quieto, sem nada à vista, devolve a atenção. Mas o tempo pesa na cabeça.',
   preparo: 'Quem prepara um golpe pesado avisa. Saia de perto, defenda ou empurre antes.',
@@ -322,7 +333,7 @@ export function novaPartida({ semente, tema = 'sanatorio', origem = 'corpo', dep
       desmaios: 0, portasFalsas: 0, buracosFalsos: 0, quedas: 0, passosPerdidos: 0, passosArrastados: 0, farejado: 0,
       itensQuebrados: 0, itensDisfarcados: 0, itensRevelados: 0, perturbadores: 0,
       rondas: 0, preparos: 0, pesadosRecebidos: 0, pesadosEvitados: 0, defesas: 0, contraGolpes: 0, empurroes: 0, empurroesCertos: 0,
-      ofegante: 0, quedasDeMonstro: 0, portasFechadas: 0, invasoes: 0, janelasBarradas: 0, batidasFalsas: 0, turnosSemFio: 0,
+      ofegante: 0, alarmes: 0, inocentesFeridos: 0, inocentesMortos: 0, antipatias: 0, clarezas: 0, convencidosVigias: 0, quedasDeMonstro: 0, portasFechadas: 0, invasoes: 0, janelasBarradas: 0, batidasFalsas: 0, turnosSemFio: 0,
     },
   };
   const d = derivados(e);
@@ -438,10 +449,12 @@ export function gerarConteudoDoAndar(semente, tema, a) {
 }
 
 function criarMonstro(m, p, esc) {
+  const vigia = PARAM.vigia.ativo && m.categoria === 'humano' && m.andar < 5;
   return {
+    vigia,
     tipo: 'monstro', especie: m.id, categoria: m.categoria, x: p.x, y: p.y,
     ataque: m.ataque + esc.combate, defesa: m.defesa + esc.combate, vida: m.vida + esc.vida, vidaMax: m.vida + esc.vida,
-    arma: m.arma, armadura: 0, vontade: m.vontade, mental: m.mental ? m.mental + esc.combate : 0, rapido: !!m.rapido, estado: 'parado',
+    arma: m.arma, armadura: 0, vontade: m.vontade, mental: m.mental ? m.mental + esc.combate : 0, rapido: !!m.rapido, estado: vigia ? 'vigiando' : 'parado',
   };
 }
 
@@ -475,6 +488,7 @@ function entrarNoAndar(e, a) {
   e.sangue = new Map();
   e.beira = null;
   e.salaAtual = -1;
+  e.alarmeNoAndar = false;
   e.cargasAncora = derivados(e).cargasAncora;
   e.janelas = c.janelas.map((j) => ({ ...j }));
   e.entrada = { ...c.inicio };
@@ -526,7 +540,8 @@ function vizinhoLivre(e, p) {
 }
 
 function perderSan(e, quanto, { reduzivel = true, motivo = 'outro' } = {}) {
-  const red = reduzivel ? n(e, 'serenidade') : 0;
+  // Serenidade e Fé seguram os sustos (0.4.0: a Fé passa a contar).
+  const red = reduzivel ? n(e, 'serenidade') + Math.floor(n(e, 'fe') / 2) : 0;
   const q = Math.min(e.san, Math.max(0, quanto - red));
   e.stats.perdas[motivo] = (e.stats.perdas[motivo] ?? 0) + q;
   e.san = Math.max(0, e.san - q);
@@ -692,7 +707,7 @@ function alvoPorId(e, id) {
 
 /** Nenhum monstro de verdade à vista, caçando você: dá para fechar os olhos. */
 function semPerigo(e) {
-  return !e.entidades.some((m) => m.tipo === 'monstro' && m.vida > 0 && e.vis.has(idx(e, m.x, m.y)) && m.estado !== 'pacificado' && m.estado !== 'fugindo');
+  return !e.entidades.some((m) => m.tipo === 'monstro' && m.vida > 0 && e.vis.has(idx(e, m.x, m.y)) && m.estado !== 'pacificado' && m.estado !== 'fugindo' && m.estado !== 'vigiando');
 }
 
 const ehCorredor = (e, x, y) =>
@@ -712,7 +727,21 @@ function mover(e, dx, dy, forcarAtaque) {
   if (ent) {
     if (ent.item) return golpearObjeto(e, ent);
     const ap = aparencia(e, ent);
+    if (!forcarAtaque && !ent.aparencia && intencaoVisivel(e, ent)) {
+      // Já conversaram: dá para passar espremido por quem só vigia (ele repara, mas deixa).
+      if (ent.conversou) {
+        [ent.x, ent.y, e.jogador.x, e.jogador.y] = [e.jogador.x, e.jogador.y, ent.x, ent.y];
+        ent.atencao = (ent.atencao ?? 0) + 1;
+        msg(e, `Você passa espremido por ${artigoDe(nomeAparente(e, ent))}.`);
+        return true;
+      }
+      return conversar(e, ent);
+    }
     if (forcarAtaque || ap.categoria !== 'aliado') return golpear(e, ent);
+    if (ent.estado === 'pacificado' && !ent.aparencia && !forcarAtaque) {
+      [ent.x, ent.y, e.jogador.x, e.jogador.y] = [e.jogador.x, e.jogador.y, ent.x, ent.y];
+      return true;
+    }
     if (ent.estado === 'seguindo' && !ent.aparencia) {
       [ent.x, ent.y, e.jogador.x, e.jogador.y] = [e.jogador.x, e.jogador.y, ent.x, ent.y];
       return true;
@@ -735,7 +764,8 @@ function mover(e, dx, dy, forcarAtaque) {
     if (ilusao === T.PORTA) {
       e.ilusaoParedes.delete(k);
       e.stats.portasFalsas++;
-      msg(e, 'Você empurra a porta e a mão encontra parede. Era só o desenho de uma porta.', 'mentira');
+      perderCons(e, 1, 'porta');
+      msg(e, 'Você empurra a porta e a mão encontra parede. Era só o desenho de uma porta. A cabeça gira.', 'mentira');
       ganharPista(e, 'porta');
       return true;
     }
@@ -846,6 +876,7 @@ function empurrar(e, alvoId) {
   }
   e.stats.empurroesCertos++;
   alvo.preparando = false;
+  if (alvo.estado === 'vigiando') provocar(e, alvo);
   const x = alvo.x + dx, y = alvo.y + dy;
   if (tile(e.mapa, x, y) === T.BURACO && !alvo.ronda) {
     alvo.vida = 0;
@@ -885,6 +916,13 @@ function fecharPorta(e) {
 /** Andar contra uma janela: olhar lá fora, ou segurar se algo está batendo. */
 function mexerNaJanela(e, j) {
   const th = temaDe(e);
+  if (j.estado === 'batendo' && j.falsa) {
+    j.estado = 'fechada';
+    e.stats.batidasFalsas++;
+    perderSan(e, PARAM.perda.miragem, { motivo: 'miragem' });
+    msg(e, 'Você segura a janela com toda a força. Lá fora, nada. Ninguém batia.', 'mentira');
+    return true;
+  }
   if (j.estado === 'batendo') {
     j.estado = 'barrada';
     e.stats.janelasBarradas++;
@@ -973,7 +1011,8 @@ function pisar(e) {
       o.usado = true;
       e.stats.miragensPisadas++;
       // Item falso só decepciona; escada ou saída falsa abala.
-      const q = o.tipo === 'item' ? 0 : perderSan(e, PARAM.perda.miragem, { motivo: 'miragem' });
+      // 0.4.0: acreditar numa mentira sempre custa, até num item falso.
+      const q = perderSan(e, PARAM.perda.miragem, { motivo: 'miragem' });
       if (o.tipo === 'peca') ganharPista(e, 'sombra');
       const oque = { item: 'Você estende a mão e', escada: 'Você pisa no primeiro degrau e', saida: 'Você corre para a saída e', altar: 'Você se ajoelha e', peca: 'Você se abaixa para pegar e' }[o.tipo];
       msg(e, `${oque} não há nada ali.${q ? ' Sua cabeça lateja.' : ''}`, 'mentira');
@@ -1152,6 +1191,8 @@ function golpearObjeto(e, o) {
 }
 
 function ferir(e, ent, dano, nome, prefixo = '') {
+  const eraInocente = ent.estado === 'vigiando';
+  if (eraInocente) provocar(e, ent);
   if (ent.ronda) {
     if (dano >= 3) { ent.tonto = 1; msg(e, `${prefixo}Você acerta ${artigoDe(nome)} com força. Ele cambaleia, mas não cai.`, 'golpe'); }
     else msg(e, `${prefixo}Você acerta ${artigoDe(nome)}. Ele nem sente.`, 'golpe');
@@ -1191,10 +1232,11 @@ function ferir(e, ent, dano, nome, prefixo = '') {
       // matou algo que parecia aliado: era monstro, mas a cabeça pesa
       perderSan(e, 1, { motivo: 'matar' });
     }
-    if (ent.categoria === 'humano' && clip.caminhoDominante(e.ficha).id !== 'corpo') {
-      // Quem vive do Corpo já se acostumou à violência; para os outros, pesa.
-      perderSan(e, PARAM.perda.matarHumano, { motivo: 'matar' });
-      msg(e, 'Era gente. Isso pesa.', 'info');
+    if (ent.categoria === 'humano') {
+      // 0.4.0: pesa para todos, até para o Corpo. Quem só vigiava pesa mais.
+      perderSan(e, eraInocente ? PARAM.perda.matarInocente : PARAM.perda.matarHumano, { motivo: 'matar' });
+      if (eraInocente) { e.stats.inocentesMortos++; anotar(e, `Matou ${artigoDe(especie(e, ent).nome)}, que só vigiava.`); }
+      msg(e, eraInocente ? 'Ele não queria briga. Isso pesa muito.' : 'Era gente. Isso pesa.', 'dano');
     }
   } else {
     msg(e, `${prefixo}Você acerta ${artigoDe(nome)}${forte ? ' em cheio' : ''}.`, 'golpe');
@@ -1250,7 +1292,15 @@ function nomeObjeto(e, o) {
 /** Mostra a verdade de uma entidade ou objeto. */
 function revelar(e, alvo, como) {
   const quieto = como === 'ancora';
+  // Desfazer uma mentira clareia a cabeça (a âncora já dá a sua parte).
+  const clareza = () => {
+    if (quieto) return;
+    ganharSan(e, PARAM.clareza, 'clareza');
+    e.stats.clarezas++;
+    if (e.stats.clarezas === 2) ganharPista(e, 'clareza');
+  };
   if (alvo.tipo === 'fantasma') {
+    clareza();
     e.stats.fantasmasRevelados++;
     if (!quieto) msg(e, `${Maiuscula(artigoDe(nomeAparente(e, alvo)))} se desfaz como fumaça. Não havia nada ali.`, 'bom');
     if (alvo.acertou) ganharPista(e, 'marca');
@@ -1259,6 +1309,7 @@ function revelar(e, alvo, como) {
     return;
   }
   if (alvo.real === false) {
+    clareza();
     alvo.usado = true;
     e.stats.miragensReveladas++;
     if (!quieto) msg(e, `${Maiuscula(nomeObjeto(e, alvo))}? Não: só uma mancha na parede.`, 'bom');
@@ -1270,6 +1321,7 @@ function revelar(e, alvo, como) {
     alvo.aparencia = null;
     alvo.confirmado = true;
     e.stats.itensRevelados++;
+    clareza();
     if (!quieto) msg(e, `Não é ${artigoDe(antes)}. É ${artigo(alvo.item.nome)}, parado no chão.`, 'bom');
     ganharPista(e, 'imovel');
     return;
@@ -1280,11 +1332,15 @@ function revelar(e, alvo, como) {
     const antes = nomeAparente(e, alvo);
     alvo.aparencia = null;
     e.stats.disfarcesRevelados++;
+    clareza();
     if (!quieto) msg(e, `Não é ${artigoDe(antes)}. É ${artigoDe(especie(e, alvo).nome)}.`, alvo.tipo === 'aliado' ? 'bom' : 'perigo');
+  } else if (!quieto && alvo.estado === 'vigiando') {
+    msg(e, `${Maiuscula(artigoDe(especie(e, alvo).nome))} só vigia. Não quer briga, se você não der motivo.`, 'bom');
+    ganharPista(e, 'vigia');
   } else if (!quieto) {
     msg(e, `${Maiuscula(artigoDe(especie(e, alvo).nome))} é real.`);
   }
-  if (como === 'olhar' && alvo.tipo === 'monstro' && !alvo.pontoFraco) {
+  if (como === 'olhar' && alvo.tipo === 'monstro' && !alvo.pontoFraco && alvo.estado !== 'vigiando') {
     // Olhar com calma também mostra onde bater.
     alvo.pontoFraco = 1;
     msg(e, 'Você nota onde a guarda dele abre.', 'bom');
@@ -1334,10 +1390,16 @@ function conversar(e, ent) {
       nivel: n(e, 'presenca'), objeto: Math.max(n(e, 'empatia'), n(e, 'intimidacao'), n(e, 'lideranca')),
       dificuldade: PARAM.convencer + ent.vontade + e.andar, rng: rng(e),
     });
+    const vigiava = ent.estado === 'vigiando';
+    ent.conversou = true;
     if (t.sucesso) {
       ent.estado = 'pacificado';
       e.stats.pacificados++;
-      msg(e, `Você fala baixo e firme. ${Maiuscula(artigoDe(nome))} abaixa a guarda e se afasta.`, 'bom');
+      if (vigiava) { e.stats.convencidosVigias++; ganharSan(e, 1, 'conversa'); }
+      msg(e, vigiava ? `Você explica, com calma. ${Maiuscula(artigoDe(nome))} faz que não viu você e vai embora.` : `Você fala baixo e firme. ${Maiuscula(artigoDe(nome))} abaixa a guarda e se afasta.`, 'bom');
+    } else if (vigiava) {
+      ent.atencao = (ent.atencao ?? 0) + 2;
+      msg(e, `${Maiuscula(artigoDe(nome))} não acredita em você. Fica de olho.`);
     } else {
       msg(e, `${Maiuscula(artigoDe(nome))} não quer conversa.`);
       ent.estado = 'cacando';
@@ -1352,6 +1414,7 @@ function conversar(e, ent) {
     msg(e, `“Sou eu!” Não era um monstro: é ${esp.nome}.`, 'bom');
   }
   if (ent.ferido) { msg(e, `${Maiuscula(esp.nome)} recua de você, com medo.`); return true; }
+  if (ent.magoado) { msg(e, `${Maiuscula(esp.nome)} desvia o olhar. Não quer falar com você.`); return true; }
   if (ent.estado === 'seguindo') { msg(e, `${Maiuscula(esp.nome)} faz que sim com a cabeça. Ainda com você.`); return true; }
   if (ent.usado) { msg(e, `${Maiuscula(esp.nome)}: “Já disse o que sabia. Vai.”`); return true; }
   ent.usado = true;
@@ -1441,7 +1504,23 @@ function encarar(e, alvoId) {
   }
   if (alvo.tipo === 'aliado') {
     if (alvo.aparencia) { revelar(e, alvo, 'encarar'); msg(e, 'Ele não foge. Só te olha, assustado.', 'bom'); }
-    else msg(e, `${Maiuscula(artigoDe(nome))} estranha o seu olhar.`);
+    else {
+      // Encarar quem é do bem é uma agressão: gera antipatia.
+      alvo.magoado = true;
+      e.stats.antipatias++;
+      perderSan(e, PARAM.perda.antipatia, { reduzivel: false, motivo: 'antipatia' });
+      if (alvo.estado === 'seguindo') { alvo.estado = 'parado'; msg(e, `${Maiuscula(artigoDe(nome))} para de seguir você.`, 'perigo'); }
+      msg(e, `${Maiuscula(artigoDe(nome))} se encolhe com o seu olhar. Você assustou alguém que queria ajudar.`, 'perigo');
+      ganharPista(e, 'vigia');
+    }
+    return true;
+  }
+  if (alvo.estado === 'vigiando') {
+    e.stats.antipatias++;
+    alvo.estado = 'cacando';
+    alvo.ultimo = { ...e.jogador };
+    msg(e, `${Maiuscula(artigoDe(nome))} não gosta nada do seu olhar e vem tirar satisfação.`, 'perigo');
+    ganharPista(e, 'vigia');
     return true;
   }
   if (alvo.ronda) {
@@ -1775,6 +1854,7 @@ function agirMonstro(e, m) {
     if (m.fugaTtl <= 0) { m.estado = ve ? 'cacando' : 'parado'; if (!ve) m.vida = 0; }
     return;
   }
+  if (m.estado === 'vigiando') { vigiar(e, m, ve); return; }
   if (ve) {
     if (!m.jaVisto && m.categoria === 'assombro') {
       m.jaVisto = true;
@@ -1807,6 +1887,48 @@ function agirMonstro(e, m) {
     return;
   }
   vagar(e, m);
+}
+
+/** Quem vigia anda pela sala; se você fica perto demais por tempo demais, manda você embora. */
+function vigiar(e, m, ve) {
+  if (ve && distancia(m, e.jogador) <= PARAM.vigia.distancia) m.atencao = (m.atencao ?? 0) + 1;
+  else m.atencao = Math.max(0, (m.atencao ?? 0) - 1);
+  if (m.atencao >= PARAM.vigia.paciencia) {
+    m.estado = 'cacando';
+    m.ultimo = { ...e.jogador };
+    msg(e, `${Maiuscula(artigoDe(nomeAparente(e, m)))} decide que você não devia estar aqui.`, 'perigo');
+    return;
+  }
+  if (m.atencao === PARAM.vigia.paciencia - 1 && ve) msg(e, `${Maiuscula(artigoDe(nomeAparente(e, m)))} olha para você e franze a testa.`, 'perigo');
+  vagar(e, m);
+}
+
+/** Dá para ver que ele só vigia? Percepção alta, ou ter olhado de novo, ou ter falado com ele. */
+const intencaoVisivel = (e, m) => m.estado === 'vigiando' && (n(e, 'percepcao') >= PARAM.vigia.percepcao || m.revelado || m.conversou);
+
+/** Bateu em quem só vigiava: ele grita, todos os humanos do andar vêm, e pesa. */
+function provocar(e, ent) {
+  if (ent.estado !== 'vigiando') return;
+  e.stats.inocentesFeridos++;
+  perderSan(e, PARAM.perda.atacarInocente, { reduzivel: false, motivo: 'antipatia' });
+  msg(e, `${Maiuscula(artigoDe(especie(e, ent).nome))} só estava vigiando. Ele grita por ajuda.`, 'perigo');
+  ganharPista(e, 'vigia');
+  alarme(e);
+}
+
+function alarme(e) {
+  let n2 = 0;
+  for (const m of e.entidades) {
+    if (m.tipo !== 'monstro' || m.categoria !== 'humano' || m.vida <= 0 || m.ronda) continue;
+    if (m.estado === 'vigiando' || m.estado === 'parado') { m.estado = 'cacando'; m.ultimo = { ...e.jogador }; n2++; }
+  }
+  if (!e.alarmeNoAndar) {
+    e.alarmeNoAndar = true;
+    e.stats.alarmes++;
+    msg(e, 'Passos correndo por todo o andar. Agora todos sabem de você.', 'perigo');
+    anotar(e, `Deu alarme em ${temaDe(e).andares[e.andar - 1]}.`);
+  }
+  return n2;
 }
 
 /** Monstro colado, com arma ou força, às vezes prepara um golpe pesado: avisa um turno antes. */
@@ -2037,12 +2159,12 @@ function alucinar(e) {
     e.ilusaoParedes.clear();
   }
   if (lv === 0 && lc === 0) return;
-  const notar = PARAM.notar * (n(e, 'sentidos') + n(e, 'discernimento'));
+  const notar = PARAM.notar * (n(e, 'sentidos') + n(e, 'discernimento') + n(e, 'percepcao'));
   const th = temaDe(e);
   const comuns = th.monstros.filter((q) => q.andar <= Math.max(2, e.andar) && q.andar < 5);
   // Disfarces para quem acabou de entrar em vista.
   for (const ent of e.entidades) {
-    if (ent.tipo === 'fantasma' || !ent.visivel) continue;
+    if (ent.tipo === 'fantasma' || !ent.visivel || ent.ronda) continue; // a ronda não se disfarça: ela é a verdade que chega
     if (!ent.decidido) {
       ent.decidido = true;
       const p = A.disfarce[lv] * (ent.estado === 'seguindo' ? 0.35 : 1) * (e.ancorado > 0 ? 0 : 1);
@@ -2332,7 +2454,7 @@ export function percebido(e) {
     const real = ent.tipo !== 'fantasma';
     entidades.push({
       id: ent.id, x: ent.x, y: ent.y, sprite: esp.sprite, cores: esp.cores, nome: esp.nome,
-      categoria: ap.categoria === 'aliado' ? 'aliado' : 'hostil', especie: ap.categoria,
+      categoria: ap.categoria === 'aliado' ? 'aliado' : !ent.aparencia && intencaoVisivel(e, ent) ? 'neutro' : 'hostil', especie: ap.categoria,
       sombra: real, respira: !real,
       companheiro: ent.estado === 'seguindo' && !ent.aparencia,
       preparando: !!ent.preparando, tonto: ent.tonto > 0, ameaca: !!ent.ronda,

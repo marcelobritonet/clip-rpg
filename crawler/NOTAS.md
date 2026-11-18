@@ -29,6 +29,7 @@ página. Não mexe na versão das regras nem das ferramentas do Clip.
 | 0.3.0 | 18/11/2026 | **Urgência**: cada andar tem um fio que queima (linha na base da tela e no painel); quando acaba, a ronda do tema chega (não cai, só dá para fugir ou atrasar) e a cabeça pesa o dobro. A escolha entre andares tem 15 segundos; se acabar, o lugar escolhe. **Combate**: golpe preparado com aviso (!), Defender (com contra-golpe), Empurrar (tonto contra a parede, derruba no buraco), Fechar porta (bichos não abrem). **Janelas**: algo passa lá fora; às vezes bate e entra, a não ser que você segure a janela; com a cabeça ruim, há batidas que ninguém dá. **Caminho**: uma peça por andar do meio (prontuário, selo, rádio) devolve fio e mostra a saída; com as três, o fim é inteiro. "Ancorar" virou "Ancorar-se", com explicação. |
 | 0.3.1 | 18/11/2026 | **O dom da Mente** deixa de ser "magia" na tela: diagnóstico no sanatório (dizer o nome exato do que o outro tem), fórmula de fogo na masmorra, frasco incendiário no prédio; o recurso vira Foco, Fórmulas ou Mistura, com palavras próprias. A regra continua Mágicas de Ataque Físico. **Âncora** vira cura para o espírito com gesto do tema (olhar a foto de casa, apertar a medalha, ouvir o recado no rádio), em frase no lugar das gemas. **Fôlego**: correr sem parar deixa ofegante, cansa a vista e, no limite, cada passo custa dois turnos; o fio ficou mais longo para compensar. **Perdas e curas visíveis**: cada estado tem uma frase curta ("sangrando", "pálpebras pesadas", "as coisas tremem"), setas ▼/▲ por alguns segundos quando algo muda e uma linha no registro quando a palavra muda. |
 | 0.3.2 | 18/11/2026 | **Mente ajustada.** Metade das mortes da Mente vinha da ronda, nos andares 4 e 5. Agora o dom da Mente deixa tonto quem acerta (1 turno; a ronda, 2): é o jeito dela de ganhar distância. Defender soma metade da Percepção. Robô atento da Mente usa o dom na ronda e defende quando está colado. Resultado (robô atento, 40 partidas por tema): fuga da Mente de 11% para 18%, morte de 86% para 76%; Corpo 13%, Espírito 28%. Correção: "a horda" e outros artigos femininos. |
+| 0.4.0 | 18/11/2026 | **Consequências, não pancadaria.** Humanos comuns (enfermeiro, guarda, carcereiro, cultista, saqueador) **só vigiam**: não caçam; ficar perto deles por 4 turnos os faz mandar você embora. Bater em quem vigia dá **alarme** (todos os humanos do andar caçam) e pesa na cabeça; matar gente pesa para todos, até para o Corpo, e quem só vigiava pesa o dobro. **Percepção** 2 ou mais mostra quem só vigia (moldura amarela; andar contra é conversar); sem ela, olhe de novo ou fale. Já conversou: dá para passar espremido. **Encarar gente de bem gera antipatia**: aliado se fecha e para de seguir, vigia vem tirar satisfação. **Desfazer uma mentira devolve clareza** (+1 de Sanidade). **Acreditar numa mentira cobra**: item falso, janela onde ninguém bate (−1 de Sanidade), porta pintada (−1 de Consciência). **Fé** reduz os sustos (metade da Fé soma à Serenidade) e **Percepção** ajuda a notar sozinho o que está errado. Consciência mínima 13 (antes 10), fôlego mais brando, fio de 350 a 430 turnos. Robô atento, 40 partidas por tema: fuga Corpo 11%, Mente 13%, Espírito 26%. |
 
 ## Como se joga
 
@@ -143,6 +144,25 @@ Cada perda ou cura mostra ▼ ou ▲ (dois, se foi grande) ao lado da palavra po
 alguns segundos. Quando a palavra muda, o registro diz a direção ("▼ Seu corpo
 piorou: agora, Ferido (sangrando)."). As setas seguem a verdade; as palavras
 da Cabeça ainda podem mentir.
+
+## Consequências (desde a 0.4.0)
+
+| Ação | Consequência | Quem faz bem |
+|---|---|---|
+| Bater em quem só vigia | Alarme no andar, −1 de Sanidade (sem desconto da Fé) | Ninguém |
+| Matar gente | −1 de Sanidade para todos; −2 se só vigiava | Ninguém |
+| Falar com quem vigia | Convencer: ele vai embora (+1 de Sanidade). Falhar: ele fica de olho, não ataca | Espírito (Presença) |
+| Olhar de novo para quem vigia | Mostra a intenção ("só vigia") | Mente (Percepção) |
+| Encarar aliado de verdade | Antipatia: ele se fecha, não ajuda, para de seguir; −1 de Sanidade | — |
+| Encarar quem vigia | Ele vem tirar satisfação | — |
+| Desfazer vulto, disfarce, miragem ou item falso | +1 de Sanidade (clareza) | Mente, Espírito |
+| Pegar item falso, segurar janela onde ninguém bate | −1 de Sanidade | — |
+| Empurrar porta pintada | −1 de Consciência | — |
+| Sustos (assombro, corpo, carta, foto) | Perda reduzida por Serenidade + metade da Fé | Espírito |
+
+A intenção de quem vigia só aparece para quem tem Percepção 2 ou mais, ou depois
+de olhar de novo ou de falar. Para o Corpo (Percepção 1), todo guarda parece
+hostil: é o jeito de a Percepção valer tanto quanto a força.
 
 ## Decisões de design
 
@@ -492,6 +512,9 @@ Todos ficam em `PARAM` (`crawler/jogo.js`) ou em `temas.js`; o motor não foi al
 | 20 | A ronda é invencível | Vida 999; só atrasa (tonta, recua) | Urgência; não há regra de criatura invencível no Clip | — |
 | 21 | Defender | +2 de Defesa (+4 contra golpe preparado) e contra-golpe se errar | O manual não tem defesa total nem contra-ataque | Combate |
 | 22 | Empurrar | Teste de Força contra 2 + Defesa do alvo | O manual não tem manobras | Combate |
+| 23 | Humanos comuns só vigiam | Estado "vigiando"; paciência de 4 turnos; alarme ao agredir | O Clip não fala de disposição de PNJ; é decisão de mesa |
+| 24 | Clareza | +1 de Sanidade por mentira desfeita | O manual não dá recuperação por acerto | Sanidade |
+| 25 | Fé reduz sustos | Metade da Fé soma à Serenidade na redução | Proposta: Fé como resistência a medo | PENDENCIAS 2 |
 
 ## Dúvidas de regra que o protótipo levantou
 

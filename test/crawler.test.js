@@ -428,7 +428,8 @@ test('item com cara de monstro: bater quebra; olhar de novo mostra o que é', ()
 });
 
 test('carta e corpo fazem mal de olhar, mas mostram o caminho e dão um item', () => {
-  const { e, x, y } = salaLimpa({ origem: 'espirito' });
+  // Mente: sem Fé para segurar o susto (a Fé do Espírito anula a carta).
+  const { e, x, y } = salaLimpa({ origem: 'mente' });
   e.objetos.push({ id: 'carta', tipo: 'perturbador', tipoP: 'carta', x: x + 1, y, real: true });
   e.objetos.push({ id: 'corpo', tipo: 'perturbador', tipoP: 'corpo', x: x + 2, y, real: true });
   const escada = e.objetos.find((o) => o.tipo === 'escada');
@@ -648,4 +649,77 @@ test('o dom da Mente deixa tonto quem acerta, inclusive a ronda', () => {
     tonto = m.tonto >= J.PARAM.magia.tontoRonda - 1 && m.vida > 900; // um turno de tontura já passou no mundo
   }
   assert.ok(tonto, 'a ronda ficou tonta e não caiu');
+});
+
+/* Versão 0.4: consequências. */
+
+test('gente comum só vigia; bater nela dá alarme e pesa', () => {
+  const { e } = salaLimpa();
+  const base = TEMAS.sanatorio.monstros.find((m) => m.id === 'enfermeiro');
+  const c = J.gerarConteudoDoAndar('vigia', 'sanatorio', 1);
+  assert.ok(c.entidades.filter((m) => m.categoria === 'humano').every((m) => m.estado === 'vigiando'), 'humanos comuns começam vigiando');
+  const v = monstroAo(e, 'enfermeiro', 1, { estado: 'vigiando', vigia: true });
+  const outro = monstroAo(e, 'guarda', 4, { estado: 'vigiando', vigia: true });
+  const san = e.san;
+  e.rDados = fluxo('bate', 1);
+  let tent = 0;
+  while (!e.stats.inocentesFeridos && tent++ < 20) J.agir(e, { tipo: 'atacar', dx: 1, dy: 0 });
+  assert.equal(e.stats.inocentesFeridos, 1);
+  assert.ok(e.san < san, 'pesa');
+  assert.equal(outro.estado, 'cacando', 'o andar inteiro vem');
+  assert.equal(e.stats.alarmes, 1);
+  assert.ok(base);
+});
+
+test('com Percepção alta, quem vigia aparece como neutro e andar contra é conversar', () => {
+  const { e } = salaLimpa({ origem: 'mente' });
+  const v = monstroAo(e, 'enfermeiro', 1, { estado: 'vigiando', vigia: true });
+  assert.equal(J.percebido(e).entidades.find((x) => x.id === v.id).categoria, 'neutro');
+  J.agir(e, { tipo: 'mover', dx: 1, dy: 0 });
+  assert.equal(e.stats.inocentesFeridos, 0, 'não bateu');
+  assert.ok(v.conversou, 'conversou');
+  // Sem Percepção, parece hostil.
+  const c = salaLimpa({ origem: 'espirito', semente: 'sem-percepcao' });
+  const w = monstroAo(c.e, 'enfermeiro', 1, { estado: 'vigiando', vigia: true });
+  assert.equal(J.percebido(c.e).entidades.find((x) => x.id === w.id).categoria, 'hostil');
+});
+
+test('encarar gente de bem gera antipatia', () => {
+  const { e, x, y } = salaLimpa({ origem: 'espirito' });
+  const al = { id: 'al', tipo: 'aliado', especie: 'lucida', categoria: 'aliado', x: x + 1, y, vida: 6, vidaMax: 6, ataque: 1, defesa: 1, arma: 1, estado: 'parado', decidido: true };
+  e.entidades.push(al);
+  e.san = J.derivados(e).sanMax - 2;
+  const san = e.san;
+  J.agir(e, { tipo: 'encarar', alvo: 'al' });
+  assert.ok(al.magoado);
+  assert.ok(e.san < san);
+  J.agir(e, { tipo: 'falar', alvo: 'al' });
+  assert.ok(e.log.some((m) => m.texto.includes('Não quer falar com você')));
+});
+
+test('desfazer uma mentira devolve clareza; acreditar numa mentira cobra', () => {
+  const { e } = cena({ origem: 'mente', especie: 'enfermeiro', fantasma: true, lucidez: 0.5 });
+  e.rDados = fluxo('clareza', 4);
+  const san = e.san;
+  let tent = 0;
+  while (e.entidades.some((x) => x.id === 'alvo') && tent++ < 10) J.agir(e, { tipo: 'olhar', alvo: 'alvo' });
+  assert.ok(e.stats.clarezas >= 1);
+  assert.ok(e.san >= san, 'a cabeça não piorou');
+  // Item falso: acreditar cobra.
+  const s2 = salaLimpa({ origem: 'mente', semente: 'item-falso' });
+  s2.e.cons = Math.ceil(J.derivados(s2.e).consMax * 0.5);
+  s2.e.objetos.push({ id: 'f', tipo: 'item', x: s2.x + 1, y: s2.y, real: false, item: { tipo: 'cura', nome: 'rolo de gaze' } });
+  const san2 = s2.e.san;
+  J.agir(s2.e, { tipo: 'mover', dx: 1, dy: 0 });
+  assert.ok(s2.e.san < san2, 'item falso cobra');
+});
+
+test('a Fé segura os sustos', () => {
+  const comFe = salaLimpa({ origem: 'espirito' });
+  const semFe = salaLimpa({ origem: 'mente' });
+  for (const { e, x, y } of [comFe, semFe]) e.objetos.push({ id: 'c', tipo: 'perturbador', tipoP: 'carta', x: x + 1, y, real: true });
+  const a = comFe.e.san, b = semFe.e.san;
+  J.agir(comFe.e, { tipo: 'mover', dx: 1, dy: 0 });
+  J.agir(semFe.e, { tipo: 'mover', dx: 1, dy: 0 });
+  assert.ok(a - comFe.e.san < b - semFe.e.san);
 });

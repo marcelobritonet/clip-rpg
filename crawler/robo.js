@@ -37,7 +37,13 @@ function crê(robo, p, ent) {
   if (veio) c.veio = true;
   // Hostil que nunca sai do lugar, mesmo vendo você: talvez nem seja bicho.
   const imovel = (robo.imoveis.get(ent.id) ?? 0) >= 3 && ent.categoria === 'hostil' && c.le;
-  return { falso: c.falso || ent.marca === 'suspeito', emboscada: c.le && !!c.veio, imovel };
+  // Gente "hostil" que não vem até você talvez só esteja vigiando.
+  if (antes && ent.categoria === 'hostil' && ent.especie === 'humano') {
+    const d0 = distancia(antes, p.jogador), d1 = distancia(ent, p.jogador);
+    c.naoVem = d1 >= d0 && d1 >= 2 && d1 <= 6 ? (c.naoVem ?? 0) + 1 : 0;
+  }
+  const quieto = c.le && (c.naoVem ?? 0) >= 3;
+  return { falso: c.falso || ent.marca === 'suspeito', emboscada: c.le && !!c.veio, imovel, quieto };
 }
 
 /** Decide, age e lembra se a ação não gastou turno (para não insistir nela). */
@@ -96,9 +102,9 @@ function decidirBruto(robo, e) {
   // A ronda não cai: correr para a saída; se colar, atrasar.
   if (ronda) {
     if (ronda.d === 1 && ronda.preparando) { const f = fugirDe(p, ronda); if (f) return fim(robo, p, f); }
-    if (ronda.d <= 3 && e.origem === 'espirito') return fim(robo, p, { tipo: 'encarar', alvo: ronda.id });
+    if (ronda.d === 1 && !ronda.fugindo && e.origem === 'espirito') return fim(robo, p, { tipo: 'encarar', alvo: ronda.id });
     const domPronto = p.estado.magia && !TEMAS[p.tema].dom.palavras.slice(4).includes(p.estado.magia);
-    if (e.origem === 'mente' && domPronto && !ronda.tonto && ronda.d <= 4) return fim(robo, p, { tipo: 'magia', alvo: ronda.id });
+    if (e.origem === 'mente' && domPronto && !ronda.tonto && !ronda.fugindo && ronda.d <= 4) return fim(robo, p, { tipo: 'magia', alvo: ronda.id });
     if (ronda.d === 1 && e.origem === 'corpo') return fim(robo, p, { tipo: 'empurrar', alvo: ronda.id });
     if (saidaVista) { const a = irPara(robo, p, (x, y) => x === saidaVista.x && y === saidaVista.y); if (a) return fim(robo, p, a); }
     if (ronda.d <= 2) { const f = fugirDe(p, ronda); if (f) return fim(robo, p, f); }
@@ -120,30 +126,45 @@ function decidirBruto(robo, e) {
     if (a) return fim(robo, p, a);
   }
   const imoveis = hostis.filter((x) => x.fe.imovel && !x.fe.falso);
-  const reaisHostis = hostis.filter((x) => !x.fe.falso && !x.fe.imovel);
+  const reaisHostis = hostis.filter((x) => !x.fe.falso && !x.fe.imovel && !(robo.perfil === 'atento' && x.fe.quieto));
   const falsos = hostis.filter((x) => x.fe.falso);
 
   // Descansar: cansado e sem nada hostil à vista (o atento descansa mais cedo, se a cabeça aguenta).
-  const cansado = (p.fio >= 0.4 || p.estado.consciencia === 'Apagando') && CANSADO.includes(p.estado.consciencia) || (robo.perfil === 'atento' && p.estado.consciencia === 'Cansado' && p.lucidez <= 1);
+  // Com o fio curto, só descansa quem está apagando (e nunca com a ronda à vista).
+  const podeParar = !ronda && (p.fio >= 0.4 || p.estado.consciencia === 'Apagando');
+  const cansado = podeParar && (CANSADO.includes(p.estado.consciencia) || (robo.perfil === 'atento' && p.estado.consciencia === 'Cansado' && p.lucidez <= 1 && p.fio >= 0.4));
   if (!reaisHostis.some((x) => x.d <= 8) && (cansado || (robo.descansando && !['Alerta', 'Desperto'].includes(p.estado.consciencia)))) {
     robo.descansando = p.lucidez <= 2 && p.fio >= 0.4;
     if (robo.descansando || CANSADO.includes(p.estado.consciencia)) return fim(robo, p, { tipo: 'esperar' });
   } else robo.descansando = false;
 
   // Ofegante e sem perigo perto: o atento para um turno para segurar o fôlego.
-  if (robo.perfil === 'atento' && p.ofegante && !reaisHostis.some((x) => x.d <= 6) && (p.ofegante === 2 || p.fio > 0.3)) return fim(robo, p, { tipo: 'esperar' });
+  if (robo.perfil === 'atento' && p.ofegante && !ronda && p.fio > 0 && !reaisHostis.some((x) => x.d <= 6) && (p.ofegante === 2 || p.fio > 0.3)) return fim(robo, p, { tipo: 'esperar' });
+
+  // Gente que não vem: o atento confere antes de bater (o Espírito fala).
+  // (quem não vem fica fora de reaisHostis: o atento não bate em quem só vigia)
+  const quieto = hostis.find((x) => x.fe.quieto && x.d <= 4 && !x.fe.falso && !robo.conferidos?.has(x.id));
+  if (quieto && robo.perfil === 'atento' && !reaisHostis.some((x) => x.d <= 2)) {
+    robo.conferidos ??= new Set();
+    robo.conferidos.add(quieto.id);
+    if (e.origem === 'espirito' && quieto.d === 1) return fim(robo, p, { tipo: 'falar', alvo: quieto.id });
+    if (e.origem === 'mente') return fim(robo, p, { tipo: 'olhar', alvo: quieto.id });
+  }
 
   // Bicho parado que não vem: olhar de novo (ou encarar) em vez de bater.
   const parado = imoveis.find((x) => x.d <= 4);
   if (parado && !reaisHostis.some((x) => x.d <= 2)) {
-    return fim(robo, p, { tipo: e.origem === 'espirito' ? 'encarar' : 'olhar', alvo: parado.id });
+    // Encarar gente gera antipatia: com quem parece gente, o Espírito fala.
+    const gente = parado.especie === 'humano';
+    if (e.origem === 'espirito' && gente && parado.d > 1) { /* espera chegar perto */ }
+    else return fim(robo, p, { tipo: e.origem === 'espirito' ? (gente ? 'falar' : 'encarar') : 'olhar', alvo: parado.id });
   }
 
   // Vulto que o robô acha falso, colado: tira a dúvida (ou ignora).
   const falsoColado = falsos.find((x) => x.d === 1);
   if (falsoColado && !reaisHostis.some((x) => x.d <= 2)) {
     if (e.origem === 'mente' || (e.origem === 'corpo' && chance(robo.r, 0.5))) return fim(robo, p, { tipo: 'olhar', alvo: falsoColado.id });
-    if (e.origem === 'espirito') return fim(robo, p, { tipo: 'encarar', alvo: falsoColado.id });
+    if (e.origem === 'espirito') return fim(robo, p, { tipo: falsoColado.especie === 'humano' || falsoColado.especie === 'aliado' ? 'falar' : 'encarar', alvo: falsoColado.id });
   }
 
   const alvo = reaisHostis[0];
@@ -237,7 +258,7 @@ function fugirDe(p, ameaca) {
 
 function irPara(robo, p, alvo) {
   const k = (x, y) => y * p.w + x;
-  const ocupado = new Set(p.entidades.filter((x) => !x.companheiro).map((x) => k(x.x, x.y)));
+  const ocupado = new Set(p.entidades.filter((x) => !x.companheiro && x.categoria !== 'neutro').map((x) => k(x.x, x.y)));
   for (const [b, ate] of robo.bloqueios ?? []) if (ate > p.turno) ocupado.add(b);
   const passo = primeiroPasso(p.w, p.h, p.jogador, (x, y) => PASSA(p.tiles[k(x, y)]) && !ocupado.has(k(x, y)), alvo, 3000);
   if (!passo) return null;

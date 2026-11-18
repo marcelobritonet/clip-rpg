@@ -99,6 +99,8 @@ function montarComo() {
       <tr><td><b>Cabeça</b> (Sanidade)</td><td>A cor desbota, aparece grão e as cores se separam</td><td>Mente sobre quem e o que as coisas são: aliado com cara de monstro e o contrário, itens que parecem bichos parados, sussurros. As palavras do painel também mentem. Em zero, você perde o controle.</td></tr>
     </table>
     <p><b>O fio.</b> Cada andar tem um fio que queima (a linha na base da tela). Quando acaba, a ronda chega pela porta por onde você entrou: não cai, não se cansa, só dá para fugir dela ou atrasá-la. E a cabeça pesa o dobro. Quem prepara um golpe pesado avisa um turno antes (<b>!</b> vermelho): saia de perto, defenda ou empurre. Janelas mostram o que passa lá fora; quando algo bate, segure a janela (ande contra ela) antes de o vidro ceder.</p>
+    <p><b>Nem todo mundo é inimigo.</b> Enfermeiros, guardas, carcereiros e saqueadores comuns só vigiam: não vêm atrás de você, mas não gostam de você por perto. Bater em quem só vigia põe o andar inteiro contra você e pesa na cabeça; matar gente pesa para todos, até para o Corpo. Com Percepção alta você vê quem só vigia (moldura amarela); sem ela, olhe de novo ou fale. Encarar gente de bem gera antipatia: aliados se fecham, vigias vêm tirar satisfação.</p>
+    <p><b>A verdade compensa.</b> Desfazer uma mentira (olhar de novo, falar, encarar o que é falso) devolve um pouco de clareza à cabeça. Acreditar numa mentira (pegar item que não existe, segurar janela onde ninguém bate, empurrar porta pintada) sempre cobra. A Fé segura os sustos; a Percepção nota sozinha o que está errado.</p>
     <p><b>O caminho.</b> Nos andares 2, 3 e 4 há uma peça do caminho. Cada uma devolve fio e mostra a saída do andar. Com as três, você sai inteiro; sem elas, também dá para sair, mas o fim é outro.</p>
     <p>Fotografias, cartas e corpos fazem mal de olhar, mas mostram coisas: o caminho, um item, algo em que se agarrar. Pisar em cima examina.</p>
     <table>
@@ -486,7 +488,7 @@ function desenharAlvo(p) {
   const dist = a.d === 0 ? 'aqui' : a.d === 1 ? 'colado em você' : `a ${a.d} passos`;
   let jeito = '';
   if (a.tipoAlvo === 'entidade') {
-    jeito = a.companheiro ? 'está com você' : a.categoria === 'aliado' ? 'parece um aliado' : a.fugindo ? 'está se afastando' : 'parece hostil';
+    jeito = a.companheiro ? 'está com você' : a.categoria === 'aliado' ? 'parece um aliado' : a.categoria === 'neutro' ? 'só vigia (não bata: andar contra é conversar)' : a.fugindo ? 'está se afastando' : 'parece hostil';
     if (a.marca === 'suspeito') jeito += '; algo nele não está certo';
     if (a.marca === 'real') jeito += '; você confirmou que é real';
     if (a.preparando) jeito += '; <b>prepara um golpe pesado</b>';
@@ -780,7 +782,7 @@ function desenharMapa(agora) {
   }
   if (atual && naTela(atual.x, atual.y)) {
     const [px, py] = pos(atual.x, atual.y);
-    ctx.fillStyle = atual.categoria === 'aliado' || atual.tipoAlvo === 'objeto' ? '#e8e0c8' : '#ff7060';
+    ctx.fillStyle = atual.categoria === 'aliado' || atual.tipoAlvo === 'objeto' ? '#e8e0c8' : atual.categoria === 'neutro' ? '#e8c860' : '#ff7060';
     for (const [x, y, w, h] of [[0, 0, 3, 1], [0, 0, 1, 3], [9, 0, 3, 1], [11, 0, 1, 3], [0, 11, 3, 1], [0, 9, 1, 3], [9, 11, 3, 1], [11, 9, 1, 3]]) ctx.fillRect(px + x, py + y, w, h);
   }
   posProcessar(ctx, lv, lc, agora, reduz);
