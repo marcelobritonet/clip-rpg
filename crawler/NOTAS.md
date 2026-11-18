@@ -17,6 +17,15 @@ responde e o que foi ajustado para ficar divertido.
 - Depuração: tecla <kbd>`</kbd> ou `?depurar=1` mostra os números, marca o que é
   falso no mapa e expõe `window.desvario` no console.
 
+## Versões
+
+A versão do Desvario é só dele (`crawler/versao.js`) e aparece no rodapé da
+página. Não mexe na versão das regras nem das ferramentas do Clip.
+
+| Versão | Data | O que mudou |
+|---|---|---|
+| 0.1.0 | 18/11/2026 | Primeira versão jogável: três temas, três origens, cinco andares, a Sanidade distorce a percepção, diário entre tentativas, robô e simulador. |
+
 ## Como se joga
 
 Chegue à saída do quinto andar. Ninguém mostra pontos: o estado aparece em

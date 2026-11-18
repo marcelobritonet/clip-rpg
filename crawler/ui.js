@@ -7,6 +7,7 @@ import { TEMAS, LISTA_TEMAS } from './temas.js';
 import { sementeNova, hash } from './rng.js';
 import { T, primeiroPasso, distancia } from './mapa.js';
 import { TAM, sprite, icone, desenharTile, desenharObjeto, COR_CAMINHO } from './sprites.js';
+import { VERSAO_DESVARIO } from './versao.js';
 
 const $ = (id) => document.getElementById(id);
 const movimentoReduzido = matchMedia('(prefers-reduced-motion: reduce)');
@@ -686,6 +687,12 @@ function posProcessar(ctx, lv, agora, reduz) {
   }
   ctx.putImageData(img, 0, 0);
 }
+
+// Rodapé: o `assets/rodape.js` (que roda depois deste módulo) escreve as versões do Clip; a do jogo entra em seguida.
+document.addEventListener('DOMContentLoaded', () => {
+  const [a, m, d] = VERSAO_DESVARIO.data.split('-');
+  $('rodape')?.insertAdjacentHTML('afterbegin', `<span>Desvario <b>v${VERSAO_DESVARIO.numero}</b> · ${d}/${m}/${a}</span>`);
+});
 
 montarInicio();
 if (params.get('jogar') === '1') comecar(params.get('semente') ?? undefined);
