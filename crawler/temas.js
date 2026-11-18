@@ -84,6 +84,15 @@ export const TEMAS = {
       certo: 'Você olha a foto de casa com firmeza e diz o seu nome em voz alta. O mundo para de mentir, por um tempo.',
       falha: 'Você olha a foto, mas o rosto não parece o seu. Ainda não.',
     },
+    tarefas: {
+      trancada: 'A porta da escada de serviço está trancada.',
+      aberta: 'Um estalo metálico ao longe: a porta da escada de serviço destrancou.',
+      passos: [
+        { nome: 'molho de chaves do zelador', texto: 'Num gancho atrás da porta, o molho de chaves do zelador. Uma delas tem etiqueta: QUADRO.' },
+        { nome: 'quadro de luz', texto: 'Você abre o quadro com a chave e abaixa a alavanca da trava. Lá longe, um zumbido para.' },
+        { nome: 'livro de ocorrências', texto: 'No livro de ocorrências, a senha da porta da escada, anotada a lápis. Você decora.' },
+      ],
+    },
     ronda: {
       nome: 'enfermeiro-chefe da ronda', sprite: 'humano', cores: cores('#d0a080', '#f2f2ee', '#3a5a8a', '#101010', '#202020'), categoria: 'humano',
       avisos: ['Longe, um molho de chaves balança. A ronda da noite começou.', 'As chaves estão mais perto. Portas batem, uma a uma.', 'Passos de borracha no fim do corredor. Ele sabe o número do seu quarto.'],
@@ -187,6 +196,15 @@ export const TEMAS = {
       certo: 'Você aperta a medalha até doer e reza o que lembra. As pedras param de mentir, por um tempo.',
       falha: 'Você aperta a medalha, mas a oração some no meio.',
     },
+    tarefas: {
+      trancada: 'A grade da escadaria está baixada.',
+      aberta: 'Correntes rangem ao longe: a grade da escadaria subiu.',
+      passos: [
+        { nome: 'chave de ferro', texto: 'Uma chave de ferro, presa ao cinto de um esqueleto. Ela abre a casa do guincho.' },
+        { nome: 'guincho da grade', texto: 'Você destrava o guincho. A corrente fica frouxa, esperando o contrapeso.' },
+        { nome: 'contrapeso', texto: 'Você empurra o contrapeso para o poço. A corrente estica com um estalo.' },
+      ],
+    },
     ronda: {
       nome: 'carrasco encapuzado', sprite: 'encapuzado', cores: cores('#b08060', '#1a1a1a', '#8a1a1a', '#ff3030'), categoria: 'humano',
       avisos: ['Um sino toca lá em cima. Alguém notou a cela vazia.', 'Ferro arrastado na pedra, mais perto a cada volta da escada.', 'Você ouve a respiração dele através das paredes.'],
@@ -288,6 +306,15 @@ export const TEMAS = {
       restam: ['Nada mais em que se agarrar neste andar', 'Ainda dá para ouvir o recado uma vez', 'Dá para ouvir o recado mais vezes'],
       certo: 'Você ouve o recado de novo, baixinho. Alguém espera você. O mundo para de mentir, por um tempo.',
       falha: 'O rádio chia. Você não reconhece a voz.',
+    },
+    tarefas: {
+      trancada: 'A porta corta-fogo da escada está travada.',
+      aberta: 'Um bipe e um clique: a porta corta-fogo destravou.',
+      passos: [
+        { nome: 'cartão de acesso', texto: 'Um cartão de acesso no bolso de um jaleco. A tarja diz: MANUTENÇÃO.' },
+        { nome: 'gerador', texto: 'Com o cartão, você entra na casa de máquinas e liga o gerador. As luzes de emergência piscam.' },
+        { nome: 'painel da portaria', texto: 'No painel da portaria, você aperta o botão da porta da escada. Uma luz verde acende.' },
+      ],
     },
     ronda: {
       nome: 'horda', sprite: 'zumbi', cores: cores('#7a9070', '#4a4a3a', '#2a2a2a', '#d0ff60'), categoria: 'besta',

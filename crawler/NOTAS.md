@@ -30,6 +30,7 @@ página. Não mexe na versão das regras nem das ferramentas do Clip.
 | 0.3.1 | 18/11/2026 | **O dom da Mente** deixa de ser "magia" na tela: diagnóstico no sanatório (dizer o nome exato do que o outro tem), fórmula de fogo na masmorra, frasco incendiário no prédio; o recurso vira Foco, Fórmulas ou Mistura, com palavras próprias. A regra continua Mágicas de Ataque Físico. **Âncora** vira cura para o espírito com gesto do tema (olhar a foto de casa, apertar a medalha, ouvir o recado no rádio), em frase no lugar das gemas. **Fôlego**: correr sem parar deixa ofegante, cansa a vista e, no limite, cada passo custa dois turnos; o fio ficou mais longo para compensar. **Perdas e curas visíveis**: cada estado tem uma frase curta ("sangrando", "pálpebras pesadas", "as coisas tremem"), setas ▼/▲ por alguns segundos quando algo muda e uma linha no registro quando a palavra muda. |
 | 0.3.2 | 18/11/2026 | **Mente ajustada.** Metade das mortes da Mente vinha da ronda, nos andares 4 e 5. Agora o dom da Mente deixa tonto quem acerta (1 turno; a ronda, 2): é o jeito dela de ganhar distância. Defender soma metade da Percepção. Robô atento da Mente usa o dom na ronda e defende quando está colado. Resultado (robô atento, 40 partidas por tema): fuga da Mente de 11% para 18%, morte de 86% para 76%; Corpo 13%, Espírito 28%. Correção: "a horda" e outros artigos femininos. |
 | 0.4.0 | 18/11/2026 | **Consequências, não pancadaria.** Humanos comuns (enfermeiro, guarda, carcereiro, cultista, saqueador) **só vigiam**: não caçam; ficar perto deles por 4 turnos os faz mandar você embora. Bater em quem vigia dá **alarme** (todos os humanos do andar caçam) e pesa na cabeça; matar gente pesa para todos, até para o Corpo, e quem só vigiava pesa o dobro. **Percepção** 2 ou mais mostra quem só vigia (moldura amarela; andar contra é conversar); sem ela, olhe de novo ou fale. Já conversou: dá para passar espremido. **Encarar gente de bem gera antipatia**: aliado se fecha e para de seguir, vigia vem tirar satisfação. **Desfazer uma mentira devolve clareza** (+1 de Sanidade). **Acreditar numa mentira cobra**: item falso, janela onde ninguém bate (−1 de Sanidade), porta pintada (−1 de Consciência). **Fé** reduz os sustos (metade da Fé soma à Serenidade) e **Percepção** ajuda a notar sozinho o que está errado. Consciência mínima 13 (antes 10), fôlego mais brando, fio de 350 a 430 turnos. Robô atento, 40 partidas por tema: fuga Corpo 11%, Mente 13%, Espírito 26%. |
+| 0.5.0 | 18/11/2026 | **Ler o inimigo**: o alvo diz se a criatura parece muito mais fraca, mais fraca, parelha, mais forte ou muito mais forte que você ("melhor fugir"), e um pingo colorido sobre a cabeça repete (verde a vermelho). A leitura compara quantos turnos cada um aguenta, incluindo o dom da Mente. Percepção 2 ou olhar de novo lê certo; Percepção 1 erra às vezes um grau; Percepção 0 só lê gente, com Empatia. Com a cabeça Perturbada ou pior, a leitura mente. Mostra também "está ferido". Assombro se mede contra a cabeça; a ronda "não dá para derrubar". **Tarefas do andar**: a passagem para a escada (ou a saída) fica trancada, com cadeado; antes é preciso fazer, em ordem, de 1 a 3 tarefas em salas diferentes (chave → quadro de luz → senha; chave de ferro → guincho → contrapeso; cartão → gerador → painel). O painel mostra a próxima e a sala; o mapa marca onde fica. Fora de ordem, não vale. Cada tarefa alonga o fio em 40 turnos. O tempo pesa menos na Sanidade (o fio já é o relógio). Robô atento, 30 partidas por tema: fuga Corpo 6%, Mente 6%, Espírito 17%; o Corpo enlouquece matando gente (o que se queria). |
 
 ## Como se joga
 
@@ -144,6 +145,36 @@ Cada perda ou cura mostra ▼ ou ▲ (dois, se foi grande) ao lado da palavra po
 alguns segundos. Quando a palavra muda, o registro diz a direção ("▼ Seu corpo
 piorou: agora, Ferido (sangrando)."). As setas seguem a verdade; as palavras
 da Cabeça ainda podem mentir.
+
+## Ler o inimigo e tarefas do andar (desde a 0.5.0)
+
+| Leitura | Quando aparece |
+|---|---|
+| muito mais fraco que você | Você aguenta 3 vezes mais turnos que ele |
+| mais fraco que você | 1,5 vez |
+| parelho com você | Entre 0,75 e 1,5 |
+| mais forte que você | Entre 0,4 e 0,75 |
+| muito mais forte que você: melhor fugir | Menos de 0,4 |
+
+| Quem lê | Como |
+|---|---|
+| Percepção 2+ (Mente) ou depois de olhar de novo | Certo |
+| Percepção 1 (Corpo) | Erra um grau em cerca de um terço das vezes |
+| Percepção 0 (Espírito) | Só lê gente, somando Empatia; bicho e assombro, só depois de olhar de novo |
+| Cabeça Perturbada ou pior | A leitura pode mentir um grau, como as palavras do painel |
+
+Vultos e disfarces têm números coerentes com a mentira: um vulto de cão "parece"
+tão forte quanto um cão.
+
+| Tema | Tarefas (na ordem) |
+|---|---|
+| Sanatório | molho de chaves do zelador → quadro de luz → livro de ocorrências |
+| Masmorra | chave de ferro → guincho da grade → contrapeso |
+| Zumbi | cartão de acesso → gerador → painel da portaria |
+
+Andares 1 e 2: uma tarefa; 3 e 4: duas; 5: três. As tarefas ficam em salas
+alcançáveis sem passar pela porta trancada (o gerador confere). A próxima fica
+marcada no mapa; o caminho até ela, não.
 
 ## Consequências (desde a 0.4.0)
 

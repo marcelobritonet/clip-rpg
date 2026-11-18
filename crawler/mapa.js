@@ -5,7 +5,8 @@
 import { inteiro, chance } from './rng.js';
 
 /** BURACO: chão que cede. O de verdade leva ao andar de baixo; a cabeça cansada inventa outros. */
-export const T = { PAREDE: 0, CHAO: 1, PORTA: 2, ABERTA: 3, BURACO: 4 };
+export const T = { PAREDE: 0, CHAO: 1, PORTA: 2, ABERTA: 3, BURACO: 4, TRANCADA: 6 };
+// TRANCADA só aparece na percepção: no mapa, a porta trancada é uma PORTA listada em `estado.trancas`.
 
 export const bloqueiaVisao = (t) => t === T.PAREDE || t === T.PORTA;
 export const passavel = (t) => t !== T.PAREDE;

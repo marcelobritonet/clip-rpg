@@ -15,6 +15,7 @@ import { TEMAS } from './temas.js';
 const PASSA = (t) => t === T.CHAO || t === T.PORTA || t === T.ABERTA;
 const VIDA_RUIM = ['Muito ferido', 'À beira do colapso'];
 const CANSADO = ['Zonzo', 'Apagando', 'Apagado'];
+const VIDA_BOA = ['Intacto', 'Arranhado'];
 
 export function novoRobo(perfil = 'atento', semente = 'robo') {
   return { perfil, r: fluxo(semente, 'robo', perfil), crencas: new Map(), conversados: new Set(), antes: new Map(), imoveis: new Map(), parado: 0, ultimo: null, andar: 0, turnosNoAndar: 0, descansando: false };
@@ -193,7 +194,9 @@ function decidirBruto(robo, e) {
       if (alvo.categoria === 'aliado') return fim(robo, p, { tipo: 'atacar', dx: alvo.x - eu.x, dy: alvo.y - eu.y });
       return fim(robo, p, { tipo: 'mover', dx: alvo.x - eu.x, dy: alvo.y - eu.y });
     }
-    if (alvo.d <= 4 && e.origem === 'corpo') return fim(robo, p, irPara(robo, p, (x, y) => x === alvo.x && y === alvo.y) ?? { tipo: 'esperar' });
+    // O atento lê a força: não vai atrás de quem parece muito mais forte; foge se estiver perto.
+    if (robo.perfil === 'atento' && alvo.nivelForca === 4 && alvo.d <= 2 && !VIDA_BOA.includes(p.estado.vida)) { const f = fugirDe(p, alvo); if (f) return fim(robo, p, f); }
+    if (alvo.d <= 4 && e.origem === 'corpo' && !(robo.perfil === 'atento' && alvo.nivelForca >= 3)) return fim(robo, p, irPara(robo, p, (x, y) => x === alvo.x && y === alvo.y) ?? { tipo: 'esperar' });
   }
 
   // Conversar com quem parece aliado.
@@ -204,6 +207,12 @@ function decidirBruto(robo, e) {
     if (a) return fim(robo, p, a);
   }
 
+  // A próxima tarefa do andar, se já se sabe onde fica.
+  const tarefa = p.objetos.find((o) => o.tipo === 'tarefa' && o.proxima);
+  if (tarefa && !reaisHostis.some((x) => x.d <= 3)) {
+    const a = irPara(robo, p, (x, y) => x === tarefa.x && y === tarefa.y) ?? irPara(robo, p, (x, y) => x === tarefa.x && y === tarefa.y, true);
+    if (a) return fim(robo, p, a);
+  }
   // Fio curto: só a peça do andar segura o robô longe da saída.
   if (p.fio < 0.3 && saidaVista && !p.objetos.some((o) => o.tipo === 'peca')) {
     const a = irPara(robo, p, (x, y) => x === saidaVista.x && y === saidaVista.y);
@@ -220,8 +229,8 @@ function decidirBruto(robo, e) {
     if (o.perturbador === 'corpo') return !cheio && p.lucidez <= 1;
     return p.lucidez <= 1; // foto
   };
-  const objs = p.objetos.filter((o) => o.tipo === 'peca' || (o.tipo === 'item' && !(cheio && ['cura', 'calma', 'ancora', 'folego'].includes(o.item)) && !robo.ignorar?.has(o.id)) || (o.tipo === 'altar' && p.lucidez >= 1) || querPerturbador(o));
-  const perto = objs.map((o) => ({ ...o, d: distancia(o, eu) - (o.tipo === 'peca' ? 20 : 0) })).filter((o) => o.d <= 10).sort((a, b) => a.d - b.d)[0];
+  const objs = p.objetos.filter((o) => o.tipo === 'peca' || (o.tipo === 'tarefa' && o.proxima) || (o.tipo === 'item' && !(cheio && ['cura', 'calma', 'ancora', 'folego'].includes(o.item)) && !robo.ignorar?.has(o.id)) || (o.tipo === 'altar' && p.lucidez >= 1) || querPerturbador(o));
+  const perto = objs.map((o) => ({ ...o, d: distancia(o, eu) - (o.tipo === 'peca' || o.tipo === 'tarefa' ? 20 : 0) })).filter((o) => o.d <= 10).sort((a, b) => a.d - b.d)[0];
   if (perto) { const a = irPara(robo, p, (x, y) => x === perto.x && y === perto.y); if (a) return fim(robo, p, a); }
 
   const saida = p.objetos.find((o) => o.tipo === 'escada' || o.tipo === 'saida');
@@ -256,11 +265,13 @@ function fugirDe(p, ameaca) {
   return melhor;
 }
 
-function irPara(robo, p, alvo) {
+function irPara(robo, p, alvo, otimista = false) {
   const k = (x, y) => y * p.w + x;
   const ocupado = new Set(p.entidades.filter((x) => !x.companheiro && x.categoria !== 'neutro').map((x) => k(x.x, x.y)));
   for (const [b, ate] of robo.bloqueios ?? []) if (ate > p.turno) ocupado.add(b);
-  const passo = primeiroPasso(p.w, p.h, p.jogador, (x, y) => PASSA(p.tiles[k(x, y)]) && !ocupado.has(k(x, y)), alvo, 3000);
+  // Otimista: o que ainda não foi visto pode ser chão (como uma pessoa que vai na direção da sala).
+  const pode = (x, y) => (PASSA(p.tiles[k(x, y)]) || (otimista && p.tiles[k(x, y)] === -1)) && !ocupado.has(k(x, y));
+  const passo = primeiroPasso(p.w, p.h, p.jogador, pode, alvo, otimista ? 6000 : 3000);
   if (!passo) return null;
   return { tipo: 'mover', dx: passo.dx, dy: passo.dy };
 }

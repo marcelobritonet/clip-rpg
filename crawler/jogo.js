@@ -72,7 +72,7 @@ export const PARAM = {
    * entra pela porta por onde você entrou, caça você sem parar e o tempo pesa
    * o dobro na cabeça. Cada peça do caminho devolve um pedaço do fio.
    */
-  fio: { turnos: (a) => 330 + 20 * a, peca: 50, avisos: [0.5, 0.25, 0.1] },
+  fio: { turnos: (a) => 330 + 20 * a + 40 * (a <= 2 ? 1 : a <= 4 ? 2 : 3), peca: 50, avisos: [0.5, 0.25, 0.1] },
   /** A ronda anda dois de cada três turnos: quem corre escapa; quem para, não. */
   ronda: { ataque: 1, defesa: 2, arma: 1, vontade: 6, passo: 3 },
   /**
@@ -91,6 +91,12 @@ export const PARAM = {
   vigia: { ativo: true, paciencia: 4, percepcao: 2, distancia: 2 },
   /** Desfazer uma mentira devolve clareza (Sanidade). */
   clareza: 1,
+  /**
+   * Tarefas do andar (0.5.0): a passagem para a escada fica trancada até você
+   * fazer, em ordem, as tarefas espalhadas pelas salas (1 nos andares 1 e 2,
+   * 2 no 3º e 4º, 3 no 5º). Cada tarefa alonga o fio do andar em 40 turnos.
+   */
+  tarefas: (a) => (a <= 2 ? 1 : a <= 4 ? 2 : 3),
   /** Golpe preparado: chance de o monstro colado preparar, e o que o golpe pesado soma. */
   preparo: { chance: 0.3, ataque: 2, dano: 2, intervalo: 3 },
   /** Defender: soma à Defesa no turno do mundo (mais contra golpe preparado). */
@@ -105,7 +111,7 @@ export const PARAM = {
   /** Buraco de verdade (andares 2 a 4): chance por andar e dano da queda. */
   buraco: { chance: 0.6, dano: 3 },
   /** Turnos por −1 de Sanidade, por andar: o silêncio pesa mais lá no fundo. */
-  drenagem: [40, 36, 32, 28, 24],
+  drenagem: [56, 50, 44, 38, 32],
   /** Companhia ao lado faz o tempo pesar menos (multiplica o intervalo). */
   drenagemCompanhia: 1.6,
   /** Sanidade máxima em que o intervalo da drenagem é o da tabela. */
@@ -217,6 +223,7 @@ export const PISTAS = {
   vigia: 'Nem todo mundo aqui quer te pegar. Quem só vigia não vem atrás; bater nele põe todos contra você.',
   clareza: 'Desfazer uma mentira clareia a cabeça. Olhar de novo vale mais que bater.',
   folego: 'Correr sem parar cansa a vista. Um passo parado de vez em quando segura o fôlego.',
+  tarefa: 'A escada não basta: cada andar pede uma coisa antes da outra. O painel diz qual é a próxima e em que sala.',
   descanso: 'Esperar quieto, sem nada à vista, devolve a atenção. Mas o tempo pesa na cabeça.',
   preparo: 'Quem prepara um golpe pesado avisa. Saia de perto, defenda ou empurre antes.',
   janela: 'Janela que bate pode virar porta. Segure antes de o vidro ceder.',
@@ -445,7 +452,38 @@ export function gerarConteudoDoAndar(semente, tema, a) {
     if (janelas.some((j) => Math.abs(j.x - c.x) + Math.abs(j.y - c.y) < 4)) continue;
     janelas.push({ ...c, estado: 'fechada' });
   }
-  return { mapa, inicio, entidades, objetos, janelas };
+  // Tarefas: tranca as entradas da última sala e espalha os passos pelas salas alcançáveis.
+  const trancas = [];
+  for (let y = ultima.y - 1; y <= ultima.y + ultima.h; y++) {
+    for (let x = ultima.x - 1; x <= ultima.x + ultima.w; x++) {
+      const borda = x === ultima.x - 1 || x === ultima.x + ultima.w || y === ultima.y - 1 || y === ultima.y + ultima.h;
+      const canto = (x === ultima.x - 1 || x === ultima.x + ultima.w) && (y === ultima.y - 1 || y === ultima.y + ultima.h);
+      if (!borda || canto) continue;
+      const t = tile(mapa, x, y);
+      if (t === T.CHAO || t === T.PORTA || t === T.ABERTA) { por(mapa, x, y, T.PORTA); trancas.push(y * mapa.w + x); }
+    }
+  }
+  const bloqueado = new Set(trancas);
+  const alcance = new Set([inicio.y * mapa.w + inicio.x]);
+  const fila = [inicio];
+  while (fila.length) {
+    const c = fila.shift();
+    for (const [dx, dy] of VIZINHOS) {
+      const x = c.x + dx, y = c.y + dy, k = y * mapa.w + x;
+      if (alcance.has(k) || bloqueado.has(k) || [T.PAREDE, T.BURACO].includes(tile(mapa, x, y))) continue;
+      alcance.add(k);
+      fila.push({ x, y });
+    }
+  }
+  const salasTarefa = embaralhar(r, mapa.salas.slice(1, -1).filter((q) => alcance.has((q.y + Math.floor(q.h / 2)) * mapa.w + q.x + Math.floor(q.w / 2))));
+  const nTarefas = Math.min(PARAM.tarefas(a), salasTarefa.length);
+  for (let i = 0; i < nTarefas; i++) {
+    const q = salasTarefa[i];
+    const p = livre([q]);
+    if (p) objetos.push({ tipo: 'tarefa', ordem: i, sala: q.nome, ...p, real: true });
+  }
+  const totalTarefas = objetos.filter((o) => o.tipo === 'tarefa').length;
+  return { mapa, inicio, entidades, objetos, janelas, trancas: totalTarefas ? trancas : [], totalTarefas };
 }
 
 function criarMonstro(m, p, esc) {
@@ -491,6 +529,9 @@ function entrarNoAndar(e, a) {
   e.alarmeNoAndar = false;
   e.cargasAncora = derivados(e).cargasAncora;
   e.janelas = c.janelas.map((j) => ({ ...j }));
+  e.trancas = new Set(c.trancas);
+  e.missao = { total: c.totalTarefas, feitos: 0 };
+  marcarProximaTarefa(e, true);
   e.entrada = { ...c.inicio };
   e.fioMax = PARAM.fio.turnos(a);
   e.fio = e.fioMax;
@@ -788,6 +829,12 @@ function mover(e, dx, dy, forcarAtaque) {
     ganharPista(e, 'buraco');
   }
   e.beira = null;
+  if (e.trancas.has(k)) {
+    const prox = proximaTarefa(e);
+    msg(e, `${temaDe(e).tarefas.trancada}${prox ? ` Falta: ${prox.nome}, ${emSala(prox.sala)}.` : ''}`);
+    ganharPista(e, 'tarefa');
+    return false;
+  }
   if (real === T.PORTA) {
     // A porta abrindo já aparece na imagem; o registro fica para o que importa.
     por(e.mapa, x, y, T.ABERTA);
@@ -1022,6 +1069,7 @@ function pisar(e) {
     else if (o.tipo === 'perturbador') examinar(e, o);
     else if (o.tipo === 'escada') descer(e);
     else if (o.tipo === 'peca') pegarPeca(e, o);
+    else if (o.tipo === 'tarefa') fazerTarefa(e, o);
     else if (o.tipo === 'saida') {
       const inteira = e.pecas.length >= 3;
       e.fim = { tipo: 'fuga', turno: e.turno, andar: e.andar, pecas: e.pecas.length, inteira };
@@ -1034,6 +1082,51 @@ function pisar(e) {
       e.cargasAncora += 1;
       msg(e, temaDe(e).altarTexto, 'bom');
     }
+  }
+}
+
+/** O próximo passo da tarefa do andar (nome e sala), ou null se já abriu. */
+function proximaTarefa(e) {
+  if (!e.missao || e.missao.feitos >= e.missao.total) return null;
+  const o = e.objetos.find((x) => x.tipo === 'tarefa' && x.ordem === e.missao.feitos);
+  return o ? { nome: temaDe(e).tarefas.passos[o.ordem].nome, sala: o.sala, x: o.x, y: o.y } : null;
+}
+
+/** A próxima tarefa fica marcada no mapa (você sabe onde ir, não o que há no caminho). */
+function marcarProximaTarefa(e, inicio = false) {
+  const prox = proximaTarefa(e);
+  if (!prox) return;
+  e.visto[idx(e, prox.x, prox.y)] = 1;
+  if (inicio) msg(e, `${temaDe(e).tarefas.trancada} Primeiro: ${artigo(prox.nome)}, ${emSala(prox.sala)}.`, 'pista');
+}
+
+/** Fazer um passo da tarefa: só serve na ordem certa. */
+function fazerTarefa(e, o) {
+  const th = temaDe(e);
+  const passo = th.tarefas.passos[o.ordem];
+  if (o.ordem > e.missao.feitos) {
+    const prox = proximaTarefa(e);
+    msg(e, `${Maiuscula(artigo(passo.nome))}. Ainda não serve: antes, ${artigo(prox.nome)}, ${emSala(prox.sala)}.`);
+    ganharPista(e, 'tarefa');
+    return;
+  }
+  o.usado = true;
+  e.missao.feitos++;
+  e.stats.tarefas = (e.stats.tarefas ?? 0) + 1;
+  msg(e, passo.texto, 'peca');
+  const prox = proximaTarefa(e);
+  if (prox) {
+    msg(e, `Agora: ${artigo(prox.nome)}, ${emSala(prox.sala)}.`, 'bom');
+    marcarProximaTarefa(e);
+    return;
+  }
+  e.trancas.clear();
+  msg(e, th.tarefas.aberta, 'bom');
+  ganharSan(e, 1, 'tarefa');
+  const saida = e.objetos.find((x) => x.real && (x.tipo === 'escada' || x.tipo === 'saida'));
+  if (saida) {
+    for (const c of caminhoReal(e, e.jogador, saida)) e.visto[idx(e, c.x, c.y)] = 1;
+    e.visto[idx(e, saida.x, saida.y)] = 1;
   }
 }
 
@@ -1116,7 +1209,7 @@ function pegar(e, o) {
   msg(e, `Você guarda ${artigo(it.nome)}.`, 'bom');
 }
 
-const FEMININOS = new Set(['horda', 'foto', 'medalha', 'bateria', 'antena', 'página', 'primeira', 'segunda', 'última', 'ampola', 'folha', 'garrafa', 'pílula', 'mistura', 'fotografia', 'carta', 'pulseira', 'pomada', 'tala', 'medalha', 'oração', 'erva', 'raiz', 'barra', 'jaqueta', 'clava', 'espada', 'ossada', 'ratazana', 'tocha', 'escada', 'escadaria', 'passagem', 'capela', 'boca', 'barricada', 'mancha', 'coisa']);
+const FEMININOS = new Set(['chave', 'enfermaria', 'solitária', 'lavanderia', 'sala', 'cela', 'cripta', 'capela', 'despensa', 'câmara', 'galeria', 'farmácia', 'garagem', 'escola', 'igreja', 'loja', 'horda', 'foto', 'medalha', 'bateria', 'antena', 'página', 'primeira', 'segunda', 'última', 'ampola', 'folha', 'garrafa', 'pílula', 'mistura', 'fotografia', 'carta', 'pulseira', 'pomada', 'tala', 'medalha', 'oração', 'erva', 'raiz', 'barra', 'jaqueta', 'clava', 'espada', 'ossada', 'ratazana', 'tocha', 'escada', 'escadaria', 'passagem', 'capela', 'boca', 'barricada', 'mancha', 'coisa']);
 
 /** "o enfermeiro", "a fotografia", "as ataduras"; nomes próprios ficam sem artigo. */
 export function artigo(nome) {
@@ -1124,6 +1217,12 @@ export function artigo(nome) {
   if (/^[A-ZÀ-Ú]/.test(nome) || /^(irmão|doutora)/.test(nome)) return nome;
   if (p === 'ataduras') return 'as ' + nome;
   return (FEMININOS.has(p) ? 'a ' : 'o ') + nome;
+}
+
+/** Lugar: "na Câmara do eco", "no Arquivo" (o nome da sala mantém a maiúscula). */
+function emSala(nome) {
+  const p = nome.split(' ')[0].toLowerCase();
+  return (FEMININOS.has(p) ? 'na ' : 'no ') + nome;
 }
 
 /** Contração com "em": "no enfermeiro", "na ossada", "em Dona Ilda". */
@@ -1286,6 +1385,7 @@ function nomeObjeto(e, o) {
   if (o.tipo === 'altar') return th.altar;
   if (o.tipo === 'perturbador') return th.perturbadores[o.tipoP].nome;
   if (o.tipo === 'peca') return th.pecas.nomes[o.indice ?? 0];
+  if (o.tipo === 'tarefa') return th.tarefas.passos[o.ordem].nome;
   return 'coisa';
 }
 
@@ -1802,7 +1902,7 @@ function acaoDoSurto(e) {
 
 // Bestas não abrem portas fechadas (a ronda abre tudo).
 const livreParaAndar = (e, x, y, quem) =>
-  tile(e.mapa, x, y) !== T.PAREDE && tile(e.mapa, x, y) !== T.BURACO &&
+  tile(e.mapa, x, y) !== T.PAREDE && tile(e.mapa, x, y) !== T.BURACO && !e.trancas?.has(y * e.mapa.w + x) &&
   !(quem?.categoria === 'besta' && !quem.ronda && tile(e.mapa, x, y) === T.PORTA) && !(e.jogador.x === x && e.jogador.y === y) && !e.entidades.some((o) => o !== quem && o.tipo !== 'fantasma' && o.vida > 0 && o.x === x && o.y === y);
 
 function passoPara(e, ent, alvo, afastar = false) {
@@ -1887,6 +1987,59 @@ function agirMonstro(e, m) {
     return;
   }
   vagar(e, m);
+}
+
+/* Ler o inimigo (0.5.0) ----------------------------------------------------- */
+
+export const FORCAS = ['muito mais fraco que você', 'mais fraco que você', 'parelho com você', 'mais forte que você', 'muito mais forte que você: melhor fugir'];
+
+/** Números que a pessoa acha que vê: os da aparência (vulto e disfarce têm números coerentes com a mentira). */
+function numerosAparentes(e, ent) {
+  if (!ent.aparencia && ent.tipo !== 'fantasma' && !ent.item) return ent;
+  const esp = catalogo(temaDe(e), aparencia(e, ent).especie) ?? {};
+  const esc = PARAM.escala(e.andar);
+  return { ataque: (esp.ataque ?? 1) + esc.combate, defesa: (esp.defesa ?? 1) + esc.combate, arma: esp.arma ?? 0, vida: (esp.vida ?? 4) + esc.vida, vidaMax: (esp.vida ?? 4) + esc.vida, mental: esp.mental ?? 0, categoria: aparencia(e, ent).categoria };
+}
+
+/**
+ * Quem ganha uma troca de golpes? Compara quantos turnos cada um aguenta.
+ * Devolve 0 (muito mais fraco) a 4 (muito mais forte).
+ */
+function forcaRelativa(e, m) {
+  const d = derivados(e);
+  if (m.categoria === 'assombro') {
+    const meu = Math.max(0.4, d.defesaMental - (m.mental ?? 1) + 2);
+    const r = meu / 1.5;
+    return r >= 2.5 ? 1 : r >= 1.3 ? 2 : r >= 0.8 ? 3 : 4;
+  }
+  const domDano = n(e, 'magiaAtaqueFisico') > 0 && e.pm >= PARAM.magia.custo ? PARAM.magia.custo + n(e, 'raciocinio') : 0;
+  const meuDano = Math.max(0.3, Math.max(d.ataque + d.arma - (m.defesa ?? 1), domDano - (m.defesa ?? 1)) + 1.5);
+  const deleDano = Math.max(0.3, (m.ataque ?? 1) + (m.arma ?? 0) - d.defesa - d.armadura + 1.5);
+  const r = (e.vida / deleDano) / ((m.vida ?? 1) / meuDano);
+  return r >= 3 ? 0 : r >= 1.5 ? 1 : r >= 0.75 ? 2 : r >= 0.4 ? 3 : 4;
+}
+
+/**
+ * O que a pessoa lê do inimigo. Percepção 2 (ou ter olhado de novo) lê certo;
+ * Percepção 1 erra às vezes por um grau; sem Percepção, só gente se lê (com
+ * Empatia). Com a cabeça Perturbada ou pior, a leitura também mente.
+ */
+function lerInimigo(e, ent) {
+  const ap = aparencia(e, ent);
+  if (ap.categoria === 'aliado' || ent.estado === 'pacificado') return { forca: null, ferido: false };
+  if (ent.ronda) return { forca: 'não dá para derrubar: só fugir ou atrasar', nivelForca: 4, ferido: false };
+  const m = numerosAparentes(e, ent);
+  const gente = (m.categoria ?? ent.categoria) === 'humano';
+  const leitura = n(e, 'percepcao') + (gente ? n(e, 'empatia') : 0);
+  if (!ent.revelado && leitura <= 0) return { forca: null, nivelForca: null, ferido: false, sem: true };
+  let nv = forcaRelativa(e, { ...m, categoria: m.categoria ?? ent.categoria });
+  const z = ruido(e.semente, ent.id ?? ent.idFalso ?? 0, e.andar, Math.floor(e.turno / 15));
+  if (!ent.revelado && leitura === 1 && z < 0.35) nv += z < 0.17 ? -1 : 1;
+  const lv = nivelCabeca(e);
+  if (lv >= 3 && ruido(e.semente, 9, ent.id ?? 0, Math.floor(e.turno / 9)) < PARAM.alu.mentiraPalavras[lv]) nv += z < 0.5 ? -1 : 1;
+  nv = Math.max(0, Math.min(4, nv));
+  const ferido = leitura >= 1 && !ent.item && ent.tipo !== 'fantasma' && !ent.aparencia && m.vida < (m.vidaMax ?? m.vida) / 2;
+  return { forca: (m.categoria ?? ent.categoria) === 'assombro' ? FORCAS[nv].replace('que você', 'que a sua cabeça') : FORCAS[nv], nivelForca: nv, ferido };
 }
 
 /** Quem vigia anda pela sala; se você fica perto demais por tempo demais, manda você embora. */
@@ -2442,6 +2595,7 @@ export function percebido(e) {
         if (z < PARAM.aluCons.esquecer[lcp] + PARAM.aluCons.memoria[lcp] && bordaDeParede(e, x, y) && t !== T.BURACO) t = t === T.PAREDE ? T.CHAO : T.PAREDE;
       }
     }
+    if (e.trancas.has(k) && t === T.PORTA) t = T.TRANCADA;
     tiles[k] = t;
   }
   const th = temaDe(e);
@@ -2458,6 +2612,7 @@ export function percebido(e) {
       sombra: real, respira: !real,
       companheiro: ent.estado === 'seguindo' && !ent.aparencia,
       preparando: !!ent.preparando, tonto: ent.tonto > 0, ameaca: !!ent.ronda,
+      ...lerInimigo(e, ent),
       fugindo: ent.estado === 'fugindo' || ent.estado === 'pacificado',
       marca: ent.suspeito ? 'suspeito' : ent.revelado ? 'real' : null,
       ...(e.depurar ? { verdade: { tipo: ent.tipo, especie: ent.especie, vida: ent.vida, disfarce: !!ent.aparencia } } : {}),
@@ -2469,7 +2624,7 @@ export function percebido(e) {
     const esp = th.monstros.find((m) => m.id === o.aparencia.especie);
     entidades.push({
       id: o.idFalso, x: o.x, y: o.y, sprite: esp.sprite, cores: esp.cores, nome: esp.nome,
-      categoria: 'hostil', especie: o.aparencia.categoria, sombra: true, respira: false,
+      categoria: 'hostil', especie: o.aparencia.categoria, sombra: true, respira: false, ...lerInimigo(e, o),
       companheiro: false, fugindo: false, marca: null,
       ...(e.depurar ? { verdade: { tipo: 'item', especie: o.item.nome, vida: 0, disfarce: true } } : {}),
     });
@@ -2479,10 +2634,11 @@ export function percebido(e) {
     if (o.usado || o.aparencia) continue;
     const k = idx(e, o.x, o.y);
     // Fora de vista, só o que é real e já foi visto fica na memória.
-    if (!e.vis.has(k) && !(o.real && e.visto[k])) continue;
+    if (!e.vis.has(k) && !(o.real && e.visto[k])) continue; // tarefas marcadas entram aqui (o.real e visto)
     objetos.push({
       id: o.id, x: o.x, y: o.y, tipo: o.tipo, item: o.item?.tipo ?? null, nome: nomeObjeto(e, o),
       perturbador: o.tipoP ?? null, examinado: !!o.examinado,
+      ...(o.tipo === 'tarefa' ? { ordem: o.ordem, proxima: o.ordem === e.missao.feitos } : {}),
       sombra: o.real, respira: !o.real, visivel: e.vis.has(k), confirmado: !!o.confirmado,
       ...(e.depurar ? { verdade: { real: o.real } } : {}),
     });
@@ -2495,6 +2651,7 @@ export function percebido(e) {
     w, h, tiles, visivel, sinais, tema: e.tema, andar: e.andar, nomeAndar: th.andares[e.andar - 1],
     sangue,
     turno: e.turno,
+    missao: { total: e.missao.total, feitos: e.missao.feitos, proxima: proximaTarefa(e) ? { nome: proximaTarefa(e).nome, sala: proximaTarefa(e).sala } : null },
     fio: e.fioMax ? Math.round((e.fio / e.fioMax) * 100) / 100 : 1,
     pecas: [0, 1, 2].map((i) => (e.pecas.includes(i) ? th.pecas.nomes[i] : null)),
     janelas: e.janelas.filter((j) => e.visto[idx(e, j.x, j.y)]).map((j) => ({ x: j.x, y: j.y, estado: j.estado, passou: j.passou ?? -99, quem: j.quem ? catalogo(th, j.quem) : null })),

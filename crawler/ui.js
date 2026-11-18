@@ -100,7 +100,9 @@ function montarComo() {
     </table>
     <p><b>O fio.</b> Cada andar tem um fio que queima (a linha na base da tela). Quando acaba, a ronda chega pela porta por onde você entrou: não cai, não se cansa, só dá para fugir dela ou atrasá-la. E a cabeça pesa o dobro. Quem prepara um golpe pesado avisa um turno antes (<b>!</b> vermelho): saia de perto, defenda ou empurre. Janelas mostram o que passa lá fora; quando algo bate, segure a janela (ande contra ela) antes de o vidro ceder.</p>
     <p><b>Nem todo mundo é inimigo.</b> Enfermeiros, guardas, carcereiros e saqueadores comuns só vigiam: não vêm atrás de você, mas não gostam de você por perto. Bater em quem só vigia põe o andar inteiro contra você e pesa na cabeça; matar gente pesa para todos, até para o Corpo. Com Percepção alta você vê quem só vigia (moldura amarela); sem ela, olhe de novo ou fale. Encarar gente de bem gera antipatia: aliados se fecham, vigias vêm tirar satisfação.</p>
+    <p><b>Ler o inimigo.</b> O alvo diz se a criatura parece mais fraca, parelha ou mais forte que você, e um pingo colorido sobre a cabeça repete isso (verde, amarelo, vermelho). A leitura compara quantos golpes cada um aguenta. Com Percepção alta, ela é certa; com pouca, erra às vezes; sem Percepção, só dá para ler gente (com Empatia), a não ser que você olhe de novo. Com a cabeça ruim, a leitura também mente.</p>
     <p><b>A verdade compensa.</b> Desfazer uma mentira (olhar de novo, falar, encarar o que é falso) devolve um pouco de clareza à cabeça. Acreditar numa mentira (pegar item que não existe, segurar janela onde ninguém bate, empurrar porta pintada) sempre cobra. A Fé segura os sustos; a Percepção nota sozinha o que está errado.</p>
+    <p><b>A tarefa do andar.</b> A passagem para a escada (ou para a saída) fica trancada, com cadeado. Antes, é preciso fazer uma coisa, depois outra, em salas diferentes: pegar uma chave, ligar um quadro de luz, achar uma senha. A ordem importa. O painel mostra a próxima tarefa e a sala; o objeto dela brilha em azul. Com a cabeça ruim, o nome das salas pode mentir.</p>
     <p><b>O caminho.</b> Nos andares 2, 3 e 4 há uma peça do caminho. Cada uma devolve fio e mostra a saída do andar. Com as três, você sai inteiro; sem elas, também dá para sair, mas o fim é outro.</p>
     <p>Fotografias, cartas e corpos fazem mal de olhar, mas mostram coisas: o caminho, um item, algo em que se agarrar. Pisar em cima examina.</p>
     <table>
@@ -476,6 +478,7 @@ function desenharEstado(p) {
     <dt>Cabeça</dt><dd>${embaralharTexto(s.sanidade, p.lucidez)}${seta('sanidade')} ${frase('sanidade', s.sanidade)}</dd>
     ${s.magia ? `<dt>${TEMAS[e.tema].dom.recurso}</dt><dd title="${TEMAS[e.tema].dom.descricao}">${s.magia}${seta('magia')}</dd>` : ''}
     <dt>Espírito</dt><dd class="ancoras" title="${TEMAS[e.tema].ancora.descricao}">${TEMAS[e.tema].ancora.restam[Math.min(2, Math.max(0, p.cargasAncora))]}</dd>
+    <dt>Tarefa</dt><dd class="tarefa">${p.missao.total === 0 ? 'nenhuma' : p.missao.proxima ? `${p.missao.proxima.nome} <small class="frase">${p.missao.proxima.sala} · ${'●'.repeat(p.missao.feitos)}${'○'.repeat(p.missao.total - p.missao.feitos)}</small>` : 'passagem aberta'}</dd>
     <dt>Caminho</dt><dd class="pecas" title="${p.pecas.map((x) => x ?? '?').join(' · ')}">${p.pecas.map((x) => (x ? '◆' : '◇')).join('')}</dd>
     <div class="fio-hud${p.fio <= 0 ? ' sem-fio' : p.fio < 0.25 ? ' curto' : ''}" title="O fio do andar: quando acaba, ${TEMAS[e.tema].ronda.nome.replace(/^./, (c) => c)} chega"><span style="transform: scaleX(${Math.max(0, p.fio).toFixed(3)})"></span></div>
     ${depurar && n ? `<div class="numeros">Vida ${n.vida}/${n.vidaMax} · Cons ${n.cons}/${n.consMax} · San ${n.san}/${n.sanMax} · PM ${n.pm}/${n.pmMax} · lucidez ${p.lucidez} · atenção ${p.atencao} · corpo ${p.ferimento} · turno ${n.turno}${s.mentindo ? ' · palavras mentindo' : ''}</div>` : ''}`;
@@ -491,6 +494,9 @@ function desenharAlvo(p) {
     jeito = a.companheiro ? 'está com você' : a.categoria === 'aliado' ? 'parece um aliado' : a.categoria === 'neutro' ? 'só vigia (não bata: andar contra é conversar)' : a.fugindo ? 'está se afastando' : 'parece hostil';
     if (a.marca === 'suspeito') jeito += '; algo nele não está certo';
     if (a.marca === 'real') jeito += '; você confirmou que é real';
+    if (a.forca) jeito += `; <span class="forca f${a.nivelForca}">pela força, ${a.forca}</span>`;
+    else if (a.sem && a.categoria !== 'aliado') jeito += '; você não sabe medir a força dele (olhe de novo)';
+    if (a.ferido) jeito += '; está ferido';
     if (a.preparando) jeito += '; <b>prepara um golpe pesado</b>';
     if (a.tonto) jeito += '; está tonto';
     if (a.ameaca) jeito += '; não dá para derrubar';
@@ -695,7 +701,7 @@ function desenharMapa(agora) {
       const t = tileEm(x, y);
       if (t < 0) continue;
       const px = lx * TAM, py = ly * TAM;
-      const nome = t === T.PAREDE ? 'parede' : t === T.PORTA ? 'porta' : t === T.ABERTA ? 'aberta' : 'chao';
+      const nome = t === T.PAREDE ? 'parede' : t === T.PORTA || t === T.TRANCADA ? 'porta' : t === T.ABERTA ? 'aberta' : 'chao';
       const abaixo = tileEm(x, y + 1);
       desenharTile(ctx, nome, px, py, pal, th.estilo, x * 7919 + y * 104729 + e.andar * 31, abaixo >= 0 && abaixo !== T.PAREDE);
       const vis = p.visivel[y * p.w + x];
@@ -704,6 +710,14 @@ function desenharMapa(agora) {
         desenharBuraco(ctx, px, py, pal);
         // O de verdade sopra: um fiapo de ar claro que sobe.
         if (sinal) { const f = reduz ? 0 : Math.floor(agora / 260 + x) % 3; ctx.fillStyle = 'rgba(220,230,240,0.55)'; ctx.fillRect(px + 4 + f, py + 4 - f, 1, 2); ctx.fillRect(px + 7 - f, py + 5 - f, 1, 1); }
+      }
+      // Porta trancada: cadeado.
+      if (t === T.TRANCADA) {
+        ctx.fillStyle = '#c9a43a';
+        ctx.fillRect(px + 4, py + 6, 4, 3);
+        ctx.fillStyle = '#2a2018';
+        ctx.fillRect(px + 5, py + 4, 2, 2);
+        ctx.fillRect(px + 6, py + 7, 1, 1);
       }
       // A porta de verdade tem luz por baixo.
       if (t === T.PORTA && sinal) { ctx.fillStyle = pal.luz; ctx.fillRect(px + 3, py + TAM - 1, 6, 1); }
@@ -751,6 +765,7 @@ function desenharMapa(agora) {
     else if (respira) py -= 1;
     if (o.tipo === 'item') ctx.drawImage(icone(criarCanvas, o.item), px, py);
     else if (o.tipo === 'peca') desenharPeca(ctx, px, py, agora, reduz);
+    else if (o.tipo === 'tarefa') desenharTarefa(ctx, px, py, agora, reduz, o.proxima);
     else desenharObjeto(ctx, o.tipo, px, py, pal, e.tema);
     if (!o.visivel) { ctx.fillStyle = 'rgba(8,6,12,0.5)'; ctx.fillRect(px, py, TAM, TAM); }
     if (depurar && !o.verdade?.real) marcaDepura(ctx, px, py, '#ff3060');
@@ -763,6 +778,11 @@ function desenharMapa(agora) {
     else if (respira) py -= 1;
     ctx.drawImage(sprite(criarCanvas, ent.sprite, ent.cores), px, py);
     if (ent.companheiro) { ctx.fillStyle = COR_CAMINHO[e.origem].r; ctx.fillRect(px + 5, py - 1, 2, 1); }
+    // Leitura da força: um pingo sobre a cabeça (verde: mais fraco; amarelo: parelho; vermelho: mais forte).
+    if (ent.nivelForca != null && ent.categoria !== 'aliado') {
+      ctx.fillStyle = ['#5fbf6a', '#9fd06a', '#e8c860', '#e8803a', '#e03a2a'][ent.nivelForca];
+      ctx.fillRect(px + 10, py + 1, 2, 2);
+    }
     if (ent.preparando) { ctx.fillStyle = '#ff3a2a'; ctx.fillRect(px + 5, py - 4, 2, 3); ctx.fillRect(px + 5, py, 2, 1); }
     if (ent.tonto) { ctx.fillStyle = '#f0e070'; const f = reduz ? 0 : Math.floor(agora / 200) % 3; ctx.fillRect(px + 2 + f * 3, py - 1, 1, 1); ctx.fillRect(px + 8 - f * 2, py - 2, 1, 1); }
     if (ent.ameaca) { ctx.fillStyle = 'rgba(200,20,20,0.5)'; ctx.fillRect(px, py + 11, TAM, 1); }
@@ -847,6 +867,23 @@ function desenharMapa(agora) {
     t.fillStyle = `${lampejo.cor}${Math.min(0.45, falta * 0.4).toFixed(3)})`;
     t.fillRect(0, 0, tela.width, tela.height);
   }
+}
+
+/** Passo da tarefa do andar: uma chave/alavanca; o próximo brilha. */
+function desenharTarefa(ctx, px, py, agora, reduz, proxima) {
+  if (proxima) {
+    const b = reduz ? 1 : 0.6 + 0.4 * Math.sin(agora / 250);
+    ctx.fillStyle = `rgba(150,220,255,${(0.28 * b).toFixed(2)})`;
+    ctx.fillRect(px + 1, py + 2, 10, 9);
+  }
+  ctx.fillStyle = '#9aa8b0';
+  ctx.fillRect(px + 3, py + 5, 6, 2);
+  ctx.fillRect(px + 7, py + 7, 1, 2);
+  ctx.fillRect(px + 5, py + 7, 1, 1);
+  ctx.fillStyle = '#d8e4ea';
+  ctx.fillRect(px + 2, py + 4, 3, 4);
+  ctx.fillStyle = '#2a3238';
+  ctx.fillRect(px + 3, py + 5, 1, 2);
 }
 
 /** Peça do caminho: um brilho no chão. */

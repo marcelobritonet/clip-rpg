@@ -723,3 +723,85 @@ test('a Fé segura os sustos', () => {
   J.agir(semFe.e, { tipo: 'mover', dx: 1, dy: 0 });
   assert.ok(a - comFe.e.san < b - semFe.e.san);
 });
+
+/* Versão 0.5: ler o inimigo. */
+
+test('a leitura da força: certa com Percepção, nenhuma sem ela, e o rato parece fraco para o Corpo', () => {
+  const pega = (origem, especie, extra = {}) => {
+    const { e } = salaLimpa({ origem, semente: 'le-' + origem });
+    const m = monstroAo(e, especie, 1, extra);
+    return J.percebido(e).entidades.find((x) => x.id === m.id);
+  };
+  assert.ok(pega('corpo', 'rato').nivelForca <= 1, 'rato é fraco para o Corpo');
+  assert.match(pega('corpo', 'rato').forca, /fraco/);
+  assert.equal(pega('espirito', 'cao').forca, null, 'Espírito (Percepção 0) não lê bicho');
+  assert.ok(pega('espirito', 'cao', { revelado: true }).forca, 'depois de olhar de novo, lê');
+  assert.ok(pega('espirito', 'enfermeiro').forca, 'gente se lê com Empatia');
+  assert.ok(pega('mente', 'guarda', { vida: 1 }).ferido, 'Mente vê que está ferido');
+  const { e } = salaLimpa();
+  e.fio = 1;
+  J.agir(e, { tipo: 'esperar' });
+  const r = e.entidades.find((x) => x.ronda);
+  r.x = e.jogador.x + 1; r.y = e.jogador.y; r.tonto = 3;
+  J.agir(e, { tipo: 'esperar' });
+  assert.match(J.percebido(e).entidades.find((x) => x.ameaca).forca, /não dá para derrubar/);
+});
+
+/* Versão 0.5: tarefas do andar. */
+
+test('cada andar tranca a passagem e espalha tarefas alcançáveis, em ordem', () => {
+  for (const tema of LISTA_TEMAS) {
+    for (let a = 1; a <= 5; a++) {
+      const c = J.gerarConteudoDoAndar('tarefas-' + a, tema, a);
+      const tarefas = c.objetos.filter((o) => o.tipo === 'tarefa');
+      assert.equal(tarefas.length, c.totalTarefas);
+      assert.ok(c.totalTarefas >= 1 && c.totalTarefas <= J.PARAM.tarefas(a), `${tema} ${a}`);
+      assert.ok(c.trancas.length >= 1, 'há porta trancada');
+      // Cada tarefa é alcançável do início sem passar pelas trancas.
+      const bloq = new Set(c.trancas);
+      for (const t of tarefas) {
+        const p = primeiroPasso(c.mapa.w, c.mapa.h, c.inicio, (x, y) => ![T.PAREDE, T.BURACO].includes(tile(c.mapa, x, y)) && !bloq.has(y * c.mapa.w + x), (x, y) => x === t.x && y === t.y, 20000);
+        assert.ok(p || (t.x === c.inicio.x && t.y === c.inicio.y), `tarefa ${t.ordem} alcançável (${tema} ${a})`);
+      }
+    }
+  }
+});
+
+test('a tarefa só vale na ordem; feita a última, a passagem abre', () => {
+  const e = J.novaPartida({ semente: 'ordem', tema: 'masmorra', origem: 'corpo' });
+  // Leva ao andar 5 (3 tarefas): pisa na escada de cada andar, com a passagem destrancada.
+  while (e.andar < 5 && !e.fim) {
+    e.trancas.clear();
+    const esc = e.objetos.find((o) => o.tipo === 'escada');
+    e.jogador = { x: esc.x - 1, y: esc.y };
+    e.mapa.tiles[esc.y * e.mapa.w + esc.x - 1] = T.CHAO;
+    J.agir(e, { tipo: 'mover', dx: 1, dy: 0 });
+    if (e.escolha) J.agir(e, { tipo: 'escolher', indice: 0 });
+  }
+  assert.equal(e.andar, 5);
+  const tarefas = e.objetos.filter((o) => o.tipo === 'tarefa').sort((a, b) => a.ordem - b.ordem);
+  assert.ok(tarefas.length >= 2);
+  assert.ok(e.trancas.size > 0);
+  const pisar = (o) => { e.jogador = { x: o.x - 1, y: o.y }; e.mapa.tiles[o.y * e.mapa.w + o.x - 1] = T.CHAO; J.agir(e, { tipo: 'mover', dx: 1, dy: 0 }); };
+  pisar(tarefas[1]);
+  assert.equal(e.missao.feitos, 0, 'fora de ordem não vale');
+  for (const t of tarefas) pisar(t);
+  assert.equal(e.missao.feitos, tarefas.length);
+  assert.equal(e.trancas.size, 0, 'a passagem abriu');
+  assert.ok(e.pistas.includes('tarefa'));
+});
+
+test('porta trancada aparece trancada e não deixa passar', () => {
+  const e = J.novaPartida({ semente: 'tranca', tema: 'sanatorio', origem: 'mente' });
+  const k = [...e.trancas][0];
+  e.visto[k] = 1;
+  assert.equal(J.percebido(e).tiles[k], T.TRANCADA);
+  const x = k % e.mapa.w, y = Math.floor(k / e.mapa.w);
+  const viz = [[1, 0], [-1, 0], [0, 1], [0, -1]].map(([dx, dy]) => ({ x: x - dx, y: y - dy, dx, dy })).find((q) => tile(e.mapa, q.x, q.y) === T.CHAO);
+  e.jogador = { x: viz.x, y: viz.y };
+  const turno = e.turno;
+  J.agir(e, { tipo: 'mover', dx: viz.dx, dy: viz.dy });
+  assert.equal(e.turno, turno, 'não gasta turno');
+  assert.deepEqual(e.jogador, { x: viz.x, y: viz.y });
+  assert.ok(e.log.some((m) => m.texto.includes('trancada') && m.texto.includes('Falta')));
+});
