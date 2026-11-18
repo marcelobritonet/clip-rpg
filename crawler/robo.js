@@ -97,6 +97,8 @@ function decidirBruto(robo, e) {
   if (ronda) {
     if (ronda.d === 1 && ronda.preparando) { const f = fugirDe(p, ronda); if (f) return fim(robo, p, f); }
     if (ronda.d <= 3 && e.origem === 'espirito') return fim(robo, p, { tipo: 'encarar', alvo: ronda.id });
+    const domPronto = p.estado.magia && !TEMAS[p.tema].dom.palavras.slice(4).includes(p.estado.magia);
+    if (e.origem === 'mente' && domPronto && !ronda.tonto && ronda.d <= 4) return fim(robo, p, { tipo: 'magia', alvo: ronda.id });
     if (ronda.d === 1 && e.origem === 'corpo') return fim(robo, p, { tipo: 'empurrar', alvo: ronda.id });
     if (saidaVista) { const a = irPara(robo, p, (x, y) => x === saidaVista.x && y === saidaVista.y); if (a) return fim(robo, p, a); }
     if (ronda.d <= 2) { const f = fugirDe(p, ronda); if (f) return fim(robo, p, f); }
@@ -160,6 +162,11 @@ function decidirBruto(robo, e) {
     if (e.origem === 'mente' && !TEMAS[p.tema].dom.palavras.slice(4).includes(p.estado.magia) && alvo.d <= 6 && alvo.d >= 1) {
       if (robo.perfil === 'atento' && alvo.d <= 6 && !alvo.marca && chance(robo.r, 0.25)) return fim(robo, p, { tipo: 'olhar', alvo: alvo.id });
       return fim(robo, p, { tipo: 'magia', alvo: alvo.id });
+    }
+    if (alvo.d === 1 && e.origem === 'mente' && robo.perfil === 'atento' && !alvo.tonto) {
+      const f = fugirDe(p, alvo);
+      if (f && chance(robo.r, 0.5)) return fim(robo, p, f);
+      return fim(robo, p, { tipo: 'defender' });
     }
     if (alvo.d === 1) {
       if (alvo.categoria === 'aliado') return fim(robo, p, { tipo: 'atacar', dx: alvo.x - eu.x, dy: alvo.y - eu.y });

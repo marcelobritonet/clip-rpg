@@ -128,7 +128,8 @@ export const PARAM = {
   convencer: 3,
   encarar: 4,
   conversarAliado: 3,
-  magia: { custo: 2, alcance: 6 },
+  /** Dom da Mente: custo em PM, alcance e turnos de atordoamento de quem é atingido (0.3.2). */
+  magia: { custo: 2, alcance: 6, tonto: 1, tontoRonda: 2 },
   /** Chance por turno de notar sozinho que algo está errado, por nível de Sentidos + Discernimento. */
   notar: 0.05,
   /** Nível mínimo de alucinação por andar (só vale se você não estiver Lúcido). */
@@ -1076,7 +1077,7 @@ function pegar(e, o) {
   msg(e, `Você guarda ${artigo(it.nome)}.`, 'bom');
 }
 
-const FEMININOS = new Set(['fotografia', 'carta', 'pulseira', 'pomada', 'tala', 'medalha', 'oração', 'erva', 'raiz', 'barra', 'jaqueta', 'clava', 'espada', 'ossada', 'ratazana', 'tocha', 'escada', 'escadaria', 'passagem', 'capela', 'boca', 'barricada', 'mancha', 'coisa']);
+const FEMININOS = new Set(['horda', 'foto', 'medalha', 'bateria', 'antena', 'página', 'primeira', 'segunda', 'última', 'ampola', 'folha', 'garrafa', 'pílula', 'mistura', 'fotografia', 'carta', 'pulseira', 'pomada', 'tala', 'medalha', 'oração', 'erva', 'raiz', 'barra', 'jaqueta', 'clava', 'espada', 'ossada', 'ratazana', 'tocha', 'escada', 'escadaria', 'passagem', 'capela', 'boca', 'barricada', 'mancha', 'coisa']);
 
 /** "o enfermeiro", "a fotografia", "as ataduras"; nomes próprios ficam sem artigo. */
 export function artigo(nome) {
@@ -1530,6 +1531,12 @@ function magia(e, alvoId) {
   if (!r.acertou) { msg(e, textoDom(dom.erra, nome)); if (alvo.tipo === 'monstro') alvo.estado = 'cacando'; return true; }
   if (dom.acertaTexto) msg(e, textoDom(dom.acertaTexto, nome), 'golpe');
   ferir(e, alvo, r.dano, nome, dom.acerta);
+  // O dom atordoa: quem é atingido perde o turno seguinte (a ronda, dois). É o jeito da Mente de ganhar distância.
+  if (alvo.vida > 0) {
+    alvo.tonto = Math.max(alvo.tonto ?? 0, alvo.ronda ? PARAM.magia.tontoRonda : PARAM.magia.tonto);
+    alvo.preparando = false;
+    if (alvo.ronda) msg(e, `${Maiuscula(artigoDe(nome))} para, confuso, por um instante.`, 'bom');
+  }
   return true;
 }
 
@@ -1911,7 +1918,8 @@ function ataqueDoMonstro(e, m, bonus, pesado = false) {
     } else msg(e, `${Maiuscula(artigoDe(nome))} tenta entrar na sua cabeça. Você não deixa.`);
     return;
   }
-  const def = e.defendendo ? PARAM.defender.defesa + (pesado ? PARAM.defender.contraPesado : 0) : 0;
+  // Quem enxerga o golpe vindo defende melhor: Percepção soma metade (0.3.2).
+  const def = e.defendendo ? PARAM.defender.defesa + Math.floor(n(e, 'percepcao') / 2) + (pesado ? PARAM.defender.contraPesado : 0) : 0;
   const r = clip.resolverAtaque({ ataque: m.ataque, defesa: d.defesa, arma: m.arma + (pesado ? PARAM.preparo.dano : 0), armadura: d.armadura, outrosAtaque: bonus, outrosDefesa: def, rng: rng(e) });
   if (pesado) {
     if (r.acertou) e.stats.pesadosRecebidos++; else e.stats.pesadosEvitados++;

@@ -637,3 +637,15 @@ test('cada tema lê a magia da Mente de um jeito, com palavras próprias para o 
     assert.ok(TEMAS[tema].ancora.acao && TEMAS[tema].ancora.restam.length === 3);
   }
 });
+
+test('o dom da Mente deixa tonto quem acerta, inclusive a ronda', () => {
+  let tonto = false;
+  for (let s = 0; s < 30 && !tonto; s++) {
+    const { e } = salaLimpa({ origem: 'mente', semente: 'dom-' + s });
+    e.rDados = fluxo('dom', s);
+    const m = monstroAo(e, 'guarda', 3, { ronda: true, especie: 'ronda', vida: 999, vidaMax: 999 });
+    J.agir(e, { tipo: 'magia', alvo: m.id });
+    tonto = m.tonto >= J.PARAM.magia.tontoRonda - 1 && m.vida > 900; // um turno de tontura já passou no mundo
+  }
+  assert.ok(tonto, 'a ronda ficou tonta e não caiu');
+});
