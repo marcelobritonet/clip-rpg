@@ -72,6 +72,14 @@ export const TEMAS = {
     fuga: 'O portão do jardim range e abre. Lá fora, a grama molhada é real. Você tem certeza.',
     morte: 'Você deita no chão frio. Amanhã alguém vai achar você e chamar de recaída.',
     loucura: 'Você volta para a enfermaria por conta própria e deita na cama de ferro. Está tudo bem. Está tudo bem.',
+    perturbadores: {
+      foto: { nome: 'fotografia sem data', texto: 'É você, dormindo nesta cama, fotografado de dentro do quarto.' },
+      carta: { nome: 'carta amassada', texto: 'Está assinada com o seu nome, na sua letra. Diz por onde fugir.' },
+      corpo: { nome: 'corpo coberto por um lençol', ver: 'Um lençol cobre alguém no chão. Os pés são do seu tamanho.', revistar: 'Você levanta o lençol só o bastante para mexer nos bolsos. Não olha o rosto.' },
+    },
+    buraco: 'O piso de azulejo afundou aqui.',
+    desmaio: 'O teto gira devagar e as luzes se apagam uma por uma.',
+    folego: ['ampola de cafeína', 'copo de água gelada', 'sais de cheiro'],
   },
 
   masmorra: {
@@ -131,6 +139,14 @@ export const TEMAS = {
     fuga: 'A boca da masmorra cospe você na noite aberta. As estrelas estão no lugar certo.',
     morte: 'A pedra fria é a última coisa que você sente. A masmorra guarda mais um.',
     loucura: 'Você senta numa cela vazia e fecha a grade por dentro. Aqui, pelo menos, você sabe onde estão as paredes.',
+    perturbadores: {
+      foto: { nome: 'retrato a carvão', texto: 'É o seu rosto, mais velho, desenhado na parede da cela de alguém.' },
+      carta: { nome: 'carta lacrada', texto: 'O lacre tem o brasão da sua família. Lá dentro, um mapa e um pedido de perdão.' },
+      corpo: { nome: 'prisioneiro caído', ver: 'Um prisioneiro caído contra a parede. Usa a mesma corrente que você usava.', revistar: 'Você revira os trapos dele sem olhar para o rosto. Ele está frio.' },
+    },
+    buraco: 'As pedras do chão cederam para o nível de baixo.',
+    desmaio: 'A tocha fica longe, cada vez mais longe, até virar um ponto.',
+    folego: ['cantil de água fria', 'folha de hortelã', 'punhado de sal grosso'],
   },
 
   zumbi: {
@@ -189,6 +205,14 @@ export const TEMAS = {
     fuga: 'As hélices cortam o amanhecer. Alguém estende a mão e puxa você para dentro.',
     morte: 'Você cai no asfalto. Daqui a pouco, você levanta. Mas não vai ser você.',
     loucura: 'Você se tranca num banheiro e liga o rádio. Só chiado. Você conversa com ele até o sol nascer.',
+    perturbadores: {
+      foto: { nome: 'foto de família', texto: 'Uma família sorrindo num churrasco. No fundo, desfocado, alguém igual a você.' },
+      carta: { nome: 'bilhete na parede', texto: 'Escrito às pressas: “Se você ler isto, ainda dá tempo.” Embaixo, setas.' },
+      corpo: { nome: 'corpo de um sobrevivente', ver: 'Alguém que não chegou. A mochila ainda está nas costas.', revistar: 'Você abre a mochila depressa. Ele não se mexe. Ele não vai se mexer.' },
+    },
+    buraco: 'O assoalho cedeu e mostra o andar de baixo.',
+    desmaio: 'O barulho da rua vai ficando abafado, como se você afundasse na água.',
+    folego: ['energético morno', 'pílula de cafeína', 'garrafa de água'],
   },
 };
 

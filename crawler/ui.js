@@ -6,7 +6,7 @@ import * as J from './jogo.js';
 import { TEMAS, LISTA_TEMAS } from './temas.js';
 import { sementeNova, hash } from './rng.js';
 import { T, primeiroPasso, distancia } from './mapa.js';
-import { TAM, sprite, icone, desenharTile, desenharObjeto, COR_CAMINHO } from './sprites.js';
+import { TAM, sprite, icone, desenharTile, desenharObjeto, desenharBuraco, desenharPerturbador, COR_CAMINHO } from './sprites.js';
 import { VERSAO_DESVARIO } from './versao.js';
 
 const $ = (id) => document.getElementById(id);
@@ -91,7 +91,14 @@ function montarInicio() {
 
 function montarComo() {
   $('como').innerHTML = `
-    <p>Chegue à saída do quinto andar. Ninguém conta seus pontos: o estado aparece em palavras e na imagem. <b>As palavras podem mentir; a cor não.</b> Quando a imagem desbota e as bordas escurecem, você está pior do que diz.</p>
+    <p>Chegue à saída do quinto andar. Ninguém conta seus pontos: o estado aparece em palavras e na imagem. <b>As palavras podem mentir; a imagem não.</b></p>
+    <table>
+      <tr><th>O que está ruim</th><th>Como aparece</th><th>O que muda no jogo</th></tr>
+      <tr><td><b>Corpo</b> (Vida)</td><td>Pulso vermelho nas bordas; gotas de sangue no chão</td><td>Você arrasta a perna (passos custam dois turnos), as mãos tremem e as bestas seguem o seu rastro.</td></tr>
+      <tr><td><b>Consciência</b> (atenção)</td><td>A vista escurece, a imagem dobra e os olhos piscam devagar</td><td>Você enxerga menos. O espaço mente: portas pintadas na parede, buracos que não existem, corredores sem fim, vultos e miragens. Em zero, você desmaia. Descanse quieto, sem nada à vista, para voltar.</td></tr>
+      <tr><td><b>Cabeça</b> (Sanidade)</td><td>A cor desbota, aparece grão e as cores se separam</td><td>Mente sobre quem e o que as coisas são: aliado com cara de monstro e o contrário, itens que parecem bichos parados, sussurros. As palavras do painel também mentem. Em zero, você perde o controle.</td></tr>
+    </table>
+    <p>Fotografias, cartas e corpos fazem mal de olhar, mas mostram coisas: o caminho, um item, algo em que se agarrar. Pisar em cima examina.</p>
     <table>
       <tr><th>Ação</th><th>Quem faz bem</th><th>O que faz</th></tr>
       <tr><td>Andar contra algo</td><td>Todos</td><td>Bate no que parece hostil; conversa com o que parece aliado. É a aparência que decide, então cuidado.</td></tr>
@@ -100,6 +107,8 @@ function montarComo() {
       <tr><td>Encarar <kbd>E</kbd></td><td>Espírito (Vontade, Fé)</td><td>Espanta bestas, desfaz assombros e vultos. Falhar abala.</td></tr>
       <tr><td>Fogo <kbd>F</kbd></td><td>Mente (Mágica de Ataque Físico)</td><td>Ataque à distância com Pontos de Magia.</td></tr>
       <tr><td>Ancorar <kbd>Q</kbd></td><td>Espírito (Vontade, Fé)</td><td>Recupera um pouco de Sanidade e apaga o que é falso à vista. Poucas vezes por andar.</td></tr>
+      <tr><td>Esperar <kbd>Espaço</kbd></td><td>Todos</td><td>Sem monstro à vista, é descanso: a atenção volta devagar. O tempo continua pesando na cabeça.</td></tr>
+      <tr><td>Pular</td><td>Todos</td><td>Andar duas vezes contra um buraco. O de verdade leva ao andar de baixo, com tombo; o falso só derruba você de joelhos.</td></tr>
     </table>
     <p>Atacar um aliado tem consequência: ele grita, foge e não ajuda mais, e a culpa pesa. Matar gente também pesa. Sem Sanidade, você perde o controle por alguns turnos e volta com uma cicatriz; três vezes e não volta mais.</p>
     <p>Existem sinais que não mudam e que um olho atento aprende a ler. O diário guarda os que você descobrir.</p>
@@ -153,8 +162,8 @@ function fazer(acao) {
   if (e.escolha && acao.tipo !== 'escolher') return;
   J.agir(e, acao);
   for (const f of e.efeitos) {
-    const cor = { golpe: 'rgba(180,20,20,', mente: 'rgba(120,60,170,', surto: 'rgba(230,230,230,', magia: 'rgba(255,170,60,' }[f.tipo];
-    if (cor) lampejo = { cor, ate: performance.now() + (f.tipo === 'surto' ? 450 : 170) };
+    const cor = { golpe: 'rgba(180,20,20,', mente: 'rgba(120,60,170,', surto: 'rgba(230,230,230,', magia: 'rgba(255,170,60,', desmaio: 'rgba(0,0,0,' }[f.tipo];
+    if (cor) lampejo = { cor, ate: performance.now() + (f.tipo === 'surto' || f.tipo === 'desmaio' ? 450 : 170) };
   }
   atualizar();
 }
@@ -380,20 +389,29 @@ function embaralharTexto(t, lv) {
   return letras.join('');
 }
 
+/** Com a atenção indo embora, a palavra apaga letras, como vista que falha. */
+function apagarTexto(t, lc) {
+  if (lc < 3) return t;
+  const quadro = movimentoReduzido.matches ? 0 : Math.floor(performance.now() / 1800);
+  return [...t].map((ch, i) => (ch !== ' ' && (hash(t + i + quadro) % 7) < lc - 2 ? '·' : ch)).join('');
+}
+
 function desenharEstado(p) {
   const s = p.estado;
   const ancoras = '◆'.repeat(Math.max(0, p.cargasAncora)) || '—';
   const n = p.numeros;
   $('estado').innerHTML = `
-    <dt>Corpo</dt><dd>${embaralharTexto(s.vida, p.lucidez)}</dd>
+    <dt>Corpo</dt><dd class="${p.ferimento >= 3 ? 'ferido' : ''}">${embaralharTexto(s.vida, p.lucidez)}</dd>
+    <dt>Consciência</dt><dd class="${p.atencao >= 3 ? 'apagando' : ''}">${apagarTexto(s.consciencia, p.atencao)}</dd>
     <dt>Cabeça</dt><dd>${embaralharTexto(s.sanidade, p.lucidez)}</dd>
     ${s.magia ? `<dt>Magia</dt><dd>${s.magia}</dd>` : ''}
     <dt>Âncoras</dt><dd class="ancoras" title="Vezes que ainda dá para se ancorar neste andar">${ancoras}</dd>
-    ${depurar && n ? `<div class="numeros">Vida ${n.vida}/${n.vidaMax} · San ${n.san}/${n.sanMax} · PM ${n.pm}/${n.pmMax} · lucidez ${p.lucidez} · turno ${n.turno}${s.mentindo ? ' · palavras mentindo' : ''}</div>` : ''}`;
+    ${depurar && n ? `<div class="numeros">Vida ${n.vida}/${n.vidaMax} · Cons ${n.cons}/${n.consMax} · San ${n.san}/${n.sanMax} · PM ${n.pm}/${n.pmMax} · lucidez ${p.lucidez} · atenção ${p.atencao} · corpo ${p.ferimento} · turno ${n.turno}${s.mentindo ? ' · palavras mentindo' : ''}</div>` : ''}`;
 }
 
 function desenharAlvo(p) {
   const a = alvoAtual(p);
+  if (p.desmaio) { $('alvo').textContent = 'Escuro. Você não está aqui.'; return; }
   if (!a) { $('alvo').textContent = p.surto ? 'Você não controla o próprio corpo.' : 'Nada à vista. Toque ou clique em algo para escolher um alvo.'; return; }
   const dist = a.d === 0 ? 'aqui' : a.d === 1 ? 'colado em você' : `a ${a.d} passos`;
   let jeito = '';
@@ -430,7 +448,7 @@ function desenharItens(p) {
     const ic = criarCanvas(TAM, TAM);
     ic.getContext('2d').drawImage(icone(criarCanvas, it.tipo), 0, 0);
     b.append(ic, document.createTextNode(`${i + 1}. ${it.nome}`));
-    b.title = { cura: 'Cuida do corpo', calma: 'Acalma a cabeça', ancora: 'Ancora você e apaga o que é falso à vista' }[it.tipo] ?? '';
+    b.title = { cura: 'Cuida do corpo', calma: 'Acalma a cabeça', folego: 'Desperta: a vista clareia', ancora: 'Ancora você e apaga o que é falso à vista' }[it.tipo] ?? '';
     b.onclick = () => fazer({ tipo: 'usar', indice: i });
     return b;
   }));
@@ -479,6 +497,11 @@ function terminar() {
     ['Falsos aliados que pegaram você', s.emboscadas],
     ['Miragens em que você acreditou', s.miragensPisadas],
     ['Paredes que mentiram', s.paredesFalsas],
+    ['Portas pintadas que você empurrou', s.portasFalsas],
+    ['Buracos que não existiam', s.buracosFalsos],
+    ['Itens quebrados achando que eram bichos', s.itensQuebrados],
+    ['Coisas que fizeram mal de olhar', s.perturbadores],
+    ['Desmaios', s.desmaios],
     ['Mentiras desfeitas a tempo', r.revelados],
     ['Gente convencida', s.pacificados],
     ['Criaturas espantadas com fé', s.espantados],
@@ -550,7 +573,8 @@ function desenharMapa(agora) {
   const reduz = movimentoReduzido.matches;
   const respira = !reduz && Math.floor(agora / 380) % 2 === 0;
   const lv = p.lucidez;
-  const raio = J.PARAM.raioVisao[lv];
+  const lc = p.atencao;
+  const raio = J.PARAM.raioVisao[lc];
   ctx.fillStyle = pal.fundo;
   ctx.fillRect(0, 0, baixa.width, baixa.height);
   const tileEm = (x, y) => (x < 0 || y < 0 || x >= p.w || y >= p.h ? -1 : p.tiles[y * p.w + x]);
@@ -564,6 +588,14 @@ function desenharMapa(agora) {
       const abaixo = tileEm(x, y + 1);
       desenharTile(ctx, nome, px, py, pal, th.estilo, x * 7919 + y * 104729 + e.andar * 31, abaixo >= 0 && abaixo !== T.PAREDE);
       const vis = p.visivel[y * p.w + x];
+      const sinal = p.sinais[y * p.w + x];
+      if (t === T.BURACO) {
+        desenharBuraco(ctx, px, py, pal);
+        // O de verdade sopra: um fiapo de ar claro que sobe.
+        if (sinal) { const f = reduz ? 0 : Math.floor(agora / 260 + x) % 3; ctx.fillStyle = 'rgba(220,230,240,0.55)'; ctx.fillRect(px + 4 + f, py + 4 - f, 1, 2); ctx.fillRect(px + 7 - f, py + 5 - f, 1, 1); }
+      }
+      // A porta de verdade tem luz por baixo.
+      if (t === T.PORTA && sinal) { ctx.fillStyle = pal.luz; ctx.fillRect(px + 3, py + TAM - 1, 6, 1); }
       if (!vis) {
         ctx.fillStyle = 'rgba(8,6,12,0.62)';
         ctx.fillRect(px, py, TAM, TAM);
@@ -584,9 +616,25 @@ function desenharMapa(agora) {
     ctx.fillRect(px + 3, py + 6, 6, 3);
     ctx.fillRect(px + 5, py + 5, 2, 5);
   }
+  // Seu sangue no chão: escurece com o tempo.
+  for (const g of p.sangue) {
+    if (!naTela(g.x, g.y)) continue;
+    const [px, py] = pos(g.x, g.y);
+    const a = Math.max(0.18, 0.7 - g.idade / 120);
+    ctx.fillStyle = `rgba(${g.idade < 30 ? 150 : 95},12,16,${a.toFixed(2)})`;
+    const z = hash(g.x * 31 + g.y * 17);
+    ctx.fillRect(px + 3 + (z % 5), py + 4 + ((z >> 3) % 4), 2, 2);
+    ctx.fillRect(px + 6 + ((z >> 5) % 3), py + 7 + ((z >> 7) % 3), 1, 1);
+    if (g.idade < 30) ctx.fillRect(px + 2 + ((z >> 9) % 6), py + 8, 1, 1);
+  }
   for (const o of p.objetos) {
     if (!naTela(o.x, o.y)) continue;
     let [px, py] = pos(o.x, o.y);
+    if (o.tipo === 'perturbador') {
+      desenharPerturbador(ctx, o.perturbador, px, py, o.examinado);
+      if (!o.visivel) { ctx.fillStyle = 'rgba(8,6,12,0.5)'; ctx.fillRect(px, py, TAM, TAM); }
+      continue;
+    }
     if (o.sombra) { ctx.fillStyle = 'rgba(0,0,0,0.45)'; ctx.fillRect(px + 2, py + 10, 8, 2); }
     else if (respira) py -= 1;
     if (o.tipo === 'item') ctx.drawImage(icone(criarCanvas, o.item), px, py);
@@ -621,7 +669,7 @@ function desenharMapa(agora) {
     ctx.fillStyle = atual.categoria === 'aliado' || atual.tipoAlvo === 'objeto' ? '#e8e0c8' : '#ff7060';
     for (const [x, y, w, h] of [[0, 0, 3, 1], [0, 0, 1, 3], [9, 0, 3, 1], [11, 0, 1, 3], [0, 11, 3, 1], [0, 9, 1, 3], [9, 11, 3, 1], [11, 9, 1, 3]]) ctx.fillRect(px + x, py + y, w, h);
   }
-  posProcessar(ctx, lv, agora, reduz);
+  posProcessar(ctx, lv, lc, agora, reduz);
   // Ampliar para a tela, com tremor quando a cabeça vai mal.
   const t = tela.getContext('2d');
   t.imageSmoothingEnabled = false;
@@ -635,6 +683,31 @@ function desenharMapa(agora) {
   }
   if (p.surto && !reduz) { ox += Math.round(Math.sin(agora / 40) * 2) * vista.escala; }
   t.drawImage(baixa, ox, oy, tela.width, tela.height);
+  // Consciência: a imagem dobra (visão dupla) e os olhos piscam devagar.
+  if (lc >= 3 && !p.desmaio) {
+    const deriva = reduz ? 1 : Math.sin(agora / 900) * 1.5 + 1.5;
+    t.globalAlpha = 0.14 * (lc - 2);
+    t.drawImage(baixa, ox + Math.round(deriva * vista.escala), oy + Math.round(deriva * 0.5 * vista.escala), tela.width, tela.height);
+    t.globalAlpha = 1;
+  }
+  if (lc >= 4 && !reduz && !p.desmaio) {
+    // Piscada longa a cada poucos segundos: a tela some e volta.
+    const ciclo = 5200 - (lc - 4) * 1800;
+    const fase = agora % ciclo;
+    if (fase < 520) { t.fillStyle = `rgba(0,0,0,${(Math.sin((fase / 520) * Math.PI) * 0.92).toFixed(3)})`; t.fillRect(0, 0, tela.width, tela.height); }
+  }
+  // Corpo: pulso vermelho nas bordas, mais rápido quanto pior.
+  if (p.ferimento >= 2) {
+    const periodo = [0, 0, 1400, 1000, 700, 700][p.ferimento];
+    const batida = reduz ? 0.5 : Math.max(0, Math.sin(((agora % periodo) / periodo) * Math.PI * 2)) ** 3;
+    const forca = (p.ferimento - 1) * 0.16 * (0.45 + 0.55 * batida);
+    const g = t.createRadialGradient(tela.width / 2, tela.height / 2, Math.min(tela.width, tela.height) * 0.3, tela.width / 2, tela.height / 2, Math.hypot(tela.width, tela.height) / 2);
+    g.addColorStop(0, 'rgba(120,0,10,0)');
+    g.addColorStop(1, `rgba(120,0,10,${forca.toFixed(3)})`);
+    t.fillStyle = g;
+    t.fillRect(0, 0, tela.width, tela.height);
+  }
+  if (p.desmaio) { t.fillStyle = 'rgba(0,0,0,0.94)'; t.fillRect(0, 0, tela.width, tela.height); }
   if (lampejo.cor && agora < lampejo.ate) {
     const falta = (lampejo.ate - agora) / 170;
     t.fillStyle = `${lampejo.cor}${Math.min(0.45, falta * 0.4).toFixed(3)})`;
@@ -647,9 +720,12 @@ function marcaDepura(ctx, px, py, cor) {
   ctx.fillRect(px, py, 2, 2);
 }
 
-/** Cor que desbota, vinheta que fecha, grão e cores que se separam. A imagem segue a lucidez verdadeira. */
-function posProcessar(ctx, lv, agora, reduz) {
-  if (lv === 0) return;
+/**
+ * A imagem segue o estado verdadeiro, cada medida com o seu jeito:
+ * a Sanidade tira a cor, põe grão e separa as cores; a Consciência fecha a vinheta.
+ */
+function posProcessar(ctx, lv, lc, agora, reduz) {
+  if (lv === 0 && lc === 0) return;
   const w = baixa.width, h = baixa.height;
   const img = ctx.getImageData(0, 0, w, h);
   const d = img.data;
@@ -657,7 +733,7 @@ function posProcessar(ctx, lv, agora, reduz) {
   const [tr, tg, tb] = TINTA[e.tema];
   const cx = w / 2, cy = h / 2;
   const maxR = Math.hypot(cx, cy);
-  const vinheta = 0.25 + lv * 0.13;
+  const vinheta = 0.25 + lc * 0.13;
   const semente = reduz ? 7 : Math.floor(agora / 120);
   const grao = lv >= 3 ? (lv - 2) * 10 : 0;
   const tremula = !reduz && lv >= 3 && (hash(Math.floor(agora / 250)) % 23) === 0 ? 0.75 : 1;

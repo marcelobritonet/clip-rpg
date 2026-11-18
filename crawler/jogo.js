@@ -35,8 +35,43 @@ export const PARAM = {
    * começa com 18 e Corpo com 4 no manual) e dá fôlego a todos.
    */
   sanidade: (motor) => Math.round(motor * 0.75) + 9,
-  /** Raio de visão por nível de lucidez (0 Lúcido … 5 Fora de si). */
-  raioVisao: [7, 7, 6, 6, 5, 5],
+  /** Raio de visão por nível de Consciência (0 Alerta … 5 Apagado): o cansaço fecha a vista. */
+  raioVisao: [7, 7, 7, 6, 5, 4],
+  /**
+   * Consciência: medida só deste jogo (não existe no Clip). Diz o quanto você
+   * percebe o espaço. Cai com o tempo, com pancadas e com o sangue perdido;
+   * volta descansando, com fôlego e na escada. Em zero, você desmaia.
+   */
+  consciencia: {
+    maximo: (fisico, percepcao, sabedoria) => 10 + 2 * (fisico + percepcao + sabedoria),
+    /** Turnos por −1, por andar. */
+    cansaco: [40, 36, 32, 28, 24],
+    /** Com o corpo Muito ferido ou pior, o cansaço vem duas vezes mais rápido. */
+    sangrando: 0.5,
+    /** Golpe recebido com este dano ou mais tira 1 de Consciência. */
+    pancada: 4,
+    /** Esperar sem perigo à vista: +1 a cada tantos turnos seguidos. */
+    descanso: 4,
+    escada: 4,
+    desmaio: { turnos: 5, depois: 0.5 },
+  },
+  /** O que o corpo ferido faz, por nível de Vida (0 Intacto … 5 Caído). */
+  corpo: {
+    /** Chance de um passo custar dois turnos (arrastar a perna). */
+    lento: [0, 0, 0, 0.2, 0.4, 0.4],
+    /** Mãos que tremem: menos no Ataque. */
+    tremor: [0, 0, 0, 0, 1, 1],
+    /** A partir deste nível, você deixa sangue por onde passa. */
+    sangra: 2,
+    /** Bestas farejam sangue fresco a esta distância e por este tempo. */
+    faro: 6,
+    sangueDura: 60,
+  },
+  /** Coisas que fazem mal de olhar: perda de Sanidade ao examinar (e ao ver o corpo). */
+  perturbador: { foto: 2, carta: 1, corpo: 1, verCorpo: 1 },
+  perturbadoresPorAndar: (a) => (a === 1 ? 1 : 2),
+  /** Buraco de verdade (andares 2 a 4): chance por andar e dano da queda. */
+  buraco: { chance: 0.6, dano: 3 },
   /** Turnos por −1 de Sanidade, por andar: o silêncio pesa mais lá no fundo. */
   drenagem: [40, 36, 32, 28, 24],
   /** Companhia ao lado faz o tempo pesar menos (multiplica o intervalo). */
@@ -59,7 +94,7 @@ export const PARAM = {
   inventario: 5,
   /** Vida recuperada ao trocar de andar. */
   folegoNaEscada: 5,
-  itens: { cura: 6, calma: 4, ancora: 2, altar: 5 },
+  itens: { cura: 6, calma: 4, ancora: 2, altar: 5, folego: 6 },
   /** Perdas de Sanidade por evento. */
   perda: { golpeNoVazio: 1, miragem: 1, emboscada: 1, matarHumano: 1, ferirAliado: 2, matarAliado: 4, encararFalhou: 1, verAssombro: 1 },
   /** Surto: turnos fora de controle; depois volta com metade da Sanidade e uma cicatriz. */
@@ -77,17 +112,28 @@ export const PARAM = {
   pressaoDoAndar: [0, 0, 1, 2, 3],
   epocaParedes: 14,
   epocaMemoria: 20,
-  /** Intensidade das alucinações por nível de lucidez. */
+  /** Sanidade baixa engana sobre **quem e o que** as coisas são (por nível de lucidez). */
   alu: {
-    fantasma: [0, 0.004, 0.015, 0.03, 0.05, 0.07],
     disfarce: [0, 0.08, 0.22, 0.42, 0.62, 0.8],
-    miragem: [0, 0.004, 0.014, 0.028, 0.045, 0.06],
-    paredes: [0, 0, 1, 3, 5, 7],
-    memoria: [0, 0, 0.04, 0.1, 0.2, 0.3],
-    esquecer: [0, 0, 0, 0, 0.12, 0.25],
+    /** Item de verdade que parece um monstro parado. */
+    itemMonstro: [0, 0, 0.12, 0.28, 0.42, 0.55],
     sussurro: [0, 0.006, 0.02, 0.04, 0.06, 0.08],
     golpeFalso: [0, 0, 0, 0.01, 0.025, 0.04],
     mentiraPalavras: [0, 0, 0, 0.5, 0.8, 1],
+  },
+  /** Consciência baixa engana sobre **o espaço** (por nível de Consciência). */
+  aluCons: {
+    fantasma: [0, 0.004, 0.015, 0.03, 0.05, 0.07],
+    miragem: [0, 0.004, 0.014, 0.028, 0.045, 0.06],
+    paredes: [0, 0, 1, 3, 5, 7],
+    /** Portas pintadas na parede, muitas vezes ao lado de uma porta de verdade. */
+    portas: [0, 0, 1, 2, 3, 4],
+    /** Buracos que não existem, de preferência nos corredores. */
+    buracos: [0, 0, 0, 1, 2, 3],
+    /** Chance de um passo no corredor não levar a lugar nenhum. */
+    infinito: [0, 0, 0, 0.06, 0.12, 0.18],
+    memoria: [0, 0, 0.04, 0.1, 0.2, 0.3],
+    esquecer: [0, 0, 0, 0, 0.12, 0.25],
   },
 };
 
@@ -131,11 +177,27 @@ export const PISTAS = {
   parede: 'Com a cabeça ruim, as paredes também mentem. A memória mente mais ainda.',
   palavras: 'As palavras mentem antes da imagem. Quando a cor some, você está pior do que diz.',
   ancora: 'Ancorar-se apaga o que é falso à vista e segura o mundo por um tempo.',
+  porta: 'Cansado, você vê portas onde há parede. A porta de verdade tem luz por baixo.',
+  buraco: 'Nem todo buraco é buraco. O de verdade sopra ar frio de baixo.',
+  infinito: 'Quando o corredor não acaba, é a cabeça cansada. Pare e descanse.',
+  imovel: 'Bicho que nunca se mexe talvez nem seja bicho. Olhe de novo antes de quebrar.',
+  sangue: 'Sangrando, você deixa rastro. As bestas seguem o rastro.',
+  descanso: 'Esperar quieto, sem nada à vista, devolve a atenção. Mas o tempo pesa na cabeça.',
 };
 
 const soma = (l) => l.reduce((a, b) => a + b, 0);
 const NOMES_LUCIDEZ = ['Lúcido', 'Inquieto', 'Abalado', 'Perturbado', 'Por um fio', 'Fora de si'];
 const NOMES_VIDA = ['Intacto', 'Arranhado', 'Ferido', 'Muito ferido', 'À beira do colapso', 'Caído'];
+export const NOMES_CONSCIENCIA = ['Alerta', 'Desperto', 'Cansado', 'Zonzo', 'Apagando', 'Apagado'];
+
+/** Faixa de 0 a 5 com os mesmos cortes de `descrever` do motor (cheio, ¾, ½, ¼, acima de zero, zero). */
+function faixa(atual, max) {
+  if (max <= 0 || atual <= 0) return 5;
+  const r = atual / max;
+  return r >= 1 ? 0 : r >= 0.75 ? 1 : r >= 0.5 ? 2 : r >= 0.25 ? 3 : 4;
+}
+export const nivelConsciencia = faixa;
+export const nivelVida = (vida, max) => NOMES_VIDA.indexOf(clip.descrever('vida', vida, max));
 
 /** Nível de lucidez (0 a 5), com as mesmas faixas de `descrever` do motor. */
 export function nivelLucidez(san, max) {
@@ -179,6 +241,7 @@ export function derivados(e) {
     vidaMax: v.vida.valor + PARAM.bonusVida,
     sanMax: Math.max(1, PARAM.sanidade(v.sanidade.valor) - e.cicatrizes),
     pmMax: v.magia.valor,
+    consMax: PARAM.consciencia.maximo(n(e, 'fisico'), n(e, 'percepcao'), n(e, 'sabedoria')),
     arma: equip(e, 'arma'),
     armadura: equip(e, 'armadura'),
     cargasAncora: 1 + Math.floor((n(e, 'vontade') + n(e, 'fe')) / 2),
@@ -216,17 +279,23 @@ export function novaPartida({ semente, tema = 'sanatorio', origem = 'corpo', dep
     surto: 0,
     surtos: 0,
     ancorado: 0,
+    desmaio: 0,
+    descanso: 0,
     stats: {
       turnos: 0, golpesNoVazio: 0, aliadosFeridos: 0, aliadosMortos: 0, emboscadas: 0, miragensPisadas: 0,
       paredesFalsas: 0, fantasmasRevelados: 0, disfarcesRevelados: 0, miragensReveladas: 0, fantasmasGolpes: 0,
       surtos: 0, vencidos: 0, pacificados: 0, espantados: 0, olhares: 0, olharesCertos: 0,
       turnosPorLucidez: [0, 0, 0, 0, 0, 0], perdas: {}, ganhos: {}, fantasmasCriados: 0, disfarcesCriados: 0, miragensCriadas: 0,
+      turnosPorConsciencia: [0, 0, 0, 0, 0, 0], turnosPorVida: [0, 0, 0, 0, 0, 0], cansaco: {},
+      desmaios: 0, portasFalsas: 0, buracosFalsos: 0, quedas: 0, passosPerdidos: 0, passosArrastados: 0, farejado: 0,
+      itensQuebrados: 0, itensDisfarcados: 0, itensRevelados: 0, perturbadores: 0,
     },
   };
   const d = derivados(e);
   e.vida = d.vidaMax;
   e.san = d.sanMax;
   e.pm = d.pmMax;
+  e.cons = d.consMax;
   msg(e, TEMAS[tema].abertura, 'narra');
   entrarNoAndar(e, 1);
   return e;
@@ -284,13 +353,31 @@ export function gerarConteudoDoAndar(semente, tema, a) {
   }
   const nItens = PARAM.itensPorAndar(a);
   for (let i = 0; i < nItens; i++) {
-    const tipo = ponderado(r, [['cura', 3], ['calma', 3.5], ['ancora', 1.2], ['arma', a <= 3 ? 1 : 0.5], ['armadura', 0.8]]);
+    const tipo = ponderado(r, [['cura', 3], ['calma', 3.5], ['folego', 2], ['ancora', 1.2], ['arma', a <= 3 ? 1 : 0.5], ['armadura', 0.8]]);
     const p = livre(i === 0 ? [entrada, ...fundo] : fundo);
     if (p) objetos.push({ tipo: 'item', ...p, real: true, item: sortearItem(r, th, tipo, a) });
   }
   if (a >= 2 && chance(r, 0.75)) {
     const p = livre(fundo);
     if (p) objetos.push({ tipo: 'altar', ...p, real: true });
+  }
+  // Coisas que fazem mal de olhar.
+  for (let i = 0; i < PARAM.perturbadoresPorAndar(a); i++) {
+    const p = livre(fundo);
+    if (p) objetos.push({ tipo: 'perturbador', tipoP: ponderado(r, [['foto', 1], ['carta', 1.2], ['corpo', 1.4]]), ...p, real: true });
+  }
+  // Um buraco de verdade, no meio de uma sala: atalho para baixo, com queda.
+  if (a >= 2 && a < PARAM.andares && chance(r, PARAM.buraco.chance)) {
+    const salas = fundo.filter((q) => q !== ultima && q.w >= 4 && q.h >= 4);
+    if (salas.length) {
+      const q = escolher(r, salas);
+      const meio = pontosDaSala(q).filter((pt) => pt.x > q.x && pt.x < q.x + q.w - 1 && pt.y > q.y && pt.y < q.y + q.h - 1 && !ocupado.has(pt.y * mapa.w + pt.x));
+      if (meio.length) {
+        const pt = escolher(r, meio);
+        ocupado.add(pt.y * mapa.w + pt.x);
+        por(mapa, pt.x, pt.y, T.BURACO);
+      }
+    }
   }
   return { mapa, inicio, entidades, objetos };
 }
@@ -313,7 +400,7 @@ function sortearItem(r, th, tipo, a) {
     const x = escolher(r, th.itens.armadura);
     return { tipo, nome: x.nome, mod: x.mod };
   }
-  return { tipo, nome: escolher(r, th.itens[tipo]) };
+  return { tipo, nome: escolher(r, tipo === 'folego' ? th.folego : th.itens[tipo]) };
 }
 
 function entrarNoAndar(e, a) {
@@ -330,6 +417,8 @@ function entrarNoAndar(e, a) {
   }
   e.objetos = c.objetos.map((x) => ({ ...x, id: 'o' + e.proximoId++ }));
   e.ilusaoParedes = new Map();
+  e.sangue = new Map();
+  e.beira = null;
   e.salaAtual = -1;
   e.cargasAncora = derivados(e).cargasAncora;
   atualizarVisao(e);
@@ -349,6 +438,10 @@ function msg(e, texto, tipo = 'info', extra = {}) {
 const efeito = (e, tipo) => e.efeitos.push({ tipo, turno: e.turno });
 
 export const lucidez = (e) => nivelLucidez(e.san, derivados(e).sanMax);
+/** Nível de Consciência (0 Alerta … 5 Apagado). */
+export const atencao = (e) => nivelConsciencia(e.cons, derivados(e).consMax);
+/** Nível de Vida (0 Intacto … 5 Caído). */
+export const ferimento = (e) => Math.max(0, nivelVida(e.vida, derivados(e).vidaMax));
 const idx = (e, x, y) => y * e.mapa.w + x;
 const rng = (e) => comoFuncao(e.rDados);
 const temaDe = (e) => TEMAS[e.tema];
@@ -377,6 +470,17 @@ function perderSan(e, quanto, { reduzivel = true, motivo = 'outro' } = {}) {
   return q;
 }
 
+function perderCons(e, quanto, motivo = 'outro') {
+  const q = Math.min(e.cons, Math.max(0, quanto));
+  e.stats.cansaco[motivo] = (e.stats.cansaco[motivo] ?? 0) + q;
+  e.cons -= q;
+  return q;
+}
+
+function ganharCons(e, quanto) {
+  e.cons = Math.min(derivados(e).consMax, e.cons + quanto);
+}
+
 function ganharSan(e, quanto, motivo = 'outro') {
   const antes = e.san;
   e.san = Math.min(derivados(e).sanMax, e.san + quanto);
@@ -396,6 +500,7 @@ function anotar(e, texto) {
 /** Aparência atual de uma entidade (o que a pessoa acha que vê). */
 function aparencia(e, ent) {
   if (ent.aparencia) return ent.aparencia;
+  if (ent.item) return { especie: null, categoria: 'item' };
   if (ent.tipo === 'aliado') return { especie: ent.especie, categoria: 'aliado' };
   return { especie: ent.especie, categoria: ent.categoria };
 }
@@ -403,17 +508,25 @@ function aparencia(e, ent) {
 function nomeAparente(e, ent) {
   const ap = aparencia(e, ent);
   const th = temaDe(e);
+  if (ap.categoria === 'item') return ent.item.nome;
   return (th.monstros.find((m) => m.id === ap.especie) ?? th.aliados.find((m) => m.id === ap.especie))?.nome ?? 'vulto';
 }
 
 const Maiuscula = (s) => s.charAt(0).toUpperCase() + s.slice(1);
+
+/** Os andares mais fundos mentem para todos, até para quem está bem. */
+const comPressao = (e, nivel) => (nivel === 0 ? 0 : Math.max(nivel, PARAM.pressaoDoAndar[e.andar - 1]));
+/** Quanto a Sanidade engana (quem e o que as coisas são). */
+const nivelCabeca = (e) => comPressao(e, lucidez(e));
+/** Quanto a Consciência engana (o espaço). */
+const nivelEspaco = (e) => comPressao(e, atencao(e));
 
 /* ------------------------------------------------------------------------ */
 /* Visão                                                                    */
 /* ------------------------------------------------------------------------ */
 
 function atualizarVisao(e) {
-  const raio = PARAM.raioVisao[lucidez(e)];
+  const raio = PARAM.raioVisao[atencao(e)];
   e.vis = visao(e.mapa, e.jogador.x, e.jogador.y, raio);
   for (const k of e.vis) e.visto[k] = 1;
   const visiveis = new Set();
@@ -428,11 +541,16 @@ function atualizarVisao(e) {
     }
     ent.visivel = ve;
   }
+  for (const o of e.objetos) {
+    const ve = e.vis.has(idx(e, o.x, o.y));
+    if (!ve && o.visivel) { o.aparencia = null; o.decidido = false; }
+    o.visivel = ve;
+  }
   // Sala nova: nome no registro (com a cabeça ruim, o nome pode mentir).
   const s = e.mapa.salas.findIndex((q) => e.jogador.x >= q.x && e.jogador.x < q.x + q.w && e.jogador.y >= q.y && e.jogador.y < q.y + q.h);
   if (s >= 0 && s !== e.salaAtual) {
     e.salaAtual = s;
-    const lv = lucidez(e);
+    const lv = nivelCabeca(e);
     let nome = e.mapa.salas[s].nome;
     if (lv >= 3 && ruido(e.semente, s, e.andar, e.turno) < 0.4) {
       nome = escolher(e.rAlu, temaDe(e).salas);
@@ -459,10 +577,15 @@ export function agir(e, acao) {
     return e;
   }
   let a = acao;
-  if (e.surto > 0) a = acaoDoSurto(e);
-  // No surto, o tempo passa mesmo que o corpo bata na parede.
-  const gastou = executar(e, a) || e.surto > 0;
+  if (e.desmaio > 0) a = { tipo: 'esperar' };
+  else if (e.surto > 0) a = acaoDoSurto(e);
+  e.arrastou = false;
+  e.descansou = false;
+  // No surto e no desmaio, o tempo passa mesmo que o corpo não faça nada útil.
+  const gastou = executar(e, a) || e.surto > 0 || e.desmaio > 0;
   if (gastou && !e.fim && !e.escolha) mundo(e);
+  // A perna arrastada: o mundo anda mais uma vez.
+  if (gastou && e.arrastou && !e.fim && !e.escolha) mundo(e);
   return e;
 }
 
@@ -470,7 +593,7 @@ function executar(e, a) {
   switch (a.tipo) {
     case 'mover': return mover(e, a.dx, a.dy, false);
     case 'atacar': return mover(e, a.dx, a.dy, true);
-    case 'esperar': return true;
+    case 'esperar': e.descansou = e.desmaio === 0 && semPerigo(e); return true;
     case 'olhar': return olhar(e, a.alvo);
     case 'falar': return falarCom(e, a.alvo);
     case 'encarar': return encarar(e, a.alvo);
@@ -482,15 +605,31 @@ function executar(e, a) {
 }
 
 /** Entidade que a pessoa vê numa casa (a real ou um vulto). */
+/** Entidade que a pessoa vê numa casa (a real, um vulto ou um item com cara de monstro). */
 function visivelEm(e, x, y) {
   if (!e.vis.has(idx(e, x, y))) return reaisEm(e, x, y) ?? null;
-  return reaisEm(e, x, y) ?? e.entidades.find((o) => o.tipo === 'fantasma' && o.x === x && o.y === y) ?? null;
+  return reaisEm(e, x, y) ?? e.entidades.find((o) => o.tipo === 'fantasma' && o.x === x && o.y === y) ??
+    e.objetos.find((o) => o.aparencia && !o.usado && o.x === x && o.y === y) ?? null;
 }
 
 function alvoPorId(e, id) {
   return e.entidades.find((x) => x.id === id && (x.vida > 0 || x.tipo === 'fantasma') && e.vis.has(idx(e, x.x, x.y))) ??
-    e.objetos.find((o) => o.id === id && e.vis.has(idx(e, o.x, o.y))) ?? null;
+    e.objetos.find((o) => (o.id === id || (o.aparencia && o.idFalso === id)) && !o.usado && e.vis.has(idx(e, o.x, o.y))) ?? null;
 }
+
+/** Nenhum monstro de verdade à vista, caçando você: dá para fechar os olhos. */
+function semPerigo(e) {
+  return !e.entidades.some((m) => m.tipo === 'monstro' && m.vida > 0 && e.vis.has(idx(e, m.x, m.y)) && m.estado !== 'pacificado' && m.estado !== 'fugindo');
+}
+
+const ehCorredor = (e, x, y) =>
+  (tile(e.mapa, x - 1, y) === T.PAREDE && tile(e.mapa, x + 1, y) === T.PAREDE) || (tile(e.mapa, x, y - 1) === T.PAREDE && tile(e.mapa, x, y + 1) === T.PAREDE);
+
+const CORREDOR_SEM_FIM = [
+  'Você anda, e o corredor anda junto.',
+  'A mesma mancha na parede. De novo.',
+  'Você conta os passos. O fim do corredor não chega mais perto.',
+];
 
 function mover(e, dx, dy, forcarAtaque) {
   if (!dx && !dy) return true;
@@ -498,6 +637,7 @@ function mover(e, dx, dy, forcarAtaque) {
   if (!dentro(e.mapa, x, y)) return false;
   const ent = visivelEm(e, x, y);
   if (ent) {
+    if (ent.item) return golpearObjeto(e, ent);
     const ap = aparencia(e, ent);
     if (forcarAtaque || ap.categoria !== 'aliado') return golpear(e, ent);
     if (ent.estado === 'seguindo' && !ent.aparencia) {
@@ -517,13 +657,48 @@ function mover(e, dx, dy, forcarAtaque) {
       ganharPista(e, 'parede');
       return true;
     }
+    if (ilusao === T.PORTA) {
+      e.ilusaoParedes.delete(k);
+      e.stats.portasFalsas++;
+      msg(e, 'Você empurra a porta e a mão encontra parede. Era só o desenho de uma porta.', 'mentira');
+      ganharPista(e, 'porta');
+      return true;
+    }
     return false;
   }
+  // Buraco (de verdade ou da cabeça): o primeiro passo só chega à beira.
+  const pareceBuraco = ilusao === T.BURACO || (real === T.BURACO && ilusao === undefined);
+  if (pareceBuraco) {
+    if (e.beira !== k) {
+      e.beira = k;
+      msg(e, 'Um buraco no chão. Ande de novo para pular.', 'info');
+      return false;
+    }
+    e.beira = null;
+    if (real === T.BURACO) return cair(e);
+    e.ilusaoParedes.delete(k);
+    e.stats.buracosFalsos++;
+    perderCons(e, 1, 'buraco');
+    msg(e, 'Você pula no buraco e cai de joelhos no chão firme. Não havia buraco.', 'mentira');
+    ganharPista(e, 'buraco');
+  }
+  e.beira = null;
   if (real === T.PORTA) {
     // A porta abrindo já aparece na imagem; o registro fica para o que importa.
     por(e.mapa, x, y, T.ABERTA);
     return true;
   }
+  // Corredor sem fim: a cabeça cansada não deixa o passo render.
+  const cl = nivelEspaco(e);
+  if (ehCorredor(e, e.jogador.x, e.jogador.y) && chance(e.rAlu, PARAM.aluCons.infinito[cl])) {
+    e.stats.passosPerdidos++;
+    msg(e, escolher(e.rAlu, CORREDOR_SEM_FIM), 'mentira', { mentira: true });
+    if (e.stats.passosPerdidos >= 3) ganharPista(e, 'infinito');
+    return true;
+  }
+  const antes = idx(e, e.jogador.x, e.jogador.y);
+  const fv = ferimento(e);
+  if (fv >= PARAM.corpo.sangra) e.sangue.set(antes, e.turno);
   e.jogador.x = x;
   e.jogador.y = y;
   if (ilusao === T.PAREDE) {
@@ -532,7 +707,27 @@ function mover(e, dx, dy, forcarAtaque) {
     msg(e, 'Você atravessa a parede. Ela nunca esteve ali.', 'mentira');
     ganharPista(e, 'parede');
   }
+  if (chance(e.rDados, PARAM.corpo.lento[fv])) {
+    e.arrastou = true;
+    e.stats.passosArrastados++;
+    if (!e.ultimaPerna || e.turno - e.ultimaPerna > 12) msg(e, 'Você arrasta a perna. Cada passo custa dois.', 'dano');
+    e.ultimaPerna = e.turno;
+  }
   pisar(e);
+  return true;
+}
+
+/** Cair pelo buraco de verdade: atalho para o andar de baixo, com tombo. */
+function cair(e) {
+  const dano = PARAM.buraco.dano;
+  e.vida -= dano;
+  e.stats.quedas++;
+  e.ultimoGolpe = 'a queda';
+  efeito(e, 'golpe');
+  msg(e, 'O chão some debaixo de você. Você cai no escuro e bate com força lá embaixo.', 'dano');
+  if (e.vida <= 0) return true;
+  anotar(e, 'Caiu por um buraco até o andar de baixo.');
+  descer(e, true);
   return true;
 }
 
@@ -549,6 +744,7 @@ function pisar(e) {
       continue;
     }
     if (o.tipo === 'item') pegar(e, o);
+    else if (o.tipo === 'perturbador') examinar(e, o);
     else if (o.tipo === 'escada') descer(e);
     else if (o.tipo === 'saida') {
       e.fim = { tipo: 'fuga', turno: e.turno, andar: e.andar };
@@ -559,6 +755,43 @@ function pisar(e) {
       e.cargasAncora += 1;
       msg(e, temaDe(e).altarTexto, 'bom');
     }
+  }
+}
+
+/** Fotografia, carta, corpo: examinar custa Sanidade e dá alguma coisa. */
+function examinar(e, o) {
+  if (o.examinado) return;
+  const th = temaDe(e);
+  const pt = th.perturbadores[o.tipoP];
+  e.stats.perturbadores++;
+  if (o.tipoP === 'corpo') {
+    o.examinado = true;
+    const q = perderSan(e, PARAM.perturbador.corpo, { motivo: 'perturbador' });
+    msg(e, pt.revistar + (q ? '' : ' Você aguenta firme.'), 'dano');
+    const tipo = ponderado(e.rDados, [['cura', 2], ['folego', 2], ['calma', 1]]);
+    const it = { tipo, nome: escolher(e.rDados, tipo === 'folego' ? th.folego : th.itens[tipo]) };
+    if (e.inventario.length < PARAM.inventario) { e.inventario.push(it); msg(e, `Você leva ${artigo(it.nome)}.`, 'bom'); }
+    else msg(e, `Havia ${artigo(it.nome)}, mas não cabe mais nada.`);
+    return;
+  }
+  o.usado = true;
+  if (o.tipoP === 'foto') {
+    const q = perderSan(e, PARAM.perturbador.foto, { motivo: 'perturbador' });
+    msg(e, `${Maiuscula(artigo(pt.nome))}. ${pt.texto}`, q ? 'dano' : 'info');
+    e.cargasAncora += 1;
+    msg(e, 'Você guarda a imagem. Pelo menos agora você sabe que alguém viu você aqui.', 'bom');
+    anotar(e, `Achou ${artigo(pt.nome)}.`);
+    return;
+  }
+  // carta
+  const q = perderSan(e, PARAM.perturbador.carta, { motivo: 'perturbador' });
+  msg(e, `${Maiuscula(artigo(pt.nome))}. ${pt.texto}`, q ? 'dano' : 'info');
+  const saida = e.objetos.find((x) => x.real && (x.tipo === 'escada' || x.tipo === 'saida'));
+  if (saida) {
+    for (const c of caminhoReal(e, e.jogador, saida)) e.visto[idx(e, c.x, c.y)] = 1;
+    e.visto[idx(e, saida.x, saida.y)] = 1;
+    saida.conhecida = true;
+    msg(e, 'Você memoriza o caminho que ela descreve.', 'bom');
   }
 }
 
@@ -605,10 +838,13 @@ function emArtigo(nome) {
   return 'em ' + a;
 }
 
-function descer(e) {
+function descer(e, queda = false) {
   if (e.andar >= PARAM.andares) return;
-  e.vida = Math.min(derivados(e).vidaMax, e.vida + PARAM.folegoNaEscada);
-  msg(e, temaDe(e).descida, 'narra');
+  if (!queda) {
+    e.vida = Math.min(derivados(e).vidaMax, e.vida + PARAM.folegoNaEscada);
+    ganharCons(e, PARAM.consciencia.escada);
+    msg(e, temaDe(e).descida, 'narra');
+  }
   anotar(e, `Novo andar: ${temaDe(e).andares[e.andar]}.`);
   entrarNoAndar(e, e.andar + 1);
   e.escolha = { opcoes: opcoesEvolucao(e) };
@@ -630,8 +866,10 @@ function golpear(e, ent) {
   }
   const d = derivados(e);
   const extraDef = ent.categoria === 'assombro' ? PARAM.defesaAssombro : 0;
+  const tremor = PARAM.corpo.tremor[ferimento(e)];
+  if (tremor && chance(e.rDados, 0.2)) msg(e, 'Suas mãos tremem.', 'info');
   const r = clip.resolverAtaque({
-    ataque: d.ataque, defesa: Math.max(0, ent.defesa + extraDef - (ent.pontoFraco ?? 0)), arma: d.arma, armadura: ent.armadura ?? 0, rng: rng(e),
+    ataque: Math.max(0, d.ataque - tremor), defesa: Math.max(0, ent.defesa + extraDef - (ent.pontoFraco ?? 0)), arma: d.arma, armadura: ent.armadura ?? 0, rng: rng(e),
   });
   if (!r.acertou) {
     msg(e, r.critico.ataque === 'falha' ? 'Você tropeça no próprio golpe.' : `Você erra ${artigoDe(nome)}.`);
@@ -643,6 +881,17 @@ function golpear(e, ent) {
 }
 
 const artigoDe = artigo;
+
+/** Bater num item que parecia monstro: ele quebra. */
+function golpearObjeto(e, o) {
+  const nome = nomeAparente(e, o);
+  o.usado = true;
+  o.aparencia = null;
+  e.stats.itensQuebrados++;
+  msg(e, `Você acerta ${artigoDe(nome)} e algo se parte. Era ${artigo(o.item.nome)}. Agora é caco.`, 'mentira');
+  ganharPista(e, 'imovel');
+  return true;
+}
 
 function ferir(e, ent, dano, nome, prefixo = '') {
   ent.vida -= dano;
@@ -714,7 +963,7 @@ function olhar(e, alvoId) {
       msg(e, 'Você esfrega os olhos até doer.', 'dano');
     }
   }
-  const nome = alvo.tipo && alvo.especie ? nomeAparente(e, alvo) : nomeObjeto(e, alvo);
+  const nome = (alvo.especie || alvo.aparencia) ? nomeAparente(e, alvo) : nomeObjeto(e, alvo);
   if (!t.sucesso) {
     msg(e, `Você olha de novo para ${artigoDe(nome)}. Não consegue ter certeza.`);
     return true;
@@ -730,6 +979,7 @@ function nomeObjeto(e, o) {
   if (o.tipo === 'escada') return th.passagem;
   if (o.tipo === 'saida') return th.saida;
   if (o.tipo === 'altar') return th.altar;
+  if (o.tipo === 'perturbador') return th.perturbadores[o.tipoP].nome;
   return 'coisa';
 }
 
@@ -749,6 +999,15 @@ function revelar(e, alvo, como) {
     e.stats.miragensReveladas++;
     if (!quieto) msg(e, `${Maiuscula(nomeObjeto(e, alvo))}? Não: só uma mancha na parede.`, 'bom');
     if (e.stats.fantasmasRevelados + e.stats.miragensReveladas >= 3) ganharPista(e, 'sombra');
+    return;
+  }
+  if (alvo.real === true && alvo.aparencia) {
+    const antes = nomeAparente(e, alvo);
+    alvo.aparencia = null;
+    alvo.confirmado = true;
+    e.stats.itensRevelados++;
+    if (!quieto) msg(e, `Não é ${artigoDe(antes)}. É ${artigo(alvo.item.nome)}, parado no chão.`, 'bom');
+    ganharPista(e, 'imovel');
     return;
   }
   if (alvo.real === true) { if (!quieto) msg(e, `${Maiuscula(nomeObjeto(e, alvo))}: é real.`); alvo.confirmado = true; return; }
@@ -774,6 +1033,12 @@ function revelar(e, alvo, como) {
 
 function falarCom(e, alvoId) {
   const alvo = alvoPorId(e, alvoId);
+  if (alvo?.aparencia && alvo.item) {
+    if (distancia(alvo, e.jogador) > 1) { msg(e, 'Longe demais para conversar.'); return false; }
+    msg(e, `Você fala com ${artigoDe(nomeAparente(e, alvo))}. Nada responde. Nada se mexe.`);
+    revelar(e, alvo, 'falar');
+    return true;
+  }
   if (!alvo || !alvo.especie) { msg(e, 'Não há com quem falar.'); return false; }
   if (distancia(alvo, e.jogador) > 1) { msg(e, 'Longe demais para conversar.'); return false; }
   return conversar(e, alvo);
@@ -890,6 +1155,12 @@ function caminhoReal(e, de, ate) {
 
 function encarar(e, alvoId) {
   const alvo = alvoPorId(e, alvoId);
+  if (alvo?.aparencia && alvo.item) {
+    if (distancia(alvo, e.jogador) > 4) { msg(e, 'Longe demais. Chegue mais perto para encarar.'); return false; }
+    msg(e, `Você encara ${artigoDe(nomeAparente(e, alvo))}. Ele não pisca. Não tem como piscar.`);
+    revelar(e, alvo, 'encarar');
+    return true;
+  }
   if (!alvo || !alvo.especie) { msg(e, 'Não há o que encarar.'); return false; }
   if (distancia(alvo, e.jogador) > 4) { msg(e, 'Longe demais. Chegue mais perto para encarar.'); return false; }
   const nome = nomeAparente(e, alvo);
@@ -938,13 +1209,21 @@ function encarar(e, alvoId) {
 function magia(e, alvoId) {
   if (n(e, 'magiaAtaqueFisico') < 1) { msg(e, 'Você não sabe nenhuma mágica.'); return false; }
   const alvo = alvoPorId(e, alvoId);
-  if (!alvo || !alvo.especie) { msg(e, 'Sem alvo para a mágica.'); return false; }
+  if (!alvo || !(alvo.especie || alvo.aparencia)) { msg(e, 'Sem alvo para a mágica.'); return false; }
   if (distancia(alvo, e.jogador) > PARAM.magia.alcance || !linhaLivre(e.mapa, e.jogador, alvo)) { msg(e, 'O alvo está fora de alcance.'); return false; }
   const m = clip.lancarMagia(e.ficha, { pericia: 'magiaAtaqueFisico', pm: PARAM.magia.custo, pmDisponivel: e.pm, rng: rng(e) });
   if (m.falhou) { msg(e, 'Você está sem Pontos de Magia. Nada acontece.'); return false; }
   e.pm -= m.gasto;
   const nome = nomeAparente(e, alvo);
   efeito(e, 'magia');
+  if (alvo.item) {
+    alvo.usado = true;
+    alvo.aparencia = null;
+    e.stats.itensQuebrados++;
+    msg(e, `O fogo pega ${artigoDe(nome)}, que não foge. Era ${artigo(alvo.item.nome)}. Virou cinza.`, 'mentira');
+    ganharPista(e, 'imovel');
+    return true;
+  }
   if (alvo.tipo === 'fantasma') {
     e.stats.golpesNoVazio++;
     msg(e, `O fogo atravessa ${artigoDe(nome)} e lambe a parede. Não havia nada ali.`, 'mentira');
@@ -984,7 +1263,10 @@ function ancorarMundo(e, ganho) {
     if (!e.vis.has(idx(e, ent.x, ent.y))) continue;
     if (ent.tipo === 'fantasma' || ent.aparencia) { revelar(e, ent, 'ancora'); desfeitos++; }
   }
-  for (const o of e.objetos) if (!o.real && !o.usado && e.vis.has(idx(e, o.x, o.y))) { revelar(e, o, 'ancora'); desfeitos++; }
+  for (const o of e.objetos) {
+    if (o.usado || !e.vis.has(idx(e, o.x, o.y))) continue;
+    if (!o.real || o.aparencia) { revelar(e, o, 'ancora'); desfeitos++; }
+  }
   e.ilusaoParedes.clear();
   if (desfeitos) msg(e, desfeitos === 1 ? 'Uma coisa que você via some.' : 'Coisas que você via somem.', 'bom');
   ganharPista(e, 'ancora');
@@ -1003,6 +1285,9 @@ function usar(e, i) {
   } else if (it.tipo === 'calma') {
     ganharSan(e, PARAM.itens.calma, 'calma');
     msg(e, `Você usa ${artigo(it.nome)}. Os contornos voltam ao lugar.`, 'bom');
+  } else if (it.tipo === 'folego') {
+    ganharCons(e, PARAM.itens.folego);
+    msg(e, `Você usa ${artigo(it.nome)}. A vista clareia, as bordas param de fugir.`, 'bom');
   } else if (it.tipo === 'ancora') {
     ancorarMundo(e, PARAM.itens.ancora);
     msg(e, `Você segura ${artigo(it.nome)} com força. Você sabe quem é.`, 'bom');
@@ -1018,6 +1303,8 @@ function mundo(e) {
   e.turno++;
   e.stats.turnos++;
   e.stats.turnosPorLucidez[lucidez(e)]++;
+  e.stats.turnosPorConsciencia[atencao(e)]++;
+  e.stats.turnosPorVida[ferimento(e)]++;
   for (const ent of [...e.entidades]) {
     if (e.fim) break;
     if (ent.tipo === 'fantasma') agirFantasma(e, ent);
@@ -1036,6 +1323,33 @@ function mundo(e) {
   if (e.turno % PARAM.regenVida === 0 && e.vida < d.vidaMax) e.vida++;
   if (e.turno % PARAM.regenPM === 0 && e.pm < d.pmMax) e.pm++;
   if (e.ancorado > 0) e.ancorado--;
+  // O cansaço pesa; o sangue perdido pesa mais.
+  const C = PARAM.consciencia;
+  const sangrando = ferimento(e) >= 3;
+  const ritmoCons = Math.max(6, Math.round(C.cansaco[e.andar - 1] * (sangrando ? C.sangrando : 1)));
+  if (e.turno % ritmoCons === 0) perderCons(e, 1, sangrando ? 'sangue' : 'tempo');
+  if (e.descansou && semPerigo(e)) {
+    e.descanso++;
+    if (e.descanso % C.descanso === 0 && e.cons < d.consMax) {
+      ganharCons(e, 1);
+      if (e.cons >= d.consMax) msg(e, 'Você abre os olhos. A vista está limpa de novo.', 'bom');
+    }
+    if (e.descanso === C.descanso * 2) ganharPista(e, 'descanso');
+  } else e.descanso = 0;
+  // Desmaio
+  if (e.desmaio > 0) {
+    e.desmaio--;
+    if (e.desmaio === 0) {
+      e.cons = Math.max(1, Math.ceil(d.consMax * C.desmaio.depois));
+      msg(e, 'Você acorda no chão, sem saber quanto tempo ficou ali.', 'perigo');
+    }
+  } else if (e.cons <= 0 && e.surto === 0) {
+    e.desmaio = C.desmaio.turnos;
+    e.stats.desmaios++;
+    msg(e, temaDe(e).desmaio, 'surto');
+    efeito(e, 'desmaio');
+    anotar(e, 'Desmaiou de cansaço.');
+  }
   // Surto
   if (e.surto > 0) {
     e.surto--;
@@ -1048,6 +1362,17 @@ function mundo(e) {
   }
   if (e.fim) return;
   atualizarVisao(e);
+  // Ver um corpo pela primeira vez pesa.
+  for (const o of e.objetos) {
+    if (o.tipo !== 'perturbador' || o.tipoP !== 'corpo' || o.visto || !e.vis.has(idx(e, o.x, o.y))) continue;
+    o.visto = true;
+    // Quem vive do Corpo já viu gente caída antes (como em matar gente).
+    const acostumado = clip.caminhoDominante(e.ficha).id === 'corpo';
+    const q = acostumado ? 0 : perderSan(e, PARAM.perturbador.verCorpo, { motivo: 'perturbador' });
+    msg(e, temaDe(e).perturbadores.corpo.ver, q ? 'dano' : 'info');
+  }
+  // Sangue velho seca.
+  for (const [k, t] of e.sangue) if (e.turno - t > PARAM.corpo.sangueDura * 2) e.sangue.delete(k);
   alucinar(e);
 }
 
@@ -1086,7 +1411,7 @@ function acaoDoSurto(e) {
 }
 
 const livreParaAndar = (e, x, y, quem) =>
-  tile(e.mapa, x, y) !== T.PAREDE && !(e.jogador.x === x && e.jogador.y === y) && !e.entidades.some((o) => o !== quem && o.tipo !== 'fantasma' && o.vida > 0 && o.x === x && o.y === y);
+  tile(e.mapa, x, y) !== T.PAREDE && tile(e.mapa, x, y) !== T.BURACO && !(e.jogador.x === x && e.jogador.y === y) && !e.entidades.some((o) => o !== quem && o.tipo !== 'fantasma' && o.vida > 0 && o.x === x && o.y === y);
 
 function passoPara(e, ent, alvo, afastar = false) {
   if (!afastar) {
@@ -1144,6 +1469,7 @@ function agirMonstro(e, m) {
     m.estado = 'cacando';
     m.ultimo = { x: e.jogador.x, y: e.jogador.y };
   }
+  if (!ve && m.categoria === 'besta' && (m.estado !== 'cacando' || !m.ultimo)) farejar(e, m);
   if (m.estado === 'cacando') {
     const companheiro = e.entidades.find((x) => x.estado === 'seguindo' && x.vida > 0 && distancia(x, m) === 1);
     if (distancia(m, e.jogador) === 1) { ataqueDoMonstro(e, m, 0); return; }
@@ -1152,11 +1478,34 @@ function agirMonstro(e, m) {
       passoPara(e, m, m.ultimo);
       // Os rápidos dão dois passos quando estão longe.
       if (m.rapido && distancia(m, e.jogador) > 1) passoPara(e, m, m.ultimo);
-      if (m.x === m.ultimo.x && m.y === m.ultimo.y && !ve) { m.estado = 'parado'; m.ultimo = null; }
+      if (m.x === m.ultimo.x && m.y === m.ultimo.y && !ve) {
+        m.estado = 'parado';
+        m.ultimo = null;
+        if (m.categoria === 'besta') farejar(e, m);
+      }
     }
     return;
   }
   vagar(e, m);
+}
+
+/** Besta acha sangue fresco por perto e segue o rastro, do mais velho para o mais novo. */
+function farejar(e, m) {
+  let melhor = null;
+  for (const [k, t] of e.sangue) {
+    if (e.turno - t > PARAM.corpo.sangueDura) continue;
+    const x = k % e.mapa.w, y = Math.floor(k / e.mapa.w);
+    if (distancia({ x, y }, m) > PARAM.corpo.faro) continue;
+    if (!melhor || t > melhor.t) melhor = { x, y, t };
+  }
+  if (!melhor || (m.x === melhor.x && m.y === melhor.y)) return;
+  if (m.estado !== 'cacando') {
+    e.stats.farejado++;
+    if (distancia(m, e.jogador) <= 12) msg(e, 'Em algum lugar atrás de você, algo fareja o chão.', 'perigo');
+    ganharPista(e, 'sangue');
+  }
+  m.estado = 'cacando';
+  m.ultimo = { x: melhor.x, y: melhor.y };
 }
 
 function ataqueDoMonstro(e, m, bonus) {
@@ -1186,6 +1535,8 @@ function ataqueDoMonstro(e, m, bonus) {
     e.vida -= r.dano;
     e.ultimoGolpe = artigoDe(especie(e, m).nome);
     efeito(e, 'golpe');
+    if (r.dano >= PARAM.consciencia.pancada) perderCons(e, 1, 'pancada');
+    if (ferimento(e) >= PARAM.corpo.sangra) e.sangue.set(idx(e, e.jogador.x, e.jogador.y), e.turno);
     msg(e, `${Maiuscula(artigoDe(nome))} acerta você${r.dano >= 4 ? ' em cheio' : ''}.`, 'dano');
   } else msg(e, `${Maiuscula(artigoDe(nome))} erra você.`);
 }
@@ -1265,20 +1616,27 @@ function agirFantasma(e, f) {
 /* ------------------------------------------------------------------------ */
 
 function alucinar(e) {
-  // Os andares mais fundos mentem para todos, até para quem está lúcido.
-  const lucido = lucidez(e);
-  const lv = lucido === 0 ? 0 : Math.max(lucido, PARAM.pressaoDoAndar[e.andar - 1]);
+  // Duas fontes de engano: a Sanidade (quem e o que as coisas são) e a Consciência (o espaço).
+  const lv = nivelCabeca(e);
+  const lc = nivelEspaco(e);
   const A = PARAM.alu;
+  const AC = PARAM.aluCons;
   const r = e.rAlu;
   if (lv === 0) {
-    // Lúcido: o mundo se assenta.
-    for (const f of e.entidades.filter((x) => x.tipo === 'fantasma')) removerFantasma(e, f);
+    // Lúcido: ninguém tem a cara errada.
     for (const x of e.entidades) x.aparencia = null;
+    for (const o of e.objetos) o.aparencia = null;
+  }
+  if (lc === 0) {
+    // Alerta: o espaço se assenta.
+    for (const f of e.entidades.filter((x) => x.tipo === 'fantasma')) removerFantasma(e, f);
     for (const o of e.objetos) if (!o.real) o.usado = true;
     e.ilusaoParedes.clear();
-    return;
   }
+  if (lv === 0 && lc === 0) return;
   const notar = PARAM.notar * (n(e, 'sentidos') + n(e, 'discernimento'));
+  const th = temaDe(e);
+  const comuns = th.monstros.filter((q) => q.andar <= Math.max(2, e.andar) && q.andar < 5);
   // Disfarces para quem acabou de entrar em vista.
   for (const ent of e.entidades) {
     if (ent.tipo === 'fantasma' || !ent.visivel) continue;
@@ -1286,9 +1644,8 @@ function alucinar(e) {
       ent.decidido = true;
       const p = A.disfarce[lv] * (ent.estado === 'seguindo' ? 0.35 : 1) * (e.ancorado > 0 ? 0 : 1);
       if (!ent.revelado && chance(r, p)) {
-        const th = temaDe(e);
         if (ent.tipo === 'aliado') {
-          const m = escolher(r, th.monstros.filter((q) => q.andar <= Math.max(2, e.andar) && q.andar < 5));
+          const m = escolher(r, comuns);
           ent.aparencia = { especie: m.id, categoria: m.categoria };
         } else {
           const al = escolher(r, th.aliados);
@@ -1303,18 +1660,28 @@ function alucinar(e) {
   for (const f of e.entidades.filter((x) => x.tipo === 'fantasma' && x.visivel && !x.suspeito)) {
     if (notar && chance(r, notar)) marcarSuspeito(e, f);
   }
+  // Itens de verdade com cara de monstro (parados, à espera).
+  for (const o of e.objetos) {
+    if (o.tipo !== 'item' || !o.real || o.usado || !o.visivel || o.decidido) continue;
+    o.decidido = true;
+    if (o.confirmado || e.ancorado > 0) continue;
+    if (distancia(o, e.jogador) >= 2 && chance(r, A.itemMonstro[lv])) {
+      const m = escolher(r, comuns);
+      o.aparencia = { especie: m.id, categoria: m.categoria };
+      o.idFalso = o.idFalso ?? 'e' + e.proximoId++;
+      e.stats.itensDisfarcados++;
+    }
+  }
   if (e.ancorado > 0) return;
-  // Vultos
-  if (chance(r, A.fantasma[lv])) criarFantasma(e);
-  // Miragens
-  if (chance(r, A.miragem[lv])) criarMiragem(e);
-  // Paredes que mentem
-  if (e.turno % PARAM.epocaParedes === 0) refazerParedes(e, A.paredes[lv]);
-  // Sussurros e golpes que não aconteceram
-  if (chance(r, A.sussurro[lv])) msg(e, escolher(r, temaDe(e).sussurros), 'sussurro', { mentira: true });
+  // O espaço mente (Consciência).
+  if (chance(r, AC.fantasma[lc])) criarFantasma(e);
+  if (chance(r, AC.miragem[lc])) criarMiragem(e);
+  if (e.turno % PARAM.epocaParedes === 0) refazerParedes(e, AC.paredes[lc], AC.portas[lc], AC.buracos[lc]);
+  // A cabeça mente (Sanidade).
+  if (chance(r, A.sussurro[lv])) msg(e, escolher(r, th.sussurros), 'sussurro', { mentira: true });
   if (chance(r, A.golpeFalso[lv])) {
     efeito(e, 'golpe');
-    msg(e, temaDe(e).golpeFalso, 'dano', { mentira: true });
+    msg(e, th.golpeFalso, 'dano', { mentira: true });
   }
 }
 
@@ -1338,7 +1705,7 @@ function casasLivresVisiveis(e, minDist) {
 function criarFantasma(e) {
   const th = temaDe(e);
   // Nasce na borda da visão ou logo fora dela, e vem andando.
-  const raio = PARAM.raioVisao[lucidez(e)];
+  const raio = PARAM.raioVisao[atencao(e)];
   const casas = [];
   for (let y = e.jogador.y - raio - 2; y <= e.jogador.y + raio + 2; y++) {
     for (let x = e.jogador.x - raio - 2; x <= e.jogador.x + raio + 2; x++) {
@@ -1365,18 +1732,21 @@ function criarMiragem(e) {
   const th = temaDe(e);
   const o = { id: 'o' + e.proximoId++, tipo, x: p.x, y: p.y, real: false };
   if (tipo === 'item') {
-    const t = ponderado(e.rAlu, [['cura', 2], ['calma', 3], ['ancora', 1]]);
-    o.item = { tipo: t, nome: escolher(e.rAlu, th.itens[t]) };
+    const t = ponderado(e.rAlu, [['cura', 2], ['calma', 3], ['folego', 1.5], ['ancora', 1]]);
+    o.item = { tipo: t, nome: escolher(e.rAlu, t === 'folego' ? th.folego : th.itens[t]) };
   }
   e.objetos.push(o);
   e.stats.miragensCriadas++;
 }
 
-function refazerParedes(e, quantas) {
+function refazerParedes(e, quantas, portas = 0, buracos = 0) {
   e.ilusaoParedes.clear();
-  if (!quantas) return;
+  if (!quantas && !portas && !buracos) return;
   const passagens = [];
   const bloqueios = [];
+  const portasFalsas = [];
+  const portasAoLado = [];
+  const covas = [];
   for (const k of e.vis) {
     const x = k % e.mapa.w, y = Math.floor(k / e.mapa.w);
     if (distancia({ x, y }, e.jogador) < 2) continue;
@@ -1385,14 +1755,34 @@ function refazerParedes(e, quantas) {
     const v = tile(e.mapa, x, y - 1) === T.CHAO && tile(e.mapa, x, y + 1) === T.CHAO;
     const hw = tile(e.mapa, x - 1, y) === T.PAREDE && tile(e.mapa, x + 1, y) === T.PAREDE;
     const vw = tile(e.mapa, x, y - 1) === T.PAREDE && tile(e.mapa, x, y + 1) === T.PAREDE;
+    const livre = !reaisEm(e, x, y) && !e.objetos.some((o) => o.x === x && o.y === y && !o.usado);
     if (t === T.PAREDE && (h || v)) passagens.push(k); // parede entre dois chãos: parece passagem
-    if (t === T.CHAO && (hw || vw) && !reaisEm(e, x, y)) bloqueios.push(k); // corredor: parece parede
+    if (t === T.CHAO && (hw || vw) && livre) { bloqueios.push(k); covas.push(k); } // corredor: parece parede, ou buraco
+    else if (t === T.CHAO && livre && distancia({ x, y }, e.jogador) >= 3) covas.push(k);
+    if (t === T.PAREDE) {
+      // Parede de frente para o chão: dá para pintar uma porta nela.
+      const chaoAoLado = [[0, 1], [0, -1], [1, 0], [-1, 0]].some(([dx, dy]) => tile(e.mapa, x + dx, y + dy) === T.CHAO);
+      if (!chaoAoLado) continue;
+      const portaVizinha = [[0, 1], [0, -1], [1, 0], [-1, 0]].some(([dx, dy]) => [T.PORTA, T.ABERTA].includes(tile(e.mapa, x + dx, y + dy)));
+      (portaVizinha ? portasAoLado : portasFalsas).push(k);
+    }
   }
   const ps = embaralhar(e.rAlu, passagens);
   const bs = embaralhar(e.rAlu, bloqueios);
   for (let i = 0; i < quantas; i++) {
     if (i % 2 === 0 && ps.length) e.ilusaoParedes.set(ps.pop(), T.CHAO);
     else if (bs.length) e.ilusaoParedes.set(bs.pop(), T.PAREDE);
+  }
+  // Portas: primeiro as que duplicam uma porta de verdade.
+  const pf = [...embaralhar(e.rAlu, portasFalsas), ...embaralhar(e.rAlu, portasAoLado)];
+  for (let i = 0; i < portas && pf.length; i++) {
+    const k = pf.pop();
+    if (!e.ilusaoParedes.has(k)) e.ilusaoParedes.set(k, T.PORTA);
+  }
+  const cs = embaralhar(e.rAlu, covas);
+  for (let i = 0; i < buracos && cs.length; i++) {
+    const k = cs.pop();
+    if (!e.ilusaoParedes.has(k)) e.ilusaoParedes.set(k, T.BURACO);
   }
 }
 
@@ -1502,23 +1892,28 @@ function aplicarEscolha(e, i) {
 export function percebido(e) {
   const { w, h } = e.mapa;
   const lv = lucidez(e);
+  const lc = atencao(e);
+  const lcp = nivelEspaco(e);
   const tiles = new Array(w * h).fill(-1);
   const visivel = new Uint8Array(w * h);
   const memoriaBoa = n(e, 'memoria') > 0;
   const epoca = Math.floor(e.turno / PARAM.epocaMemoria);
+  // Sinais que não mentem: a porta de verdade tem luz por baixo; o buraco de verdade sopra ar frio.
+  const sinais = new Uint8Array(w * h);
   for (let k = 0; k < w * h; k++) {
     if (!e.visto[k]) continue;
     const x = k % w, y = Math.floor(k / w);
     let t = tile(e.mapa, x, y);
     if (e.vis.has(k)) {
       visivel[k] = 1;
+      if ((t === T.PORTA || t === T.BURACO) && !e.ilusaoParedes.has(k)) sinais[k] = 1;
       if (e.ilusaoParedes.has(k)) t = e.ilusaoParedes.get(k);
     } else {
       if (e.ilusaoParedes.has(k)) t = e.ilusaoParedes.get(k);
-      else if (!memoriaBoa && lv >= 2) {
+      else if (!memoriaBoa && lcp >= 2) {
         const z = ruido(e.semente + e.andar, x, y, epoca);
-        if (z < PARAM.alu.esquecer[lv]) { tiles[k] = -1; continue; }
-        if (z < PARAM.alu.esquecer[lv] + PARAM.alu.memoria[lv] && bordaDeParede(e, x, y)) t = t === T.PAREDE ? T.CHAO : T.PAREDE;
+        if (z < PARAM.aluCons.esquecer[lcp]) { tiles[k] = -1; continue; }
+        if (z < PARAM.aluCons.esquecer[lcp] + PARAM.aluCons.memoria[lcp] && bordaDeParede(e, x, y) && t !== T.BURACO) t = t === T.PAREDE ? T.CHAO : T.PAREDE;
       }
     }
     tiles[k] = t;
@@ -1541,21 +1936,41 @@ export function percebido(e) {
       ...(e.depurar ? { verdade: { tipo: ent.tipo, especie: ent.especie, vida: ent.vida, disfarce: !!ent.aparencia } } : {}),
     });
   }
+  // Itens com cara de monstro: na tela, são criaturas paradas (com sombra, porque são reais).
+  for (const o of e.objetos) {
+    if (o.usado || !o.aparencia || !e.vis.has(idx(e, o.x, o.y))) continue;
+    const esp = th.monstros.find((m) => m.id === o.aparencia.especie);
+    entidades.push({
+      id: o.idFalso, x: o.x, y: o.y, sprite: esp.sprite, cores: esp.cores, nome: esp.nome,
+      categoria: 'hostil', especie: o.aparencia.categoria, sombra: true, respira: false,
+      companheiro: false, fugindo: false, marca: null,
+      ...(e.depurar ? { verdade: { tipo: 'item', especie: o.item.nome, vida: 0, disfarce: true } } : {}),
+    });
+  }
   const objetos = [];
   for (const o of e.objetos) {
-    if (o.usado) continue;
+    if (o.usado || o.aparencia) continue;
     const k = idx(e, o.x, o.y);
     // Fora de vista, só o que é real e já foi visto fica na memória.
     if (!e.vis.has(k) && !(o.real && e.visto[k])) continue;
     objetos.push({
       id: o.id, x: o.x, y: o.y, tipo: o.tipo, item: o.item?.tipo ?? null, nome: nomeObjeto(e, o),
+      perturbador: o.tipoP ?? null, examinado: !!o.examinado,
       sombra: o.real, respira: !o.real, visivel: e.vis.has(k), confirmado: !!o.confirmado,
       ...(e.depurar ? { verdade: { real: o.real } } : {}),
     });
   }
+  // Sangue: o seu, no chão que você vê ou lembra.
+  const sangue = [];
+  for (const [k, t] of e.sangue) if (e.visto[k]) sangue.push({ x: k % w, y: Math.floor(k / w), idade: e.turno - t });
   const d = derivados(e);
   return {
-    w, h, tiles, visivel, tema: e.tema, andar: e.andar, nomeAndar: th.andares[e.andar - 1],
+    w, h, tiles, visivel, sinais, tema: e.tema, andar: e.andar, nomeAndar: th.andares[e.andar - 1],
+    sangue,
+    turno: e.turno,
+    atencao: lc,
+    ferimento: ferimento(e),
+    desmaio: e.desmaio > 0,
     jogador: { ...e.jogador, caminho: e.origem },
     entidades, objetos,
     lucidez: lv,
@@ -1566,7 +1981,7 @@ export function percebido(e) {
     temMagia: n(e, 'magiaAtaqueFisico') > 0,
     inventario: e.inventario.map((it) => ({ tipo: it.tipo, nome: it.nome })),
     equipamento: e.ficha.equipamentos.map((q) => q.nome),
-    ...(e.depurar ? { numeros: { vida: e.vida, vidaMax: d.vidaMax, san: e.san, sanMax: d.sanMax, pm: e.pm, pmMax: d.pmMax, turno: e.turno, ancorado: e.ancorado } } : {}),
+    ...(e.depurar ? { numeros: { vida: e.vida, vidaMax: d.vidaMax, san: e.san, sanMax: d.sanMax, pm: e.pm, pmMax: d.pmMax, cons: e.cons, consMax: d.consMax, turno: e.turno, ancorado: e.ancorado } } : {}),
   };
 }
 
@@ -1600,6 +2015,7 @@ function palavras(e, d, lv) {
     vida: vidaDita,
     sanidade: san,
     magia: n(e, 'magiaAtaqueFisico') > 0 ? clip.descrever('magia', e.pm, d.pmMax) : null,
+    consciencia: NOMES_CONSCIENCIA[nivelConsciencia(e.cons, d.consMax)],
     mentindo: vidaDita !== vida || san !== clip.descrever('sanidade', e.san, d.sanMax),
   };
 }
@@ -1607,11 +2023,11 @@ function palavras(e, d, lv) {
 /** Resumo para o fim da partida e para o diário. */
 export function resumo(e) {
   const s = e.stats;
-  const enganos = s.golpesNoVazio + s.aliadosFeridos + s.emboscadas + s.miragensPisadas + s.paredesFalsas;
+  const enganos = s.golpesNoVazio + s.aliadosFeridos + s.emboscadas + s.miragensPisadas + s.paredesFalsas + s.portasFalsas + s.buracosFalsos + s.itensQuebrados;
   return {
     semente: e.semente, tema: e.tema, origem: e.origem,
     resultado: e.fim?.tipo ?? 'andando', andar: e.andar, turnos: s.turnos,
-    enganos, revelados: s.fantasmasRevelados + s.disfarcesRevelados + s.miragensReveladas,
+    enganos, revelados: s.fantasmasRevelados + s.disfarcesRevelados + s.miragensReveladas + s.itensRevelados,
     stats: { ...s }, pistas: [...e.pistas], diario: [...e.diario],
   };
 }

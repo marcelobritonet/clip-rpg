@@ -13,9 +13,10 @@ import { fluxo, prox, chance, escolher } from './rng.js';
 
 const PASSA = (t) => t === T.CHAO || t === T.PORTA || t === T.ABERTA;
 const VIDA_RUIM = ['Muito ferido', 'À beira do colapso'];
+const CANSADO = ['Zonzo', 'Apagando', 'Apagado'];
 
 export function novoRobo(perfil = 'atento', semente = 'robo') {
-  return { perfil, r: fluxo(semente, 'robo', perfil), crencas: new Map(), conversados: new Set(), antes: new Map(), parado: 0, ultimo: null, andar: 0, turnosNoAndar: 0 };
+  return { perfil, r: fluxo(semente, 'robo', perfil), crencas: new Map(), conversados: new Set(), antes: new Map(), imoveis: new Map(), parado: 0, ultimo: null, andar: 0, turnosNoAndar: 0, descansando: false };
 }
 
 /** O robô acredita que a entidade é falsa? (decide uma vez por aparição) */
@@ -33,14 +34,28 @@ function crê(robo, p, ent) {
   const andou = antes && (antes.x !== ent.x || antes.y !== ent.y);
   const veio = andou && distancia(ent, p.jogador) < distancia(antes, p.jogador) && ent.categoria === 'aliado' && !ent.companheiro;
   if (veio) c.veio = true;
-  return { falso: c.falso || ent.marca === 'suspeito', emboscada: c.le && !!c.veio };
+  // Hostil que nunca sai do lugar, mesmo vendo você: talvez nem seja bicho.
+  const imovel = (robo.imoveis.get(ent.id) ?? 0) >= 3 && ent.categoria === 'hostil' && c.le;
+  return { falso: c.falso || ent.marca === 'suspeito', emboscada: c.le && !!c.veio, imovel };
 }
 
 /** Decide, age e lembra se a ação não gastou turno (para não insistir nela). */
 export function passo(robo, e) {
   const t = e.turno;
+  const antes = { ...e.jogador };
+  const andar = e.andar;
   const a = decidir(robo, e);
   agir(e, a);
+  // Andou contra algo que parecia passagem e não saiu do lugar: lembra por um tempo (porta pintada, parede falsa).
+  if (a.tipo === 'mover' && e.turno > t && e.andar === andar && e.jogador.x === antes.x && e.jogador.y === antes.y) {
+    const k = (antes.y + a.dy) * e.mapa.w + antes.x + a.dx;
+    // Porta de verdade abre (e aparece aberta); a pintada vira parede.
+    const agora = percebido(e).tiles[k];
+    if (agora !== T.ABERTA && agora !== T.CHAO) {
+      robo.bloqueios ??= new Map();
+      robo.bloqueios.set(k, e.turno + 15);
+    }
+  }
   robo.falhou = e.turno === t && !e.escolha && a.tipo !== 'escolher' ? a.tipo + ':' + (a.alvo ?? a.dx + ',' + a.dy) : null;
   return a;
 }
@@ -70,11 +85,26 @@ function decidirBruto(robo, e) {
   if (p.lucidez >= 4) { const a = usar('ancora') ?? usar('calma'); if (a) return fim(robo, p, a); }
   if (p.lucidez >= 3) { const a = usar('calma'); if (a) return fim(robo, p, a); }
   if (p.lucidez >= 3 && p.cargasAncora > 0 && !p.ancorado && (e.origem === 'espirito' || p.lucidez >= 4)) return fim(robo, p, { tipo: 'ancorar' });
+  if (CANSADO.includes(p.estado.consciencia)) { const a = usar('folego'); if (a) return fim(robo, p, a); }
 
   const vistos = p.entidades.map((x) => ({ ...x, d: distancia(x, eu), fe: crê(robo, p, x) }));
   const hostis = vistos.filter((x) => (x.categoria === 'hostil' || x.fe.emboscada) && !x.fugindo).sort((a, b) => a.d - b.d);
-  const reaisHostis = hostis.filter((x) => !x.fe.falso);
+  const imoveis = hostis.filter((x) => x.fe.imovel && !x.fe.falso);
+  const reaisHostis = hostis.filter((x) => !x.fe.falso && !x.fe.imovel);
   const falsos = hostis.filter((x) => x.fe.falso);
+
+  // Descansar: cansado e sem nada hostil à vista (o atento descansa mais cedo, se a cabeça aguenta).
+  const cansado = CANSADO.includes(p.estado.consciencia) || (robo.perfil === 'atento' && p.estado.consciencia === 'Cansado' && p.lucidez <= 1);
+  if (!reaisHostis.some((x) => x.d <= 8) && (cansado || (robo.descansando && !['Alerta', 'Desperto'].includes(p.estado.consciencia)))) {
+    robo.descansando = p.lucidez <= 2;
+    if (robo.descansando || CANSADO.includes(p.estado.consciencia)) return fim(robo, p, { tipo: 'esperar' });
+  } else robo.descansando = false;
+
+  // Bicho parado que não vem: olhar de novo (ou encarar) em vez de bater.
+  const parado = imoveis.find((x) => x.d <= 4);
+  if (parado && !reaisHostis.some((x) => x.d <= 2)) {
+    return fim(robo, p, { tipo: e.origem === 'espirito' ? 'encarar' : 'olhar', alvo: parado.id });
+  }
 
   // Vulto que o robô acha falso, colado: tira a dúvida (ou ignora).
   const falsoColado = falsos.find((x) => x.d === 1);
@@ -118,7 +148,15 @@ function decidirBruto(robo, e) {
   // Objetos: itens, altar e, na hora certa, a saída.
   const cheio = inv.length >= 5;
   if (cheio && p.lucidez >= 2) { const a = usar('calma'); if (a) return fim(robo, p, a); }
-  const objs = p.objetos.filter((o) => (o.tipo === 'item' && !(cheio && ['cura', 'calma', 'ancora'].includes(o.item)) && !robo.ignorar?.has(o.id)) || (o.tipo === 'altar' && p.lucidez >= 1));
+  const saidaConhecida = p.objetos.some((o) => o.tipo === 'escada' || o.tipo === 'saida');
+  const querPerturbador = (o) => {
+    if (o.tipo !== 'perturbador' || o.examinado) return false;
+    if (robo.perfil !== 'atento') return true; // o ingênuo mexe em tudo
+    if (o.perturbador === 'carta') return !saidaConhecida && p.lucidez <= 2;
+    if (o.perturbador === 'corpo') return !cheio && p.lucidez <= 1;
+    return p.lucidez <= 1; // foto
+  };
+  const objs = p.objetos.filter((o) => (o.tipo === 'item' && !(cheio && ['cura', 'calma', 'ancora', 'folego'].includes(o.item)) && !robo.ignorar?.has(o.id)) || (o.tipo === 'altar' && p.lucidez >= 1) || querPerturbador(o));
   const perto = objs.map((o) => ({ ...o, d: distancia(o, eu) })).filter((o) => o.d <= 10).sort((a, b) => a.d - b.d)[0];
   if (perto) { const a = irPara(robo, p, (x, y) => x === perto.x && y === perto.y); if (a) return fim(robo, p, a); }
 
@@ -157,13 +195,20 @@ function fugirDe(p, ameaca) {
 function irPara(robo, p, alvo) {
   const k = (x, y) => y * p.w + x;
   const ocupado = new Set(p.entidades.filter((x) => !x.companheiro).map((x) => k(x.x, x.y)));
+  for (const [b, ate] of robo.bloqueios ?? []) if (ate > p.turno) ocupado.add(b);
   const passo = primeiroPasso(p.w, p.h, p.jogador, (x, y) => PASSA(p.tiles[k(x, y)]) && !ocupado.has(k(x, y)), alvo, 3000);
   if (!passo) return null;
   return { tipo: 'mover', dx: passo.dx, dy: passo.dy };
 }
 
 function fim(robo, p, acao) {
-  for (const x of p.entidades) robo.antes.set(x.id, { x: x.x, y: x.y });
+  for (const x of p.entidades) {
+    const a = robo.antes.get(x.id);
+    // Quem está colado e batendo também fica parado: só conta quem fica longe.
+    const longe = distancia(x, p.jogador) >= 2;
+    robo.imoveis.set(x.id, longe && a && a.x === x.x && a.y === x.y ? (robo.imoveis.get(x.id) ?? 0) + 1 : 0);
+    robo.antes.set(x.id, { x: x.x, y: x.y });
+  }
   const pos = p.jogador.x + ',' + p.jogador.y;
   robo.parado = pos === robo.ultimo ? robo.parado + 1 : 0;
   robo.ultimo = pos;

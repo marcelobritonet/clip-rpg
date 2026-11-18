@@ -25,6 +25,7 @@ página. Não mexe na versão das regras nem das ferramentas do Clip.
 | Versão | Data | O que mudou |
 |---|---|---|
 | 0.1.0 | 18/11/2026 | Primeira versão jogável: três temas, três origens, cinco andares, a Sanidade distorce a percepção, diário entre tentativas, robô e simulador. |
+| 0.2.0 | 18/11/2026 | Três medidas, três jeitos de errar. **Vida** baixa: sangue no chão que as bestas seguem, perna arrastada (passo de dois turnos), mãos que tremem, pulso vermelho na tela. **Consciência** (medida nova, só do jogo): o espaço mente (portas pintadas, buracos que não existem, corredores sem fim, vultos, miragens), a vista fecha e dobra, os olhos piscam; em zero, desmaio; descansar quieto devolve. **Sanidade** baixa: quem e o que as coisas são (aliado ↔ monstro, itens com cara de bicho parado, sussurros, palavras que mentem). Fotografias, cartas e corpos fazem mal de olhar, mas mostram o caminho, dão item ou âncora. Buraco de verdade é atalho com tombo. Item de fôlego. Seis pistas novas. |
 
 ## Como se joga
 
@@ -41,6 +42,8 @@ palavras (de `descrever`, do motor) e na própria imagem.
 | Fogo | F | botão | Mente | `lancarMagia` (Mágicas de Ataque Físico) e `resolverAtaque` |
 | Ancorar | Q | botão | Espírito | `testar` com Vontade ou Fé contra 3; poucas vezes por andar |
 | Itens | 1 a 5 | botões | Todos | — |
+| Esperar / descansar | Espaço | ponto do meio da cruz | Todos | Sem monstro à vista, devolve Consciência (0.2.0) |
+| Pular num buraco | andar duas vezes contra ele | idem | Todos | O primeiro passo só chega à beira (0.2.0) |
 | Explorar sozinho | O | botão | Todos | Anda até o que ainda não foi visto; para quando algo aparece |
 | Trocar o alvo | Tab | tocar na criatura | Todos | — |
 
@@ -56,6 +59,36 @@ limites do Clip (Aprimoramento até o Atributo; Perícia até o menor requisito)
 
 Cada tema dá nome próprio às origens (no sanatório: Interno da ala pesada,
 Médica internada, Capelão esquecido).
+
+## As três medidas (desde a 0.2.0)
+
+Nenhuma aparece em número. Cada uma tem palavras, uma assinatura na imagem e um
+jeito próprio de mentir, para que o jogador aprenda a separar "estou ferido",
+"estou cansado" e "estou enlouquecendo".
+
+| Medida | Palavras | Na imagem | O que muda no jogo | Como volta |
+|---|---|---|---|---|
+| **Vida** (Corpo) | Intacto … Caído (`descrever` do motor) | Pulso vermelho nas bordas, mais rápido quanto pior; gotas de sangue no chão | Ferido: deixa sangue por onde passa, e bestas fora de vista seguem o rastro fresco. Muito ferido: 20% dos passos custam dois turnos e o cansaço vem duas vezes mais rápido. À beira do colapso: 40% dos passos custam dois turnos e −1 no Ataque | Curativos, tempo, escada |
+| **Consciência** (atenção; só do jogo) | Alerta, Desperto, Cansado, Zonzo, Apagando, Apagado | A vista escurece e encolhe (raio 7 → 4), a imagem dobra (visão dupla), os olhos piscam devagar; a palavra perde letras | **O espaço mente**: vultos, miragens, paredes que trocam, portas pintadas na parede (muitas ao lado de uma porta de verdade), buracos que não existem, passos que não rendem no corredor, mapa lembrado que troca e apaga. Em zero: desmaio de 5 turnos | Esperar sem monstro à vista (+1 a cada 4 turnos), fôlego (+6), escada (+4); acorda do desmaio com metade |
+| **Sanidade** (Cabeça) | Lúcido … Fora de si (`descrever` do motor) | A cor desbota, aparece grão, as cores se separam, a tela treme; a palavra embaralha | **Quem e o que as coisas são**: aliado com cara de monstro e o contrário, itens de verdade com cara de bicho parado, sussurros, golpes que não aconteceram, nome de sala errado, palavras do painel que mentem. Em zero: surto | Calmantes, altar, ancorar, conversa, presente de aliado |
+
+A Consciência cai com o tempo (1 a cada 40 → 24 turnos, conforme o andar), com
+pancadas (golpe de 4 ou mais) e com o sangue perdido; o máximo é 10 + 2 × (Físico
++ Percepção + Sabedoria): Corpo e Mente 16, Espírito 10. Descansar devolve a
+atenção, mas o tempo parado continua pesando na Sanidade: é a troca que o jogo
+propõe.
+
+**Coisas que fazem mal de olhar** (1 ou 2 por andar). Pisar em cima examina:
+
+| Coisa | Custa | Dá |
+|---|---|---|
+| Carta | −1 de Sanidade | O caminho até a saída do andar fica marcado no mapa |
+| Fotografia | −2 de Sanidade | +1 âncora no andar |
+| Corpo | −1 ao ver pela primeira vez (menos para o Corpo, que já viu gente caída) e −1 ao revistar | Um item (curativo, fôlego ou calmante) |
+
+**Buraco de verdade** (andares 2 a 4, às vezes): o primeiro passo só chega à
+beira; o segundo pula. Cai no andar de baixo com −3 de Vida, sem o fôlego da
+escada. É atalho, e é aposta: o buraco falso só derruba você de joelhos.
 
 ## Decisões de design
 
@@ -87,8 +120,19 @@ Médica internada, Capelão esquecido).
 | O corpo | Golpe de vulto tira Sanidade, não Vida: a palavra do Corpo não muda | Pista "marca" |
 | A cor | Cor desbotada, vinheta e tremor seguem a lucidez verdadeira | Pista "palavras", no primeiro surto |
 | "Algo nele não está certo" | Com Sentidos ou Discernimento, às vezes você nota sozinho; aparece um "?" sobre a criatura | Na hora |
+| Luz por baixo da porta | Porta de verdade tem um fio de luz na base; a pintada, não | Pista "porta", ao empurrar uma pintada |
+| Ar frio do buraco | Buraco de verdade solta fiapos de ar claro; o falso, não | Pista "buraco", ao pular num falso |
+| Bicho que nunca se mexe | Item com cara de monstro não sai do lugar, mesmo vendo você (e tem sombra, porque o item é real) | Pista "imovel", ao quebrar ou desmascarar um |
+| O corredor que não acaba | É cansaço, não lugar: descanse | Pista "infinito", no terceiro passo perdido |
+| O rastro | Sangrando, você deixa sangue; as bestas seguem | Pista "sangue", quando uma besta fareja |
 
 ### O que a cabeça inventa, por nível de lucidez
+
+Desde a 0.2.0, vultos, miragens, paredes e memória vêm da **Consciência**
+(`PARAM.aluCons`, mesmas faixas de valor, mais portas, buracos e corredor sem
+fim) e disfarces, sussurros, golpes falsos e palavras vêm da **Sanidade**
+(`PARAM.alu`, mais os itens com cara de bicho: 0%, 0%, 12%, 28%, 42% e 55% ao
+aparecer). A tabela abaixo é da 0.1.0, quando tudo vinha da Sanidade.
 
 Valores em `PARAM.alu` (chance por turno, salvo indicação).
 
@@ -119,7 +163,85 @@ Tudo em `localStorage` (chave `clip-desvario-diario`), com `try/catch`: sem
 armazenamento, o jogo funciona igual. Não há desbloqueio de poder, para não
 virar grind.
 
-## Números do simulador
+## Números do simulador — 0.2.0
+
+`node crawler/simular.mjs 200`, mesmas sementes. As tabelas da 0.1.0 continuam
+abaixo, para comparar.
+
+### Robô atento (0.2.0)
+
+
+| Tema | Origem | Fuga | Morte | Loucura | Limite | Andar médio | Turnos (fuga) | Turnos (todas) | Enganos/partida | Revelados/partida | Surtos | % turnos Abalado ou pior |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| sanatorio | corpo | 12% | 46% | 43% | 0% | 4,3 | 760 | 734 | 25,6 | 5,3 | 1,6 | 50% |
+| sanatorio | mente | 15% | 63% | 22% | 0% | 4,3 | 1002 | 792 | 31,2 | 9,6 | 0,9 | 51% |
+| sanatorio | espirito | 48% | 38% | 14% | 0% | 4,8 | 1043 | 983 | 36,2 | 15,2 | 0,5 | 41% |
+| masmorra | corpo | 13% | 50% | 37% | 0% | 4,5 | 888 | 797 | 27,6 | 6,0 | 1,4 | 44% |
+| masmorra | mente | 13% | 69% | 19% | 0% | 4,3 | 1020 | 812 | 31,5 | 8,4 | 0,7 | 43% |
+| masmorra | espirito | 56% | 28% | 15% | 0% | 4,8 | 1041 | 1045 | 41,3 | 15,4 | 0,5 | 39% |
+| zumbi | corpo | 17% | 23% | 61% | 0% | 4,7 | 791 | 807 | 30,6 | 6,7 | 2,1 | 52% |
+| zumbi | mente | 26% | 53% | 22% | 0% | 4,5 | 962 | 875 | 37,6 | 10,4 | 0,9 | 52% |
+
+### Robô ingênuo (0.2.0)
+
+
+| Tema | Origem | Fuga | Morte | Loucura | Limite | Andar médio | Turnos (fuga) | Turnos (todas) | Enganos/partida | Revelados/partida | Surtos | % turnos Abalado ou pior |
+| sanatorio | corpo | 7% | 46% | 47% | 0% | 4,3 | 839 | 690 | 27,5 | 1,0 | 1,6 | 53% |
+| sanatorio | mente | 9% | 79% | 13% | 0% | 4,0 | 854 | 632 | 29,6 | 0,4 | 0,7 | 51% |
+| sanatorio | espirito | 37% | 48% | 16% | 0% | 4,7 | 1105 | 1069 | 40,3 | 15,3 | 0,6 | 45% |
+| masmorra | corpo | 12% | 42% | 47% | 0% | 4,4 | 821 | 773 | 32,1 | 1,0 | 1,6 | 51% |
+| masmorra | mente | 8% | 80% | 12% | 0% | 4,1 | 900 | 674 | 29,4 | 0,5 | 0,6 | 42% |
+| masmorra | espirito | 45% | 41% | 14% | 0% | 4,8 | 1203 | 1122 | 44,5 | 16,1 | 0,5 | 43% |
+| zumbi | corpo | 16% | 16% | 68% | 0% | 4,7 | 826 | 809 | 34,9 | 1,2 | 2,3 | 60% |
+| zumbi | mente | 14% | 68% | 19% | 0% | 4,3 | 891 | 736 | 34,5 | 0,5 | 0,8 | 53% |
+| zumbi | espirito | 50% | 32% | 19% | 0% | 4,8 | 1113 | 1179 | 49,5 | 18,3 | 0,7 | 51% |
+
+### Consciência e enganos novos (robô atento, média por partida)
+
+| % dos turnos em cada Consciência | corpo | mente | espirito |
+|---|---|---|---|
+| Alerta | 12% | 12% | 13% |
+| Desperto | 58% | 59% | 54% |
+| Cansado | 29% | 29% | 31% |
+| Zonzo | 1% | 1% | 2% |
+| Apagando | 0% | 0% | 0% |
+| Apagado | 0% | 0% | 0% |
+
+| Engano (média por partida) | Valor |
+|---|---|
+| Desmaios | 0,0 |
+| Passos no corredor sem fim | 2,7 |
+| Portas pintadas empurradas | 16,8 |
+| Buracos falsos pulados | 0,1 |
+| Quedas por buraco de verdade | 0,0 |
+| Passos arrastados | 0,9 |
+| Bestas que farejaram sangue | 0,7 |
+| Itens com cara de monstro | 2,4 |
+| Itens quebrados por engano | 0,7 |
+| Itens desmascarados | 1,1 |
+| Coisas perturbadoras examinadas | 4,3 |
+| Golpes no vazio | 1,1 |
+| Golpes de vulto recebidos | 2,5 |
+| Aliados feridos | 0,7 |
+| Aliados mortos | 0,3 |
+| Emboscadas de falso aliado | 2,4 |
+| Miragens pisadas | 7,0 |
+| Paredes falsas | 4,9 |
+| Vultos desfeitos | 6,9 |
+| Disfarces desfeitos | 1,9 |
+| Olhar de novo | 8,5 |
+
+### Leitura (0.2.0)
+
+| Achado | O que fazer |
+|---|---|
+| O Espírito caiu de 60–77% para 48–59% de fuga (atento): a Consciência baixa (máximo 10) e as coisas perturbadoras pesam mais nele | Era o pedido da 0.1.0; manter |
+| Corpo (12–17%) e Mente (13–26%) ficaram um pouco mais difíceis que na 0.1.0 (18–40%) | Se pesar nas pessoas, aliviar `perturbador` ou `consciencia.cansaco` |
+| O robô descansa cedo e quase nunca passa de Cansado (Zonzo 1%, nenhum desmaio). Portas pintadas, buracos falsos e corredor sem fim aparecem, mas o pior da Consciência só quem não descansa vai ver | Testar com gente: é o jogador apressado que vai desmaiar |
+| O robô empurra 16 portas pintadas por partida: ele explora borda desconhecida, e a porta pintada parece borda | Para uma pessoa, a luz por baixo da porta deve bastar; ver no teste |
+| Partidas mais longas (800–1100 turnos), por causa do descanso | Ainda dentro de 10 a 20 minutos com Explorar |
+
+## Números do simulador — 0.1.0
 
 Robô `node crawler/simular.mjs 200`: 200 partidas por tema e origem, sementes `sim-0` a `sim-199`, com os parâmetros desta versão. O robô **atento** conhece os sinais e os lê com 75% de acerto; o **ingênuo** acredita em tudo. Os dois só enxergam `percebido()`.
 
@@ -250,6 +372,9 @@ Todos ficam em `PARAM` (`crawler/jogo.js`) ou em `temas.js`; o motor não foi al
 | 14 | Assombros flutuam devagar (andam a cada 2 turnos) e só atacam a Sanidade; os "corredores" andam 2 casas | — | Dar ao Corpo como fugir do que ele não enfrenta; dar pressão ao tema zumbi | — |
 | 15 | Críticos | Sucesso crítico do jogador dobra o dano; falha crítica só vira texto | A arena mostrou que críticos mudam pouco (A8) | PENDENCIAS 5.4 |
 | 16 | Equipamento acima do limite de Força | Não dá para usar ("pesado demais") | `limiteEquipamento` do motor; Mente e Espírito com Força 0 lutam de mãos nuas | Limitação para Equipamentos |
+| 17 | **Consciência**, medida nova | Máximo 10 + 2 × (Físico + Percepção + Sabedoria); cai com o tempo, pancadas e sangue; volta descansando; em zero, desmaio de 5 turnos | Separar "cansado" de "louco": o espaço mente pelo cansaço, as identidades pela Sanidade. Não existe no Clip | — |
+| 18 | Ferimento muda o corpo | Muito ferido: 20% dos passos custam dois turnos; À beira do colapso: 40% e −1 no Ataque | O manual não tem penalidade por Vida baixa | PENDENCIAS 1 |
+| 19 | Coisas perturbadoras | Carta −1, fotografia −2, corpo −1 ao ver e −1 ao revistar (o Corpo não perde ao ver) | Mais um jeito de a Sanidade cair, agora por escolha do jogador | Sanidade |
 
 ## Dúvidas de regra que o protótipo levantou
 
@@ -265,6 +390,8 @@ Todos ficam em `PARAM` (`crawler/jogo.js`) ou em `temas.js`; o motor não foi al
 | 8 | Memória | Memória ≥ 1 impede o mapa lembrado de mentir | Primeiro uso concreto do Aprimoramento proposto | PENDENCIAS 2 |
 | 9 | Caminho dominante muda no meio da campanha | Ao evoluir, Vida e Sanidade são recalculadas pelo novo Caminho, mantendo o dano sofrido | O manual não diz o que acontece se o Caminho dominante mudar | Valores Resumidos |
 | 10 | Aliados e Unindo forças | A companhia luta sozinha, ao lado, com números fixos, e faz o tempo pesar menos | O manual soma Atributos ao unir forças; aqui é outra coisa | Testes, Situação 5 |
+| 11 | Cansaço e atenção | Consciência como terceiro recurso (ver desvio 17) | O Clip tem Vida, Magia e Sanidade. Vale um recurso de fadiga, ou isso cabe nos Pontos de Magia? | Pontos de Magia, PENDENCIAS 1 |
+| 12 | Penalidade por ferimento | Lentidão e tremor com Vida baixa | O manual não diz se o personagem ferido luta pior | Combate, PENDENCIAS 1 |
 
 ## Próximos passos possíveis
 

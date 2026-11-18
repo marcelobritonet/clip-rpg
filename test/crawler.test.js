@@ -111,7 +111,7 @@ test('percebido não vaza a verdade fora do modo de depuração', () => {
   const p = J.percebido(e);
   const texto = JSON.stringify(p);
   for (const chave of ['"verdade"', '"numeros"', '"real"']) assert.ok(!texto.includes(chave), chave);
-  assert.ok(!/"(vida|san|pm)":\d/.test(texto), 'sem números de Vida, Sanidade ou PM');
+  assert.ok(!/"(vida|san|pm|cons)":\d/.test(texto), "sem números de Vida, Sanidade, PM ou Consciência");
   assert.ok(typeof p.estado.vida === 'string' && typeof p.estado.sanidade === 'string');
   e.depurar = true;
   assert.ok(J.percebido(e).numeros);
@@ -138,9 +138,11 @@ test('lúcido, nada mente', () => {
   const robo = novoRobo('ingenuo', 'l');
   for (let i = 0; i < 150 && !e.fim; i++) {
     e.san = J.derivados(e).sanMax;
+    e.cons = J.derivados(e).consMax;
     passo(robo, e);
   }
-  assert.equal(e.stats.fantasmasCriados + e.stats.miragensCriadas + e.stats.disfarcesCriados, 0);
+  assert.equal(e.stats.fantasmasCriados + e.stats.miragensCriadas + e.stats.disfarcesCriados + e.stats.itensDisfarcados, 0);
+  assert.equal(e.ilusaoParedes.size, 0);
 });
 
 /** Partida com um único monstro ou aliado colado no jogador, num andar limpo. */
@@ -158,6 +160,7 @@ function cena({ origem = 'corpo', tipo = 'monstro', especie, aparencia = null, f
   };
   // Abalado (sem isso, lúcido, o mundo se assenta e desfaz vultos e disfarces).
   e.san = Math.ceil(J.derivados(e).sanMax * lucidez);
+  e.cons = Math.ceil(J.derivados(e).consMax * lucidez);
   e.mapa.tiles[y * e.mapa.w + x + 1] = T.CHAO;
   e.entidades.push(ent);
   J.agir(e, { tipo: 'esperar' });
@@ -304,4 +307,158 @@ test('o robô termina partidas nos três temas e origens', () => {
       assert.ok(r.turnos > 20);
     }
   }
+});
+
+/* Versão 0.2: Vida, Consciência e Sanidade, cada uma com o seu jeito de enganar. */
+
+/** Andar limpo: só o jogador e a escada; a casa à direita vira chão. */
+function salaLimpa({ origem = 'corpo', semente = 'limpa' } = {}) {
+  const e = J.novaPartida({ semente, tema: 'sanatorio', origem });
+  e.entidades = [];
+  e.objetos = e.objetos.filter((o) => o.tipo === 'escada');
+  const { x, y } = e.jogador;
+  for (let dx = 1; dx <= 4; dx++) e.mapa.tiles[y * e.mapa.w + x + dx] = T.CHAO;
+  return { e, x, y, k: (dx) => y * e.mapa.w + x + dx };
+}
+
+test('Corpo ferido deixa sangue, arrasta a perna e as bestas farejam o rastro', () => {
+  const { e, x, y, k } = salaLimpa();
+  const D = J.derivados(e);
+  e.vida = Math.max(1, Math.floor(D.vidaMax * 0.2)); // À beira do colapso
+  e.rDados = fluxo('perna', 1);
+  const turno = e.turno;
+  for (let i = 0; i < 20; i++) J.agir(e, { tipo: 'mover', dx: i % 2 ? -1 : 1, dy: 0 });
+  assert.ok(e.sangue.size > 0, 'deixou sangue');
+  assert.ok(e.stats.passosArrastados > 0 && e.turno - turno > 20, 'algum passo custou dois turnos');
+  assert.ok(J.percebido(e).sangue.length > 0, 'o sangue aparece na tela');
+  // Uma besta fora de vista, perto do sangue, sai caçando.
+  e.vida = J.derivados(e).vidaMax;
+  e.sangue.set(k(1), e.turno);
+  e.entidades.push({ id: 'rato', tipo: 'monstro', especie: 'rato', categoria: 'besta', x: x + 4, y, ataque: 0, defesa: 0, vida: 3, vidaMax: 3, arma: 0, vontade: 0, estado: 'parado' });
+  e.vis = new Set();
+  J.agir(e, { tipo: 'esperar' });
+  const rato = e.entidades.find((m) => m.id === 'rato');
+  assert.equal(rato.estado, 'cacando');
+  assert.ok(e.stats.farejado >= 1);
+});
+
+test('Consciência baixa: porta pintada na parede e buraco que não existe', () => {
+  const { e, x, y, k } = salaLimpa();
+  e.cons = Math.ceil(J.derivados(e).consMax * 0.4);
+  // Porta pintada: bate na parede, gasta o turno, não sai do lugar.
+  e.mapa.tiles[k(1)] = T.PAREDE;
+  e.ilusaoParedes.set(k(1), T.PORTA);
+  assert.equal(J.percebido(e).tiles[k(1)], T.PORTA);
+  let turno = e.turno;
+  J.agir(e, { tipo: 'mover', dx: 1, dy: 0 });
+  assert.equal(e.stats.portasFalsas, 1);
+  assert.equal(e.jogador.x, x);
+  assert.ok(e.turno > turno);
+  // Buraco falso: o primeiro passo só chega à beira; o segundo pula e cai em chão firme.
+  e.mapa.tiles[k(1)] = T.CHAO;
+  e.ilusaoParedes.clear();
+  e.ilusaoParedes.set(k(1), T.BURACO);
+  turno = e.turno;
+  J.agir(e, { tipo: 'mover', dx: 1, dy: 0 });
+  assert.equal(e.turno, turno, 'à beira, não gasta turno');
+  const cons = e.cons;
+  J.agir(e, { tipo: 'mover', dx: 1, dy: 0 });
+  assert.equal(e.jogador.x, x + 1);
+  assert.equal(e.stats.buracosFalsos, 1);
+  assert.ok(e.cons < cons, 'o tombo cansa');
+  assert.ok(e.pistas.includes('buraco') && e.pistas.includes('porta'));
+});
+
+test('buraco de verdade leva ao andar de baixo, com queda', () => {
+  const { e, k } = salaLimpa();
+  e.mapa.tiles[k(1)] = T.BURACO;
+  const vida = e.vida;
+  J.agir(e, { tipo: 'mover', dx: 1, dy: 0 });
+  J.agir(e, { tipo: 'mover', dx: 1, dy: 0 });
+  assert.equal(e.andar, 2);
+  assert.equal(e.stats.quedas, 1);
+  assert.equal(e.vida, vida - J.PARAM.buraco.dano);
+});
+
+test('com a Consciência baixa aparecem portas e buracos falsos; com a Sanidade baixa, itens com cara de monstro', () => {
+  let portas = 0, buracos = 0, itens = 0;
+  for (let s = 0; s < 6; s++) {
+    const e = J.novaPartida({ semente: 'cansado-' + s, tema: 'masmorra', origem: 'mente' });
+    const robo = novoRobo('ingenuo', 'c' + s);
+    for (let i = 0; i < 300 && !e.fim; i++) {
+      const D = J.derivados(e);
+      if (e.desmaio === 0) e.cons = Math.max(1, Math.floor(D.consMax * 0.2));
+      if (e.surto === 0) e.san = Math.max(1, Math.floor(D.sanMax * 0.3));
+      passo(robo, e);
+      for (const t of e.ilusaoParedes.values()) { portas += t === T.PORTA; buracos += t === T.BURACO; }
+    }
+  }
+  // Itens à vista, com a cabeça ruim: alguns ganham cara de bicho.
+  for (let s = 0; s < 10; s++) {
+    const { e, x, y } = salaLimpa({ semente: 'itens-' + s });
+    for (let dx = 2; dx <= 4; dx++) e.objetos.push({ id: 'i' + dx, tipo: 'item', x: x + dx, y, real: true, item: { tipo: 'cura', nome: 'rolo de gaze' } });
+    e.san = Math.max(1, Math.floor(J.derivados(e).sanMax * 0.2));
+    J.agir(e, { tipo: 'esperar' });
+    itens += e.stats.itensDisfarcados;
+  }
+  assert.ok(portas > 0, 'portas pintadas');
+  assert.ok(buracos > 0, 'buracos falsos');
+  assert.ok(itens > 0, 'itens com cara de monstro');
+});
+
+test('item com cara de monstro: bater quebra; olhar de novo mostra o que é', () => {
+  const { e, x, y } = salaLimpa({ origem: 'mente' });
+  e.san = Math.ceil(J.derivados(e).sanMax * 0.4);
+  e.cons = Math.ceil(J.derivados(e).consMax * 0.6);
+  const novoItem = (id, dx) => ({ id, tipo: 'item', x: x + dx, y, real: true, item: { tipo: 'cura', nome: 'rolo de gaze' }, aparencia: { especie: 'rato', categoria: 'besta' }, idFalso: 'falso-' + id, decidido: true, visivel: true });
+  e.objetos.push(novoItem('a', 1), novoItem('b', 2));
+  const p = J.percebido(e);
+  assert.ok(p.entidades.some((q) => q.id === 'falso-a' && q.categoria === 'hostil'), 'aparece como bicho');
+  assert.ok(!p.objetos.some((q) => q.id === 'a'), 'não aparece como item');
+  J.agir(e, { tipo: 'mover', dx: 1, dy: 0 });
+  assert.equal(e.stats.itensQuebrados, 1);
+  assert.ok(e.objetos.find((o) => o.id === 'a').usado, 'quebrou');
+  e.rDados = fluxo('olhar-item', 2);
+  let tent = 0;
+  const b = e.objetos.find((o) => o.id === 'b');
+  while (b.aparencia && tent++ < 10) J.agir(e, { tipo: 'olhar', alvo: 'falso-b' });
+  assert.equal(b.aparencia, null);
+  assert.equal(e.stats.itensRevelados, 1);
+  assert.ok(e.pistas.includes('imovel'));
+});
+
+test('carta e corpo fazem mal de olhar, mas mostram o caminho e dão um item', () => {
+  const { e, x, y } = salaLimpa({ origem: 'espirito' });
+  e.objetos.push({ id: 'carta', tipo: 'perturbador', tipoP: 'carta', x: x + 1, y, real: true });
+  e.objetos.push({ id: 'corpo', tipo: 'perturbador', tipoP: 'corpo', x: x + 2, y, real: true });
+  const escada = e.objetos.find((o) => o.tipo === 'escada');
+  const san = e.san;
+  J.agir(e, { tipo: 'mover', dx: 1, dy: 0 });
+  assert.ok(e.san < san, 'a carta abala');
+  assert.equal(e.visto[escada.y * e.mapa.w + escada.x], 1, 'a carta mostra a saída');
+  const itens = e.inventario.length;
+  const san2 = e.san;
+  J.agir(e, { tipo: 'mover', dx: 1, dy: 0 });
+  assert.ok(e.san < san2, 'revistar o corpo abala');
+  assert.equal(e.inventario.length, itens + 1, 'leva um item do corpo');
+  assert.equal(e.stats.perturbadores, 2);
+});
+
+test('sem Consciência você desmaia; descansar sem perigo à vista devolve a atenção', () => {
+  const { e, x } = salaLimpa();
+  const D = J.derivados(e);
+  e.cons = 4;
+  const antes = e.cons;
+  for (let i = 0; i < J.PARAM.consciencia.descanso * 2; i++) J.agir(e, { tipo: 'esperar' });
+  assert.ok(e.cons > antes, 'descansou');
+  e.cons = 0;
+  J.agir(e, { tipo: 'esperar' });
+  assert.ok(e.desmaio > 0);
+  assert.equal(e.stats.desmaios, 1);
+  J.agir(e, { tipo: 'mover', dx: 1, dy: 0 });
+  assert.equal(e.jogador.x, x, 'desmaiado, não anda');
+  for (let i = 0; i < J.PARAM.consciencia.desmaio.turnos + 1; i++) J.agir(e, { tipo: 'esperar' });
+  assert.equal(e.desmaio, 0);
+  assert.ok(e.cons >= Math.floor(D.consMax * J.PARAM.consciencia.desmaio.depois) - 1, 'acorda com metade');
+  assert.ok(J.percebido(e).estado.consciencia);
 });

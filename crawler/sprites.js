@@ -189,6 +189,15 @@ const ICONES = {
     '...kk.....',
     '..k..k....',
   ],
+  folego: [
+    '...kkkk...',
+    '...kwwk...',
+    '..kwbbwk..',
+    '..kbbbbk..',
+    '..kbwbbk..',
+    '..kbbbbk..',
+    '...kkkk...',
+  ],
   armadura: [
     '..r....r..',
     '.rrr..rrr.',
@@ -333,6 +342,52 @@ export function desenharTile(ctx, tipo, px, py, pal, estilo, variante, frente) {
     ctx.fillRect(px + 8, py + 6, 1, 1);
     return;
   }
+}
+
+/** Buraco no chão: desenhado por cima do chão. */
+export function desenharBuraco(ctx, px, py, pal) {
+  ctx.fillStyle = misturar(pal.chao2, '#000000', 0.5);
+  ctx.fillRect(px + 1, py + 2, 10, 9);
+  ctx.fillStyle = '#050407';
+  ctx.fillRect(px + 2, py + 3, 8, 7);
+  ctx.fillRect(px + 1, py + 4, 10, 5);
+  ctx.fillStyle = misturar(pal.chao, '#ffffff', 0.12);
+  ctx.fillRect(px + 2, py + 2, 8, 1);
+}
+
+/** Coisas que fazem mal de olhar: fotografia, carta e corpo. */
+export function desenharPerturbador(ctx, tipo, px, py, examinado) {
+  if (tipo === 'corpo') {
+    ctx.fillStyle = 'rgba(90,10,14,0.55)';
+    ctx.fillRect(px + 1, py + 8, 10, 3);
+    ctx.fillStyle = examinado ? '#5a5048' : '#6e6258';
+    ctx.fillRect(px + 2, py + 6, 7, 3);
+    ctx.fillStyle = '#c8a890';
+    ctx.fillRect(px + 9, py + 6, 2, 2);
+    ctx.fillStyle = '#3a3028';
+    ctx.fillRect(px + 1, py + 8, 3, 1);
+    ctx.fillRect(px + 4, py + 9, 4, 1);
+    return;
+  }
+  if (tipo === 'foto') {
+    ctx.fillStyle = '#ece6d6';
+    ctx.fillRect(px + 3, py + 4, 7, 6);
+    ctx.fillStyle = '#4a5058';
+    ctx.fillRect(px + 4, py + 5, 5, 3);
+    ctx.fillStyle = '#d8b898';
+    ctx.fillRect(px + 6, py + 5, 1, 2);
+    ctx.fillStyle = '#8a1a1a';
+    ctx.fillRect(px + 5, py + 6, 3, 1);
+    return;
+  }
+  // carta
+  ctx.fillStyle = '#e8e0c8';
+  ctx.fillRect(px + 2, py + 5, 8, 5);
+  ctx.fillStyle = '#7a7060';
+  ctx.fillRect(px + 3, py + 6, 6, 1);
+  ctx.fillRect(px + 3, py + 8, 4, 1);
+  ctx.fillStyle = '#8a1a1a';
+  ctx.fillRect(px + 8, py + 8, 1, 1);
 }
 
 /** Objetos fixos: passagem para o próximo andar, saída e altar. */

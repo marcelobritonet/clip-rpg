@@ -86,6 +86,8 @@ kbd {
 .estado dt { color: var(--ink-2); font-size: 0.85rem; }
 .estado dd { margin: 0; font-family: var(--serif); font-weight: 700; }
 .estado .ancoras { letter-spacing: 2px; color: var(--espirito); }
+.estado dd.ferido { color: #b8323a; }
+.estado dd.apagando { opacity: 0.62; letter-spacing: 0.04em; }
 .numeros { grid-column: 1 / -1; font-family: ui-monospace, Menlo, monospace; font-size: 0.78rem; color: var(--aviso); }
 
 .alvo { min-height: 2.6em; font-size: 0.92rem; color: var(--ink-2); padding: 0 2px; }
