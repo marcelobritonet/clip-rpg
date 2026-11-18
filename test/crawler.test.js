@@ -615,6 +615,8 @@ test('correr sem parar deixa ofegante e cansa a vista; parar recupera o fôlego'
   assert.ok(e.pistas.includes('folego'));
   for (let i = 0; i < 12; i++) J.agir(e, { tipo: 'esperar' });
   assert.equal(J.percebido(e).ofegante, 0, 'parado, o fôlego volta');
+  assert.ok(e.log.some((m) => m.texto.startsWith('O ar volta')), 'o personagem diz que o ar voltou');
+  assert.ok(e.log.some((m) => m.texto.startsWith('Estou ofegante')), 'e disse antes que estava ofegante');
 });
 
 test('a percepção diz a direção de cada perda ou cura, sem números', () => {

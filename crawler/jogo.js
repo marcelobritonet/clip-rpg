@@ -222,7 +222,7 @@ export const PISTAS = {
   sangue: 'Sangrando, você deixa rastro. As bestas seguem o rastro.',
   vigia: 'Nem todo mundo aqui quer te pegar. Quem só vigia não vem atrás; bater nele põe todos contra você.',
   clareza: 'Desfazer uma mentira clareia a cabeça. Olhar de novo vale mais que bater.',
-  folego: 'Correr sem parar cansa a vista. Um passo parado de vez em quando segura o fôlego.',
+  folego: 'Quem corre sem parar perde o ar e a vista. Um instante parado devolve o fôlego.',
   tarefa: 'A escada não basta: cada andar pede uma coisa antes da outra. O painel diz qual é a próxima e em que sala.',
   descanso: 'Esperar quieto, sem nada à vista, devolve a atenção. Mas o tempo pesa na cabeça.',
   preparo: 'Quem prepara um golpe pesado avisa. Saia de perto, defenda ou empurre antes.',
@@ -709,7 +709,11 @@ export function agir(e, acao) {
   if (gastou && e.arrastou && !e.fim && !e.escolha) mundo(e);
   // Parou, ou fez outra coisa: o fôlego volta.
   const andou = e.andar === antes.andar && (e.jogador.x !== antes.x || e.jogador.y !== antes.y);
-  if (gastou && !andou) e.corrida = Math.max(0, e.corrida - PARAM.folego.recupera);
+  if (gastou && !andou) {
+    const antesCorrida = e.corrida;
+    e.corrida = Math.max(0, e.corrida - PARAM.folego.recupera);
+    if (antesCorrida > PARAM.folego.limite && e.corrida <= PARAM.folego.limite) msg(e, 'O ar volta aos poucos. Já consigo seguir.', 'bom');
+  }
   // Quanto cada medida mudou neste turno (a tela mostra a direção, não o número).
   e.variacao = { vida: e.vida - antes.vida, cons: e.cons - antes.cons, san: e.san - antes.san, pm: e.pm - antes.pm };
   return e;
@@ -862,13 +866,15 @@ function mover(e, dx, dy, forcarAtaque) {
   // Fôlego: correr sem parar cobra da vista e, no limite, das pernas.
   const F = PARAM.folego;
   e.corrida++;
-  if (e.corrida === F.limite + 1) { msg(e, 'Você está ofegante. O corredor parece mais comprido.', 'perigo'); ganharPista(e, 'folego'); }
+  // Os avisos são o que o personagem sente, não instrução de jogo.
+  if (e.corrida === F.limite + 1) { msg(e, 'Estou ofegante. O peito arde e o corredor parece mais comprido. Seria prudente parar um pouco, ou recorrer ao que trago comigo.', 'perigo'); ganharPista(e, 'folego'); }
+  if (e.corrida === F.forte + 1) msg(e, 'As pernas pesam e o ar não vem. Se eu continuar correndo assim, vou cair. Preciso parar.', 'dano');
   if (e.corrida > F.limite) {
     e.stats.ofegante++;
     if ((e.corrida - F.limite) % F.custo === 0) perderCons(e, 1, 'corrida');
     if (e.corrida > F.forte && chance(e.rDados, F.passoDuplo)) {
       e.arrastou = true;
-      if (!e.ultimoFolego || e.turno - e.ultimoFolego > 10) msg(e, 'Sem fôlego, você precisa parar a cada poucos passos.', 'dano');
+      if (!e.ultimoFolego || e.turno - e.ultimoFolego > 10) msg(e, 'Sem ar, paro a cada poucos passos, apoiado na parede.', 'dano');
       e.ultimoFolego = e.turno;
     }
   }
@@ -1766,7 +1772,9 @@ function usar(e, i) {
     msg(e, `Você usa ${artigo(it.nome)}. Os contornos voltam ao lugar.`, 'bom');
   } else if (it.tipo === 'folego') {
     ganharCons(e, PARAM.itens.folego);
-    msg(e, `Você usa ${artigo(it.nome)}. A vista clareia, as bordas param de fugir.`, 'bom');
+    const ofegava = e.corrida > PARAM.folego.limite;
+    e.corrida = 0;
+    msg(e, `Você usa ${artigo(it.nome)}. A vista clareia${ofegava ? ' e o ar volta ao peito' : ', as bordas param de fugir'}.`, 'bom');
   } else if (it.tipo === 'ancora') {
     ancorarMundo(e, PARAM.itens.ancora);
     msg(e, `Você segura ${artigo(it.nome)} com força. Você sabe quem é.`, 'bom');
