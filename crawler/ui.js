@@ -117,7 +117,7 @@ function montarComo() {
       <tr><td>Defender <kbd>Z</kbd></td><td>Corpo</td><td>Guarda alta por um turno. Contra golpe preparado, vale mais. Se o golpe errar, você devolve na hora.</td></tr>
       <tr><td>Empurrar <kbd>G</kbd></td><td>Corpo (Força)</td><td>Tira de perto e deixa tonto; contra a parede, mais tonto. Perto de um buraco de verdade, derruba de vez. Única coisa que segura a ronda, além de encarar.</td></tr>
       <tr><td>Fechar porta <kbd>C</kbd></td><td>Todos</td><td>Bichos não abrem porta; gente e a ronda abrem.</td></tr>
-      <tr><td>Esperar <kbd>Espaço</kbd></td><td>Todos</td><td>Sem monstro à vista, é descanso: a atenção volta devagar. O tempo continua pesando na cabeça.</td></tr>
+      <tr><td>Esperar <kbd>Espaço</kbd> · Descansar <kbd>R</kbd></td><td>Todos</td><td>Ficar parado num canto sem ninguém à vista clareia a cabeça devagar. Descansar repete a espera até algo acontecer.</td></tr>
       <tr><td>Pular</td><td>Todos</td><td>Andar duas vezes contra um buraco. O de verdade leva ao andar de baixo, com tombo; o falso só derruba você de joelhos.</td></tr>
     </table>
     <p>Atacar um aliado tem consequência: ele grita, foge e não ajuda mais, e a culpa pesa. Matar gente também pesa. Sem Sanidade, você perde o controle por alguns turnos e volta com uma cicatriz; três vezes e não volta mais.</p>
@@ -222,7 +222,7 @@ function avisar(texto) {
 
 /* Controles --------------------------------------------------------------- */
 
-const DIRECOES = [[-1, -1, '↖'], [0, -1, '↑'], [1, -1, '↗'], [-1, 0, '←'], [0, 0, '·'], [1, 0, '→'], [-1, 1, '↙'], [0, 1, '↓'], [1, 1, '↘']];
+const DIRECOES = [[-1, -1, '↖'], [0, -1, '↑'], [1, -1, '↗'], [-1, 0, '←'], [0, 0, '⏸'], [1, 0, '→'], [-1, 1, '↙'], [0, 1, '↓'], [1, 1, '↘']];
 
 function montarControles() {
   $('cruz').replaceChildren(...DIRECOES.map(([dx, dy, s]) => {
@@ -281,7 +281,7 @@ document.addEventListener('keydown', (ev) => {
   }
   const mapa = {
     x: () => acaoNoAlvo('olhar'), t: () => acaoNoAlvo('falar'), e: () => acaoNoAlvo('encarar'), f: () => acaoNoAlvo('magia'),
-    o: () => (viagem ? pararViagem() : viajar('explorar')), q: () => fazer({ tipo: 'ancorar' }),
+    o: () => (viagem ? pararViagem() : viajar('explorar')), r: () => (viagem ? pararViagem() : descansar()), q: () => fazer({ tipo: 'ancorar' }),
     z: () => fazer({ tipo: 'defender' }), g: () => acaoNoAlvo('empurrar'), c: () => fazer({ tipo: 'fechar' }), ' ': () => fazer({ tipo: 'esperar' }), '.': () => fazer({ tipo: 'esperar' }), Tab: () => trocarAlvo(),
   };
   if (mapa[k]) { ev.preventDefault(); mapa[k](); return; }
@@ -347,7 +347,29 @@ function pararViagem() {
   if (viagem?.timer) clearTimeout(viagem.timer);
   viagem = null;
 }
-document.addEventListener('keydown', (ev) => { if (ev.key.toLowerCase() !== 'o') pararViagem(); }, true);
+/**
+ * Descansar: espera turno a turno até a cabeça clarear, até algo aparecer ou
+ * acontecer, ou até a espera não render (há perigo à vista).
+ */
+function descansar() {
+  pararViagem();
+  viagem = { log: e.log.length, passos: 0, descanso: true };
+  const parar = () => { pararViagem(); if (e) atualizar(); };
+  const passo = () => {
+    if (!viagem || !e || e.fim || e.escolha) return parar();
+    const antes = e.log.length;
+    fazer({ tipo: 'esperar' });
+    if (!viagem) return;
+    viagem.passos++;
+    const novo = e.log.slice(antes).some((m) => ['dano', 'perigo', 'surto', 'golpe', 'fala', 'mentira', 'pista', 'peca'].includes(m.tipo));
+    const limpo = J.atencao(e) === 0 && J.percebido(e).desmaio === false;
+    if (novo || limpo || !e.descansou || viagem.passos > 60) return parar();
+    viagem.timer = setTimeout(passo, movimentoReduzido.matches ? 30 : 90);
+  };
+  passo();
+}
+
+document.addEventListener('keydown', (ev) => { const k = ev.key.toLowerCase(); if (k !== 'o' && k !== 'r') pararViagem(); }, true);
 
 $('comecar').onclick = () => comecar();
 $('sortear').onclick = () => { $('semente').value = sementeNova(Date.now() + Math.random()); };
@@ -521,6 +543,7 @@ function desenharAcoes(p) {
   ];
   if (p.temMagia) lista.splice(3, 0, botao(TEMAS[e.tema].dom.botao, 'F', () => acaoNoAlvo('magia'), !ent || ent.d > 6));
   lista.push(botao('Trocar alvo', 'Tab', trocarAlvo, false));
+  lista.splice(0, 0, botao(viagem?.descanso ? 'Parar' : 'Descansar', 'R', () => (viagem ? (pararViagem(), atualizar()) : descansar()), false));
   lista.push(botao('Explorar', 'O', () => (viagem ? pararViagem() : viajar('explorar')), false));
   $('acoes').replaceChildren(...lista);
 }

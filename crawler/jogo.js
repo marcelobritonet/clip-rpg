@@ -697,6 +697,7 @@ export function agir(e, acao) {
   }
   let a = acao;
   if (e.desmaio > 0) a = { tipo: 'esperar' };
+  else if (a.tipo !== 'esperar') e.avisoSemDescanso = false;
   else if (e.surto > 0) a = acaoDoSurto(e);
   e.arrastou = false;
   e.descansou = false;
@@ -723,7 +724,7 @@ function executar(e, a) {
   switch (a.tipo) {
     case 'mover': return mover(e, a.dx, a.dy, false);
     case 'atacar': return mover(e, a.dx, a.dy, true);
-    case 'esperar': e.descansou = e.desmaio === 0 && semPerigo(e); return true;
+    case 'esperar': return esperar(e);
     case 'olhar': return olhar(e, a.alvo);
     case 'falar': return falarCom(e, a.alvo);
     case 'encarar': return encarar(e, a.alvo);
@@ -750,9 +751,24 @@ function alvoPorId(e, id) {
     e.objetos.find((o) => (o.id === id || (o.aparencia && o.idFalso === id)) && !o.usado && e.vis.has(idx(e, o.x, o.y))) ?? null;
 }
 
+/** Ficar parado. Sem perigo à vista, é descanso; com perigo, o personagem diz que não consegue. */
+function esperar(e) {
+  e.descansou = e.desmaio === 0 && semPerigo(e);
+  if (!e.descansou && e.desmaio === 0 && e.cons < derivados(e).consMax && !e.avisoSemDescanso) {
+    const quem = e.entidades.find((m) => perigoVisivel(e, m));
+    if (quem) {
+      e.avisoSemDescanso = true;
+      msg(e, `Não consigo fechar os olhos com ${artigoDe(nomeAparente(e, quem))} ali. Preciso de um canto sem ninguém à vista.`, 'perigo');
+    }
+  }
+  return true;
+}
+
+const perigoVisivel = (e, m) => m.tipo === 'monstro' && m.vida > 0 && e.vis.has(idx(e, m.x, m.y)) && m.estado !== 'pacificado' && m.estado !== 'fugindo' && m.estado !== 'vigiando';
+
 /** Nenhum monstro de verdade à vista, caçando você: dá para fechar os olhos. */
 function semPerigo(e) {
-  return !e.entidades.some((m) => m.tipo === 'monstro' && m.vida > 0 && e.vis.has(idx(e, m.x, m.y)) && m.estado !== 'pacificado' && m.estado !== 'fugindo' && m.estado !== 'vigiando');
+  return !e.entidades.some((m) => perigoVisivel(e, m));
 }
 
 const ehCorredor = (e, x, y) =>
@@ -1829,11 +1845,13 @@ function mundo(e) {
   if (e.descansou && semPerigo(e)) {
     e.descanso++;
     if (e.descanso % C.descanso === 0 && e.cons < d.consMax) {
+      if (e.descanso === C.descanso) msg(e, 'Fico quieto um pouco, encostado na parede. A cabeça desanuvia devagar.', 'bom');
       ganharCons(e, 1);
       if (e.cons >= d.consMax) msg(e, 'Você abre os olhos. A vista está limpa de novo.', 'bom');
     }
     if (e.descanso === C.descanso * 2) ganharPista(e, 'descanso');
   } else e.descanso = 0;
+  if (semPerigo(e)) e.avisoSemDescanso = false;
   // Desmaio
   if (e.desmaio > 0) {
     e.desmaio--;
@@ -2363,6 +2381,7 @@ function alucinar(e) {
   if (chance(r, AC.fantasma[lc])) criarFantasma(e);
   if (chance(r, AC.miragem[lc])) criarMiragem(e);
   if (e.turno % PARAM.epocaParedes === 0) refazerParedes(e, AC.paredes[lc], AC.portas[lc], AC.buracos[lc]);
+  desconfiarDeParedes(e, notar);
   // A cabeça mente (Sanidade).
   if (chance(r, A.sussurro[lv])) msg(e, escolher(r, th.sussurros), 'sussurro', { mentira: true });
   if (chance(r, A.golpeFalso[lv])) {
@@ -2424,6 +2443,20 @@ function criarMiragem(e) {
   }
   e.objetos.push(o);
   e.stats.miragensCriadas++;
+}
+
+/** Uma parede que fecha um corredor bem à frente pode dar a sensação de que não estava ali. */
+function desconfiarDeParedes(e, notar) {
+  e.paredesSuspeitas ??= new Set();
+  for (const [k, t] of e.ilusaoParedes) {
+    if (t !== T.PAREDE || e.paredesSuspeitas.has(k) || !e.vis.has(k)) continue;
+    const x = k % e.mapa.w, y = Math.floor(k / e.mapa.w);
+    if (distancia({ x, y }, e.jogador) > 2) continue;
+    if (!chance(e.rAlu, 0.4 + notar)) continue;
+    e.paredesSuspeitas.add(k);
+    msg(e, 'Essa parede bem aí na frente… não lembro dela. Ou lembro? Talvez valha encostar a mão.', 'pista');
+    return;
+  }
 }
 
 function refazerParedes(e, quantas, portas = 0, buracos = 0) {

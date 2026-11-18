@@ -807,3 +807,24 @@ test('porta trancada aparece trancada e não deixa passar', () => {
   assert.deepEqual(e.jogador, { x: viz.x, y: viz.y });
   assert.ok(e.log.some((m) => m.texto.includes('trancada') && m.texto.includes('Falta')));
 });
+
+test('descansar: sem ninguém à vista a cabeça clareia, e o personagem diz que está descansando', () => {
+  const e = J.novaPartida({ semente: 'descanso-1', tema: 'sanatorio', origem: 'mente' });
+  e.entidades = e.entidades.filter((m) => m.tipo !== 'monstro');
+  e.cons = 3;
+  for (let i = 0; i < 8; i++) J.agir(e, { tipo: 'esperar' });
+  assert.ok(e.cons > 3);
+  assert.ok(e.log.some((m) => m.texto.includes('A cabeça desanuvia')));
+});
+
+test('descansar: com perigo à vista não rende, e o personagem diz por quê uma vez só', () => {
+  const e = J.novaPartida({ semente: 'descanso-2', tema: 'sanatorio', origem: 'mente' });
+  const m = e.entidades.find((x) => x.tipo === 'monstro');
+  const livre = [[2, 0], [0, 2], [-2, 0], [0, -2], [2, 2]].map(([dx, dy]) => ({ x: e.jogador.x + dx, y: e.jogador.y + dy })).find((c) => tile(e.mapa, c.x, c.y) === T.CHAO);
+  Object.assign(m, livre, { estado: 'parado' });
+  e.cons = 3;
+  J.agir(e, { tipo: 'esperar' });
+  J.agir(e, { tipo: 'esperar' });
+  const avisos = e.log.filter((x) => x.texto.includes('Não consigo fechar os olhos'));
+  assert.equal(avisos.length, 1);
+});
