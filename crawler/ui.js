@@ -238,6 +238,7 @@ function botao(rotulo, dica, onclick, desligado = false) {
   const b = document.createElement('button');
   b.type = 'button';
   b.innerHTML = `${rotulo}<small>${dica}</small>`;
+  b.title = `${rotulo} (tecla ${dica})`;
   b.disabled = desligado;
   b.onclick = onclick;
   return b;
@@ -650,7 +651,13 @@ function redimensionar() {
   const palco = $('palco');
   const largura = palco.clientWidth || 360;
   const celular = largura < 600;
-  const alturaMax = Math.max(220, Math.min(window.innerHeight * (celular ? 0.44 : 0.74), 760));
+  // Desktop: o mapa ocupa a altura que sobra embaixo do cabeçalho (sem rolar a página).
+  // Celular: pouco menos da metade da tela, para os controles caberem embaixo.
+  const estreito = window.innerWidth <= 860;
+  const topo = document.querySelector('.topo')?.getBoundingClientRect().height ?? 60;
+  const alturaMax = estreito
+    ? Math.max(200, window.innerHeight * 0.42)
+    : Math.max(260, window.innerHeight - topo - 36);
   let escala = celular ? 2 : 3;
   let cols = Math.floor(largura / (TAM * escala));
   if (cols > 23) { escala = 4; cols = Math.floor(largura / (TAM * escala)); }
