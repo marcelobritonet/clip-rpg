@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import * as R from '../duplo-seis/regras.js';
 import * as J from '../duplo-seis/jogo.js';
-import { PASSADOS, PONTOS_INICIAIS } from '../duplo-seis/passados.js';
+import { PASSADOS, PONTOS_INICIAIS } from '../duplo-seis/aventuras/brasa/passados.js';
 import { brasa } from '../duplo-seis/aventuras/brasa/index.js';
 import { validarCenas } from '../duplo-seis/aventuras/validar.js';
 import { jogar, chance } from '../duplo-seis/robo.js';
@@ -309,4 +309,56 @@ test('comprar nível recalcula o valor inicial de Vida e Sanidade', () => {
 test('chance do robô confere com a conta: 2D6 contra 7 é 21 em 36', () => {
   assert.ok(Math.abs(chance(2, 7) - 21 / 36) < 1e-9);
   assert.ok(Math.abs(chance(0, 3) - 2 / 6) < 1e-9);
+});
+
+/* ---------- 0.1.1 ---------- */
+
+test('guardar e retomar devolvem a mesma sessão, e ela segue igual', () => {
+  const { AVENTURAS } = { AVENTURAS: [brasa] };
+  const a = J.nova({ semente: 'salva', passado: 'cacador', aventura: brasa });
+  J.escolher(a, 'mente');
+  const b = J.retomar(JSON.parse(JSON.stringify(J.guardar(a))), AVENTURAS);
+  assert.equal(b.fase, a.fase);
+  assert.equal(b.cena.id, a.cena.id);
+  J.continuar(a); J.continuar(b);
+  assert.equal(b.cena.id, a.cena.id);
+  const ida = J.opcoes(a)[0].id;
+  J.escolher(a, ida); J.escolher(b, ida);
+  assert.deepEqual(b.rolagem?.dados, a.rolagem?.dados);
+  assert.equal(J.retomar({ aventura: 'nao-existe' }, AVENTURAS), null);
+});
+
+test('ficha livre: o jogador traz o próprio passado', () => {
+  const livre = { id: 'livre', titulo: 'A Ferreira', nome: 'Lia', quem: 'x', atributos: { forca: 3, fisico: 2, vontade: 2, presenca: 1 }, aprimoramentos: { ataqueCorporal: 2, saude: 2 }, pericias: {}, antecedentes: {}, itens: ['corda'] };
+  const e = J.nova({ semente: 'livre', passado: livre, aventura: brasa });
+  assert.equal(e.passado, 'livre');
+  assert.equal(e.max.vida, 8 + 0 + 8);
+  assert.deepEqual(R.validar(e.ficha, PONTOS_INICIAIS), []);
+  assert.ok(J.cronica(e).includes('Lia, a Ferreira'));
+});
+
+test('o palpite do Mestre acompanha a chance', () => {
+  assert.equal(J.palpite(1, 10), 'impossível assim');
+  assert.equal(J.palpite(3, 4), 'quase certo');
+  assert.equal(J.palpite(2, 7), 'pode ir para qualquer lado');
+});
+
+test('companheiro que une forças numa falha fica de fora da cena seguinte', () => {
+  for (let i = 0; i < 300; i++) {
+    const e = J.nova({ semente: `cansa-${i}`, passado: 'boticaria', aventura: brasa });
+    e.companheiros.push('nicaSaltimbanca');
+    e.cena = brasa.cenas.find((c) => c.id === 'ato1-agulha');
+    const o = J.opcoes(e).find((x) => x.chave === 'destreza');
+    assert.ok(o.aliados.some((a) => a.id === 'nicaSaltimbanca'));
+    J.escolher(e, o.id, { unir: ['nicaSaltimbanca'] });
+    if (e.fase === 'insistir') J.insistir(e, false);
+    if (e.desfecho.ok) continue;
+    assert.ok(e.desfecho.mudou.some((m) => m.tipo === 'cansado'));
+    J.continuar(e);
+    if (e.fase !== 'cena') return;
+    assert.deepEqual(e.cansados, ['nicaSaltimbanca']);
+    for (const op of J.opcoes(e)) assert.ok(!(op.aliados ?? []).some((a) => a.id === 'nicaSaltimbanca'));
+    return;
+  }
+  assert.fail('nenhuma semente falhou');
 });

@@ -6,6 +6,14 @@
   <meta name="theme-color" content="#14100c">
   <title>Duplo Seis · uma mesa de RPG para um</title>
   <meta name="description" content="Uma sessão de RPG de mesa para um jogador, em dez minutos, sobre o Sistema Clip. O Mestre narra, você decide, os dados rolam.">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" href="icones/icone-192.png">
+  <link rel="apple-touch-icon" href="icones/icone-180.png">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta property="og:title" content="Duplo Seis">
+  <meta property="og:description" content="Uma mesa de RPG para um. O Mestre narra, você decide, os dados rolam.">
+  <meta property="og:image" content="https://marcelobritonet.github.io/clip-rpg/duplo-seis/icones/icone-512.png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Alegreya:ital,wght@0,400;0,500;0,700;0,800;1,400&family=Alegreya+Sans:wght@400;500;700&display=swap" rel="stylesheet">
@@ -20,10 +28,11 @@
       <h1>Duplo Seis</h1>
       <p class="lema">Uma mesa de RPG para um. O Mestre narra, você decide, os dados rolam.</p>
     </header>
-    <section class="aventura">
-      <p class="rotulo">A aventura de hoje</p>
-      <h2 id="aventura-nome"></h2>
-      <p id="aventura-resumo"></p>
+    <section id="retomar" class="caixa destaque" hidden></section>
+    <section id="dia" class="caixa"></section>
+    <section>
+      <p class="rotulo">A aventura</p>
+      <div id="aventuras" class="aventuras" role="radiogroup" aria-label="Aventura"></div>
     </section>
     <section>
       <p class="rotulo">Antes dos dados, o passado. Quem é você?</p>

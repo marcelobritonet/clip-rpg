@@ -711,24 +711,24 @@ export const cenas = [
     ato: 3,
     titulo: 'Os lobos brancos',
     texto:
-      'Num platô de neve dura, três lobos brancos rodeiam uma pedra alta. Em cima dela, Nuno, um pastorzinho de uns dez anos, abraça um cordeiro e não chora por pura teimosia. Os lobos estão magros, de costela à mostra. Não rosnam. Volta e meia um deles para e olha para trás, para o escuro de onde vieram, de orelhas baixas.',
+      'Num platô de neve dura, três lobos brancos rodeiam uma pedra alta. Em cima dela, Dito, um pastorzinho de uns dez anos, abraça um cordeiro e não chora por pura teimosia. Os lobos estão magros, de costela à mostra. Não rosnam. Volta e meia um deles para e olha para trás, para o escuro de onde vieram, de orelhas baixas.',
     abordagens: [
       {
         id: 'corpo',
         rotulo: 'Espantar os lobos na marra',
         combate: 'loboBrancoDoCimo',
         vitoria: {
-          texto: 'O maior avança e leva o que merece. Os outros dois medem você, medem a fome, e escolhem a encosta. Nuno desce da pedra com o cordeiro no colo e as pernas bambas.',
+          texto: 'O maior avança e leva o que merece. Os outros dois medem você, medem a fome, e escolhem a encosta. Dito desce da pedra com o cordeiro no colo e as pernas bambas.',
           cronica: '{nome} enfrentou o lobo branco do Cimo para tirar um menino de cima de uma pedra.',
           efeitos: { lacos: 1 },
         },
         derrota: {
-          texto: 'O lobo é mais rápido do que a fome faria supor. Você cai, e é o grito de Nuno, lá de cima, jogando pedras, que faz a alcateia recuar. Os dois descem a montanha amparando um ao outro.',
+          texto: 'O lobo é mais rápido do que a fome faria supor. Você cai, e é o grito de Dito, lá de cima, jogando pedras, que faz a alcateia recuar. Os dois descem a montanha amparando um ao outro.',
           cronica: '{nome} apanhou do lobo branco e foi salvo pelas pedradas de um menino.',
           efeitos: { brasa: -1, lacos: 1 },
         },
         fuga: {
-          texto: 'Você recua de costas, lanterna à frente. Os lobos deixam. Nuno fica na pedra, olhando você ir, e você só respira direito quando ouve, bem depois, os pastores subindo com tochas.',
+          texto: 'Você recua de costas, lanterna à frente. Os lobos deixam. Dito fica na pedra, olhando você ir, e você só respira direito quando ouve, bem depois, os pastores subindo com tochas.',
           cronica: '{nome} deixou um menino cercado de lobos e torceu para os pastores chegarem.',
           efeitos: { sanidade: -3 },
         },
@@ -739,12 +739,12 @@ export const cenas = [
         teste: { chave: 'sabedoria', dificuldade: 7 },
         ajuda: ['isca'],
         sucesso: {
-          texto: 'Eles não cercam o menino: fogem de alguma coisa, e a pedra é o ponto mais alto. Você põe a lanterna no chão e se afasta um passo. Os três se deitam em volta do calor, e Nuno desce pelo outro lado.',
+          texto: 'Eles não cercam o menino: fogem de alguma coisa, e a pedra é o ponto mais alto. Você põe a lanterna no chão e se afasta um passo. Os três se deitam em volta do calor, e Dito desce pelo outro lado.',
           cronica: '{nome} percebeu que os lobos do Cimo tinham mais medo da Noite do que fome.',
           efeitos: { lacos: 1, item: 'unguento' },
         },
         falha: {
-          texto: 'Você conclui que estão fracos demais para atacar. O mais magro discorda e fecha os dentes na sua canela. Nuno aproveita a confusão e pula para o seu lado, com cordeiro e tudo.',
+          texto: 'Você conclui que estão fracos demais para atacar. O mais magro discorda e fecha os dentes na sua canela. Dito aproveita a confusão e pula para o seu lado, com cordeiro e tudo.',
           cronica: '{nome} julgou mal a fome dos lobos brancos e levou uma mordida.',
           efeitos: { vida: -3, lacos: 1 },
         },
@@ -755,7 +755,7 @@ export const cenas = [
         teste: { chave: 'fe', dificuldade: 8 },
         ajuda: ['amuleto', 'luz'],
         sucesso: {
-          texto: 'Você anda para o meio deles com a brasa no alto, sem pressa e sem arma. A luz bate nos olhos amarelos. Os lobos abrem passagem, como gente em procissão. Nuno desce e segura a sua mão.',
+          texto: 'Você anda para o meio deles com a brasa no alto, sem pressa e sem arma. A luz bate nos olhos amarelos. Os lobos abrem passagem, como gente em procissão. Dito desce e segura a sua mão.',
           cronica: '{nome} atravessou a alcateia com a lanterna erguida, e os lobos deram passagem.',
           efeitos: { lacos: 1 },
         },
@@ -776,7 +776,7 @@ export const cenas = [
           efeitos: { lacos: 1, item: 'unguento' },
         },
         falha: {
-          texto: 'O lobo da frente não está para conversa e mostra todos os dentes. Você recua devagar. Nuno, que não é bobo, aproveita e desce pelo lado de lá.',
+          texto: 'O lobo da frente não está para conversa e mostra todos os dentes. Você recua devagar. Dito, que não é bobo, aproveita e desce pelo lado de lá.',
           cronica: '{nome} tentou acalmar os lobos brancos, e eles não quiseram assunto.',
           efeitos: { sanidade: -1, lacos: 1 },
         },
@@ -787,7 +787,7 @@ export const cenas = [
         requer: { nivel: { magiaAtaqueFisico: 1 } },
         teste: { chave: 'magiaAtaqueFisico', dificuldade: 4 },
         sucesso: {
-          texto: 'Você mira a neve, a dois passos do focinho deles. O estrondo sobe pela montanha e volta em eco. Os lobos somem na encosta sem um arranhão, e Nuno pede para você fazer de novo.',
+          texto: 'Você mira a neve, a dois passos do focinho deles. O estrondo sobe pela montanha e volta em eco. Os lobos somem na encosta sem um arranhão, e Dito pede para você fazer de novo.',
           cronica: '{nome} espantou os lobos brancos com um estrondo, sem ferir nenhum.',
           efeitos: { lacos: 1 },
         },

@@ -1,0 +1,16 @@
+{
+  "name": "Duplo Seis",
+  "short_name": "Duplo Seis",
+  "description": "Uma mesa de RPG para um. O Mestre narra, você decide, os dados rolam.",
+  "lang": "pt-BR",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#14100c",
+  "theme_color": "#14100c",
+  "icons": [
+    { "src": "icones/icone-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any maskable" },
+    { "src": "icones/icone-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
+  ]
+}

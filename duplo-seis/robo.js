@@ -9,19 +9,7 @@ import * as J from './jogo.js';
 import * as R from './regras.js';
 import { fluxo, prox } from './rng.js';
 
-/** Chance de nD6 (ou 1D6−2) alcançar a dificuldade. */
-export function chance(dados, dificuldade) {
-  if (dados <= 0) return Math.max(0, Math.min(6, 6 - (dificuldade + 2) + 1)) / 6;
-  let dist = new Map([[0, 1]]);
-  for (let i = 0; i < dados; i++) {
-    const nova = new Map();
-    for (const [s, p] of dist) for (let f = 1; f <= 6; f++) nova.set(s + f, (nova.get(s + f) ?? 0) + p / 6);
-    dist = nova;
-  }
-  let ok = 0;
-  for (const [s, p] of dist) if (s >= dificuldade) ok += p;
-  return ok;
-}
+export const chance = J.chanceDeSucesso;
 
 function avaliar(e, o, perfil, r) {
   if (!o.disponivel) return { nota: -1 };

@@ -10,7 +10,6 @@
  */
 import * as R from './regras.js';
 import { fluxo, comoFuncao, embaralhar, inteiro, sortear } from './rng.js';
-import { PASSADOS, passado as acharPassado } from './passados.js';
 
 /** Decisões do Mestre: nada aqui é regra do Clip. */
 export const MESA = {
@@ -20,11 +19,12 @@ export const MESA = {
   noite: { brasa: -2 }, // cada acampamento é uma noite a menos de brasa
   aperto: [0, 0, 1, 1, 1], // o Mestre aperta a Dificuldade conforme o ato (a noite cai)
   pontosPorAto: 1, // Pontos de Evolução por ato vencido, mais 1 por marco de história
-  repouso: { feridas: 'vida', cabeca: 'sanidade', brasa: 1 },
+  repouso: { feridas: 'vida', cabeca: 'sanidade', brasa: 2 },
   quedas: 2, // na segunda vez sem Vida, o Mestre decide "morto"
   desmaio: { brasa: -2, brasaAcompanhado: -1 },
   surtos: 3, // na terceira vez sem Sanidade, o personagem não volta
   combate: { rodadas: 10, ajudaDeCompanheiro: 1 },
+  cansaco: 1, // companheiro que une forças numa falha fica de fora da cena seguinte
   critico: {
     sucessoBonus: { sanidade: 2 }, // duplo seis num teste que já passou, sem desfecho próprio
     falhaExtra: { sanidade: -1 }, // duplo um num teste que já falhou, sem desfecho próprio
@@ -43,18 +43,22 @@ const T = {
   convulsao: 'O chão sobe. O corpo treme sozinho, os dentes batem, a língua sangra. Passa. Demora, mas passa.',
   torpor: 'Você se senta. Só um pouco. A lanterna queima ao seu lado enquanto você olha para nada, por muito tempo.',
   noite: 'Você acha um canto abrigado e acende um fogo pequeno ao lado da lanterna. A brasa come a noite devagar.',
+  cronicaDesmaio: '{nome} caiu sem sentidos e acordou com a brasa menor.',
+  cronicaSurto: '{nome} ficou fora de si por um tempo, e não gosta de lembrar.',
 };
 
 /* ---------- Início ---------- */
 
 export function nova({ semente, passado = 'desertora', nome, aventura }) {
-  const p = acharPassado(passado) ?? PASSADOS[0];
+  // `passado` é o id de um passado da aventura, ou uma ficha livre feita pelo jogador.
+  const p = typeof passado === 'object' ? passado : aventura.passados.find((x) => x.id === passado) ?? aventura.passados[0];
   const ficha = R.novaFicha({ nome: nome || p.nome, atributos: p.atributos, aprimoramentos: p.aprimoramentos, pericias: p.pericias, antecedentes: p.antecedentes });
   const v = R.valores(ficha);
   const e = {
     semente: String(semente),
     aventura,
     passado: p.id,
+    tituloDoPassado: p.titulo,
     nome: ficha.nome,
     ficha,
     max: { vida: v.vida, magia: v.magia, sanidade: v.sanidade },
@@ -73,6 +77,7 @@ export function nova({ semente, passado = 'desertora', nome, aventura }) {
     ato: 0,
     cenaNoAto: 0,
     vistas: [],
+    cansados: [],
     cronica: [],
     trilha: [],
     fase: 'cena',
@@ -89,6 +94,8 @@ export function nova({ semente, passado = 'desertora', nome, aventura }) {
 }
 
 const rng = (e) => comoFuncao(e.r);
+/** Texto de sistema: o da aventura, se ela tiver; senão o padrão. */
+const txt = (e, k) => e.aventura.textos?.[k] ?? T[k];
 const lista = (x) => (x == null ? [] : Array.isArray(x) ? x : [x]);
 const comNome = (e, texto) => String(texto).replaceAll('{nome}', e.nome);
 
@@ -188,6 +195,8 @@ export function equipado(e) {
 /* ---------- Cenas ---------- */
 
 function entrarNaCena(e, cena) {
+  e.cansados = e.cansando ?? [];
+  e.cansando = [];
   e.cena = cena;
   e.fase = 'cena';
   e.rolagem = null;
@@ -229,7 +238,7 @@ export function opcoes(e) {
           .map((i) => ({ id: i.id, nome: i.nome, mod: i.mod }));
         o.aliados = [
           ...(a.ajudantes ?? []).map((h, i) => ({ id: `cena:${i}`, nome: h.nome, nivel: h.nivel })),
-          ...e.companheiros.map((id) => ({ id, nome: av.companheiros[id].nome, nivel: av.companheiros[id].niveis[chave] ?? 0 })).filter((c) => c.nivel > 0),
+          ...e.companheiros.filter((id) => !e.cansados?.includes(id)).map((id) => ({ id, nome: av.companheiros[id].nome, nivel: av.companheiros[id].niveis[chave] ?? 0 })).filter((c) => c.nivel > 0),
         ];
       }
     } else if (a.combate) {
@@ -324,7 +333,12 @@ function resolverTeste(e, insistiu) {
     desf = ok ? a.sucesso : a.falha;
   }
   const antes = insistiu ? [{ tipo: 'vida', valor: -r.custoInsistir }] : [];
-  return fechar(e, desf, { tipo: 'teste', ok, critico: crit, antes, extra });
+  // Quem uniu forças numa falha precisa de fôlego: fica de fora da próxima cena.
+  const juntos = (r.unidos ?? []).map((u) => u.id).filter((id) => e.companheiros.includes(id));
+  e.cansando = !ok && MESA.cansaco ? juntos : [];
+  fechar(e, desf, { tipo: 'teste', ok, critico: crit, antes, extra });
+  for (const id of e.cansando) e.desfecho.mudou.push({ tipo: 'cansado', nome: e.aventura.companheiros[id].nome });
+  return e;
 }
 
 /** Fecha a cena com um desfecho: aplica efeitos, escreve a crônica. */
@@ -355,8 +369,8 @@ function conferirLimites(e) {
     e.vida = Math.min(e.max.vida, rolarTexto(e, '1d6'));
     const antes = e.brasa;
     e.brasa = Math.max(0, e.brasa + perde);
-    d.avisos.push({ tipo: 'desmaio', texto: quem ? T.desmaioAcompanhado.replace('{quem}', quem) : T.desmaio, mudou: [{ tipo: 'brasa', valor: e.brasa - antes }] });
-    e.cronica.push(`${e.nome} caiu sem sentidos e acordou com a brasa menor.`);
+    d.avisos.push({ tipo: 'desmaio', texto: quem ? txt(e, 'desmaioAcompanhado').replace('{quem}', quem) : txt(e, 'desmaio'), mudou: [{ tipo: 'brasa', valor: e.brasa - antes }] });
+    e.cronica.push(comNome(e, txt(e, 'cronicaDesmaio')));
   }
   if (e.sanidade <= 0) {
     e.surtos += 1;
@@ -523,14 +537,13 @@ export function continuar(e) {
  * loucura impulsiva, convulsões ou torpor. Quem escolhe é o Mestre.
  */
 function surtar(e, reacao) {
-  let texto = T[reacao];
+  let texto = txt(e, reacao);
   let mudou = [];
   if (reacao === 'furia') {
     if (e.companheiros.length) mudou = aplicar(e, { semCompanheiro: e.companheiros[e.companheiros.length - 1], vida: -1 });
-    else { texto = T.furiaSozinho; mudou = aplicar(e, { vida: -1 }); }
+    else { texto = txt(e, 'furiaSozinho'); mudou = aplicar(e, { vida: -1 }); }
   } else if (reacao === 'impulso') {
-    const soltos = e.itens.filter((id) => id !== 'peDeCabra' || e.itens.length === 1);
-    const perde = soltos.length ? sortear(e.r, soltos) : null;
+    const perde = e.itens.length ? sortear(e.r, e.itens) : null;
     mudou = aplicar(e, { ...(perde ? { semItem: perde } : {}), brasa: -1 });
   } else if (reacao === 'convulsao') {
     mudou = aplicar(e, { vida: -2 });
@@ -539,7 +552,7 @@ function surtar(e, reacao) {
   }
   if (e.vida <= 0) e.vida = 1;
   e.sanidade = Math.min(e.max.sanidade, rolarTexto(e, '1d6'));
-  e.cronica.push(`${e.nome} ficou fora de si por um tempo, e não gosta de lembrar.`);
+  e.cronica.push(comNome(e, txt(e, 'cronicaSurto')));
   e.surto = { reacao, texto, mudou, restam: MESA.surtos - e.surtos };
   e.fase = 'surto';
   return e;
@@ -578,7 +591,7 @@ function acampar(e) {
   const pm = e.max.magia - e.magia;
   e.magia = e.max.magia;
   if (pm > 0) mudou.push({ tipo: 'magia', valor: pm });
-  e.acampamento = { ato: e.ato, ganhos, marcos: e.marcosDoAto, texto: T.noite, mudou, repousou: null };
+  e.acampamento = { ato: e.ato, ganhos, marcos: e.marcosDoAto, texto: txt(e, 'noite'), mudou, repousou: null };
   e.marcosDoAto = 0;
   e.fase = 'acampamento';
   return e;
@@ -669,14 +682,15 @@ function terminar(e, final) {
 }
 
 /** Vida, Sanidade e brasa em palavras: o Mestre não narra em números. */
-export function emPalavras(tipo, atual, max) {
+export function emPalavras(tipo, atual, max, aventura = null) {
   const f = max > 0 ? atual / max : 0;
-  const escala = {
+  let escala = {
     vida: ['caído', 'por um fio', 'muito ferido', 'ferido', 'arranhado', 'inteiro'],
     sanidade: ['fora de si', 'em pedaços', 'abalado', 'inquieto', 'firme', 'sereno'],
     magia: ['esgotado', 'quase seco', 'gasto', 'pela metade', 'disposto', 'pleno'],
     brasa: ['cinza', 'um ponto vermelho', 'fraca', 'viva', 'forte', 'gorda e clara'],
   }[tipo];
+  if (tipo === 'brasa' && aventura?.relogio?.palavras) escala = aventura.relogio.palavras;
   if (atual <= 0) return escala[0];
   if (f >= 1) return escala[5];
   return escala[1 + Math.min(3, Math.floor(f * 4))];
@@ -684,11 +698,10 @@ export function emPalavras(tipo, atual, max) {
 
 /** A crônica da sessão, pronta para copiar. */
 export function cronica(e) {
-  const p = acharPassado(e.passado);
   const marcas = e.trilha.map((t) => (t.caminho === 'corpo' ? '🟥' : t.caminho === 'mente' ? '🟦' : t.caminho === 'espirito' ? '🟪' : '⬜') ).join('');
   const linhas = [
     `Duplo Seis · ${e.aventura.nome}`,
-    `${e.nome}, ${p.titulo.replace(/^(O|A) /, (m) => m.toLowerCase())}`,
+    `${e.nome}, ${e.tituloDoPassado.replace(/^(O|A) /, (m) => m.toLowerCase())}`,
     '',
     ...e.cronica,
     '',
@@ -697,4 +710,49 @@ export function cronica(e) {
     `semente ${e.semente}`,
   ];
   return linhas.join('\n');
+}
+
+/* ---------- O palpite do Mestre ---------- */
+
+/** Chance de nD6 (ou 1D6−2, com 0 dados) alcançar a Dificuldade. */
+export function chanceDeSucesso(dados, dificuldade) {
+  if (dados <= 0) return Math.max(0, Math.min(6, 6 - (dificuldade + 2) + 1)) / 6;
+  let dist = new Map([[0, 1]]);
+  for (let i = 0; i < dados; i++) {
+    const nova = new Map();
+    for (const [s, p] of dist) for (let f = 1; f <= 6; f++) nova.set(s + f, (nova.get(s + f) ?? 0) + p / 6);
+    dist = nova;
+  }
+  let ok = 0;
+  for (const [s, p] of dist) if (s >= dificuldade) ok += p;
+  return ok;
+}
+
+/** O Mestre não dá porcentagem: dá um aviso. */
+export function palpite(dados, dificuldade) {
+  const c = chanceDeSucesso(dados, dificuldade);
+  if (c <= 0) return 'impossível assim';
+  if (c < 0.2) return 'só com muita sorte';
+  if (c < 0.45) return 'arriscado';
+  if (c < 0.7) return 'pode ir para qualquer lado';
+  if (c < 0.93) return 'provável';
+  return 'quase certo';
+}
+
+/* ---------- Guardar e retomar ---------- */
+
+/** O estado da sessão como dados simples, para guardar no aparelho. */
+export function guardar(e) {
+  const { aventura, cena, abordagem, ...resto } = e;
+  return JSON.parse(JSON.stringify({ ...resto, aventura: aventura.id, cena: cena?.id ?? null, abordagem: abordagem?.id ?? null }));
+}
+
+/** Retoma uma sessão guardada. Devolve null se a aventura ou a cena não existem mais. */
+export function retomar(dados, aventuras) {
+  const aventura = aventuras.find((a) => a.id === dados?.aventura);
+  if (!aventura) return null;
+  const cena = [aventura.abertura, ...aventura.cenas, ...aventura.desfecho].find((c) => c.id === dados.cena);
+  if (!cena) return null;
+  const abordagem = cena.abordagens.find((a) => a.id === dados.abordagem) ?? null;
+  return { ...JSON.parse(JSON.stringify(dados)), aventura, cena, abordagem };
 }

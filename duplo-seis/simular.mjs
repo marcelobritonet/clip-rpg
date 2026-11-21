@@ -3,14 +3,15 @@
  * Uso: node duplo-seis/simular.mjs [sessões=300] [atento|teimoso|acaso]
  */
 import { jogar } from './robo.js';
-import { PASSADOS } from './passados.js';
-import { brasa } from './aventuras/brasa/index.js';
+import { AVENTURAS } from './aventuras/index.js';
 
 const n = Number(process.argv[2] ?? 300);
 const perfil = process.argv[3] ?? 'atento';
+const brasa = AVENTURAS.find((a) => a.id === (process.argv[4] ?? 'brasa'));
+const PASSADOS = brasa.passados;
 const finais = [...brasa.finais.map((f) => f.id), ...Object.keys(brasa.quedas)];
 
-console.log(`Robô ${perfil}, ${n} sessões por passado\n`);
+console.log(`${brasa.nome}: robô ${perfil}, ${n} sessões por passado\n`);
 console.log(`| Passado | ${finais.join(' | ')} | ★ média | brasa | laços | sucesso | insistiu | surtos | quedas |`);
 console.log(`|---|${finais.map(() => '---').join('|')}|---|---|---|---|---|---|---|`);
 for (const p of PASSADOS) {

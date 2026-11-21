@@ -97,15 +97,18 @@ export function validarCenas({ cenas, itens = {}, companheiros = {}, inimigos = 
 }
 
 if (import.meta.url === `file://${process.argv[1]}`) {
-  const base = await import('./brasa/base.js');
-  const alvo = process.argv[2];
-  const mod = alvo ? await import(new URL(alvo, import.meta.url)) : { cenas: [] };
+  // node validar.js brasa            confere a abertura e o desfecho da aventura
+  // node validar.js brasa/ato1.js    confere um arquivo de ato
+  const [pasta, arquivo] = (process.argv[2] ?? 'brasa').split('/');
+  const base = await import(new URL(`./${pasta}/base.js`, import.meta.url));
+  const mod = arquivo ? await import(new URL(`./${pasta}/${arquivo}`, import.meta.url)) : {};
+  const cenas = arquivo ? mod.cenas : [base.abertura, ...base.desfecho];
   const erros = validarCenas({
-    cenas: [...(mod.cenas ?? []), ...(alvo ? [] : [base.abertura, ...base.desfecho])],
+    cenas,
     itens: { ...base.itens, ...mod.itens },
     companheiros: { ...base.companheiros, ...mod.companheiros },
     inimigos: { ...base.inimigos, ...mod.inimigos },
   });
   if (erros.length) { console.log(erros.join('\n')); process.exit(1); }
-  console.log(`ok: ${alvo ? mod.cenas.length : 1 + base.desfecho.length} cenas`);
+  console.log(`ok: ${cenas.length} cenas`);
 }

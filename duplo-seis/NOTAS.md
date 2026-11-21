@@ -12,6 +12,7 @@ as regras foram reescritas do zero em `regras.js`, cada função citando a seç�
 
 | Versão | Data | O que mudou |
 |---|---|---|
+| 0.1.1 | 21/11/2026 | **A mesa ganha rosto e memória.** Cenário desenhado em código no alto de cada cena (vila, vale, mata, montanha, farol), com a lanterna brilhando conforme a brasa. Sessão guardada no aparelho, para continuar depois. Ficha livre: o jogador escreve o passado e distribui os 12 pontos, com os tetos do manual. Aventura do dia (a mesma semente para todos), caderno de finais, palpite do Mestre antes de rolar, e companheiro que une forças numa falha fica de fora da cena seguinte. Instalável no celular e joga sem rede. Velar a brasa passa a valer +2. Robô atento, 300 sessões: 3 estrelas entre 20% (Desertora) e 82% (Menestrel). |
 | 0.1.0 | 21/11/2026 | **Primeira sessão completa.** Aventura "A Última Brasa": abertura (a porta de Dificuldade 10 do manual), três atos de quatro cenas sorteadas entre 27, o Farol em duas cenas e sete finais. Seis passados, todos fichas válidas de 12 pontos. Teste com objeto, unir forças, insistir, nível 0 e dado da sorte; combate por rodadas; magia por Ponto de Magia; Sanidade e perda de controle; evolução por marcos no acampamento; crônica da sessão; dados animados e som em código. Robô atento, 500 sessões por passado: final de 3 estrelas entre 20% (Desertora) e 79% (Menestrel); sucesso por teste entre 76% e 84%. Robô ao acaso: 85% de "Cinza". |
 
 ## Como o manual vira jogo
@@ -39,7 +40,7 @@ Tudo isto está no bloco `MESA` de `jogo.js`. Nada aqui muda regra escrita.
 | 2 | De onde vem a experiência ("XX") | 1 ponto por ato vencido, mais 1 por marco de história. Nunca por inimigo |
 | 3 | Efeito dos críticos ("cabe ao mestre") | Em teste: duplo seis vira a falha em sucesso, ou melhora o sucesso; duplo um piora a falha, ou cobra 1 de Vida do sucesso. Em combate: ataque com duplo seis dobra o dano; com duplo um, erra; defesa com duplo seis escapa; com duplo um, perde a proteção |
 | 4 | Críticos em teste de vários dados | Vale o primeiro dado, o "dado da sorte". O manual só descreve o crítico para um D6 |
-| 5 | Recuperar Vida, Magia e Sanidade | Uma noite devolve toda a Magia e deixa escolher: 1D6 de Vida (mais Saúde), 1D6 de Sanidade ou +1 de brasa |
+| 5 | Recuperar Vida, Magia e Sanidade | Uma noite devolve toda a Magia e deixa escolher: 1D6 de Vida (mais Saúde), 1D6 de Sanidade ou +2 de brasa |
 | 6 | Vida 0: "morto ou desmaiado" | Na primeira vez, desmaia e acorda com 1D6 de Vida e menos brasa. Na segunda, morre |
 | 7 | Sanidade 0 | Uma das quatro reações, depois volta com 1D6 de Sanidade. Na terceira vez não volta |
 | 8 | Quando o Mestre autoriza insistir | Sempre que a Vida cobrir o custo e sobrar ao menos 1 |
@@ -48,6 +49,7 @@ Tudo isto está no bloco `MESA` de `jogo.js`. Nada aqui muda regra escrita.
 | 11 | Companheiro em combate | Soma +1 em "outros modificadores" do ataque |
 | 12 | Teste de Perícia Mágica fora de combate | 1D6 por PM gasto contra a Dificuldade, como no encantamento temporário |
 | 13 | Dificuldade ao longo da sessão | O Mestre aperta em +1 a partir do ato 2 (`MESA.aperto`) |
+| 14 | Unir forças tem preço? | Companheiro que uniu forças numa falha fica de fora da cena seguinte (`MESA.cansaco`) |
 
 ## Coisas do jogo que não são do Clip
 
