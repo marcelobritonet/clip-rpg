@@ -1,0 +1,88 @@
+/**
+ * "Conteúdo é o Rei": antes dos pontos vem o passado. Cada passado é uma ficha
+ * de Especialista Iniciante (12 Pontos de Evolução) conferida por `validar`.
+ */
+export const PONTOS_INICIAIS = 12;
+
+export const PASSADOS = [
+  {
+    id: 'desertora',
+    titulo: 'A Desertora',
+    nome: 'Brena',
+    caminho: 'corpo',
+    quem: 'Você serviu seis invernos na guarda da fronteira e largou a farda na noite em que mandaram queimar uma vila. Voltou para Vau-do-Sino devendo a todos uma explicação.',
+    motivo: 'Levar a brasa é o jeito de pagar o que você deve sem ter de falar sobre isso.',
+    atributos: { forca: 3, destreza: 2, fisico: 1, percepcao: 1, vontade: 1 },
+    aprimoramentos: { ataqueCorporal: 2, reflexo: 1, resistencia: 1 },
+    pericias: {},
+    antecedentes: { maFama: { nivel: 1, mau: true }, aliado: { nivel: 1 } },
+    itens: ['espadaCurta', 'gibao'],
+  },
+  {
+    id: 'cacador',
+    titulo: 'O Caçador',
+    nome: 'Ivo',
+    caminho: 'corpo',
+    quem: 'Você conhece a Mata Velha pelo cheiro e prefere bicho a gente. Quem some na mata, é você que vão chamar; quem volta, raramente agradece.',
+    motivo: 'Sem o Farol, a mata vira outra coisa. E é lá que você mora.',
+    atributos: { forca: 1, destreza: 3, fisico: 1, percepcao: 2 },
+    aprimoramentos: { precisao: 2, agilidade: 1 },
+    pericias: { sobrevivencia: 1, furtividade: 1 },
+    antecedentes: {},
+    itens: ['arco', 'faca', 'isca'],
+  },
+  {
+    id: 'boticaria',
+    titulo: 'A Boticária',
+    nome: 'Maína',
+    caminho: 'mente',
+    quem: 'Meia vila nasceu nas suas mãos e a outra meia lhe deve um xarope. Você sabe o nome de toda erva do vale e de quase toda doença.',
+    motivo: 'Você já viu o que o frio da Longa Noite faz com um pulmão. Não vai ver de novo.',
+    atributos: { inteligencia: 3, percepcao: 1, sabedoria: 2, fisico: 1, vontade: 1 },
+    aprimoramentos: {},
+    pericias: { medicina: 2, magiaSuporte: 1, investigacao: 1 },
+    antecedentes: { recursos: { nivel: 1 } },
+    itens: ['ervas', 'unguento', 'cajado'],
+  },
+  {
+    id: 'aprendiz',
+    titulo: 'O Aprendiz',
+    nome: 'Caio',
+    caminho: 'mente',
+    quem: 'Seu mestre morreu no outono e deixou meia biblioteca e nenhuma instrução. O que você sabe de magia, aprendeu sozinho, à noite, errando.',
+    motivo: 'Num dos livros há um desenho do Farol, com uma anotação na margem: "não deixar apagar". A letra é do seu mestre.',
+    atributos: { inteligencia: 3, percepcao: 2, sabedoria: 1, vontade: 1 },
+    aprimoramentos: {},
+    pericias: { magiaAtaqueFisico: 1, magiaEncantamento: 2, magiaElemental: 1, historia: 1 },
+    antecedentes: {},
+    itens: ['almanaque', 'lamparina'],
+  },
+  {
+    id: 'menestrel',
+    titulo: 'O Menestrel',
+    nome: 'Tomé',
+    caminho: 'espirito',
+    quem: 'Você canta em toda feira daqui até o mar e nunca pagou por uma sopa. Conhece todo mundo, e todo mundo acha que conhece você.',
+    motivo: 'Falta uma canção sobre alguém que acendeu o Farol. Você pretende escrevê-la na primeira pessoa.',
+    atributos: { presenca: 3, vontade: 1, fe: 1, destreza: 1, percepcao: 1, sabedoria: 1 },
+    aprimoramentos: { empatia: 2, agilidade: 1 },
+    pericias: { prestidigitacao: 1 },
+    antecedentes: { boaFama: { nivel: 1 } },
+    itens: ['flauta', 'faca'],
+  },
+  {
+    id: 'peregrina',
+    titulo: 'A Peregrina',
+    nome: 'Auta',
+    caminho: 'espirito',
+    quem: 'Você anda de capela em capela há tanto tempo que esqueceu a promessa que começou a caminhada. Os bichos confiam em você; as pessoas, depois de um tempo, também.',
+    motivo: 'Uma luz no alto de um monte. Você reconhece um chamado quando vê um.',
+    atributos: { fe: 3, vontade: 2, presenca: 1, sabedoria: 2, fisico: 1 },
+    aprimoramentos: {},
+    pericias: { magiaControle: 2, lidarAnimais: 1 },
+    antecedentes: { aliado: { nivel: 1 } },
+    itens: ['amuleto', 'cajado'],
+  },
+];
+
+export const passado = (id) => PASSADOS.find((p) => p.id === id);

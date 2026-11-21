@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#14100c">
+  <title>Duplo Seis · uma mesa de RPG para um</title>
+  <meta name="description" content="Uma sessão de RPG de mesa para um jogador, em dez minutos, sobre o Sistema Clip. O Mestre narra, você decide, os dados rolam.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Alegreya:ital,wght@0,400;0,500;0,700;0,800;1,400&family=Alegreya+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="duplo-seis.css">
+</head>
+<body>
+  <div id="luz" aria-hidden="true"></div>
+
+  <main id="inicio" class="tela">
+    <header class="capa">
+      <div class="selo" aria-hidden="true"><span class="dado mini"></span><span class="dado mini"></span></div>
+      <h1>Duplo Seis</h1>
+      <p class="lema">Uma mesa de RPG para um. O Mestre narra, você decide, os dados rolam.</p>
+    </header>
+    <section class="aventura">
+      <p class="rotulo">A aventura de hoje</p>
+      <h2 id="aventura-nome"></h2>
+      <p id="aventura-resumo"></p>
+    </section>
+    <section>
+      <p class="rotulo">Antes dos dados, o passado. Quem é você?</p>
+      <div id="passados" class="passados" role="radiogroup" aria-label="Passado do personagem"></div>
+    </section>
+    <section id="escolhido" class="escolhido" hidden></section>
+    <footer class="rodape-inicio">
+      <a href="../manual/">Manual do Sistema Clip</a> · <span id="versao"></span>
+    </footer>
+  </main>
+
+  <main id="mesa" class="tela" hidden>
+    <header class="topo">
+      <div class="topo-linha">
+        <button id="abrir-ficha" class="botao-ficha" type="button" aria-haspopup="dialog"><span id="topo-nome"></span><small>ficha</small></button>
+        <div class="ato" id="topo-ato"></div>
+        <button id="som" class="icone" type="button" aria-label="Som" aria-pressed="true">♪</button>
+      </div>
+      <div class="medidas" id="medidas"></div>
+    </header>
+    <section id="palco" class="palco" aria-live="polite"></section>
+  </main>
+
+  <dialog id="ficha" class="ficha"></dialog>
+
+  <script type="module" src="ui.js"></script>
+</body>
+</html>
