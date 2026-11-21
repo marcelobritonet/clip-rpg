@@ -886,3 +886,32 @@ test('surto: porta arrancada não fecha mais', () => {
   assert.ok(e.log.some((m) => m.texto.includes('arranca a porta')));
   assert.ok(e.portasArrancadas.size >= 1);
 });
+
+test('ferido (regra 7.8): −1 abaixo da metade da Vida, −2 abaixo de um quarto', () => {
+  const e = J.novaPartida({ semente: 'ferido-1', tema: 'masmorra', origem: 'corpo' });
+  const max = J.derivados(e).vidaMax;
+  e.vida = max; assert.equal(J.penalFerido(e), 0);
+  e.vida = Math.ceil(max / 2); assert.equal(J.penalFerido(e), 0);
+  e.vida = Math.ceil(max / 2) - 1; assert.equal(J.penalFerido(e), 1);
+  e.vida = Math.ceil(max / 4) - 1; assert.equal(J.penalFerido(e), 2);
+});
+
+test('aliados unem forças (regra 7.6): a companhia ao lado soma ao teste', () => {
+  const conta = (comAmigo) => {
+    let juntos = 0;
+    for (let i = 0; i < 30; i++) {
+      const e = J.novaPartida({ semente: 'junto-' + i, tema: 'sanatorio', origem: 'mente' });
+      const vizinhas = [[1, 0], [0, 1], [-1, 0], [0, -1]].map(([dx, dy]) => ({ x: e.jogador.x + dx, y: e.jogador.y + dy })).filter((c) => tile(e.mapa, c.x, c.y) === T.CHAO);
+      if (vizinhas.length < 2) continue;
+      const m = e.entidades.find((x) => x.tipo === 'monstro');
+      e.entidades = [m];
+      Object.assign(m, vizinhas[1], { estado: 'parado', aparencia: null });
+      if (comAmigo) e.entidades.push({ tipo: 'aliado', especie: TEMAS.sanatorio.aliados[0].id, categoria: 'aliado', ...vizinhas[0], vida: 6, vidaMax: 6, ataque: 1, defesa: 1, arma: 1, estado: 'seguindo', id: 'amigo' });
+      J.agir(e, { tipo: 'empurrar', alvo: m.id });
+      juntos += e.stats.unindoForcas ?? 0;
+    }
+    return juntos;
+  };
+  assert.equal(conta(false), 0);
+  assert.ok(conta(true) > 0);
+});

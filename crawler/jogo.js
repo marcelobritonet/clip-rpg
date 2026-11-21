@@ -59,8 +59,11 @@ export const PARAM = {
   corpo: {
     /** Chance de um passo custar dois turnos (arrastar a perna). */
     lento: [0, 0, 0, 0.2, 0.4, 0.4],
-    /** Mãos que tremem: menos no Ataque. */
-    tremor: [0, 0, 0, 0, 1, 1],
+    /**
+     * Personagem ferido (regra 7.8, 0.10.0): abaixo destas frações da Vida,
+     * −1 e −2 no Ataque, na Defesa e nos testes do Corpo.
+     */
+    ferido: [0.5, 0.25],
     /** A partir deste nível, você deixa sangue por onde passa. */
     sangra: 2,
     /** Bestas farejam sangue fresco a esta distância e por este tempo. */
@@ -132,7 +135,8 @@ export const PARAM = {
   alivioCorpo: 1,
   /** Resistência reduz a Sanidade perdida para golpes de vulto e de assombro (0.8.0). */
   resistenciaNaCabeca: true,
-  aliado: { vida: 6, ataque: 1, defesa: 1, arma: 1 },
+  /** `ajuda`: nível que a companhia ao lado soma aos seus testes (Unindo forças, regra 7.6, 0.10.0). */
+  aliado: { vida: 6, ataque: 1, defesa: 1, arma: 1, ajuda: 1 },
   inventario: 5,
   /** Vida recuperada ao trocar de andar. */
   folegoNaEscada: 5,
@@ -563,6 +567,29 @@ export const lucidez = (e) => nivelLucidez(e.san, derivados(e).sanMax);
 /** Nível de Consciência (0 Alerta … 5 Apagado). */
 export const atencao = (e) => nivelConsciencia(e.cons, derivados(e).consMax);
 /** Nível de Vida (0 Intacto … 5 Caído). */
+/** −1 com a Vida abaixo da metade, −2 abaixo de um quarto (regra 7.8). */
+export function penalFerido(e) {
+  const f = e.vida / derivados(e).vidaMax;
+  return PARAM.corpo.ferido.filter((lim) => f < lim).length;
+}
+
+/** A companhia ao lado, de verdade e sem disfarce, une forças nos seus testes (regra 7.6). */
+function companhiaAoLado(e) {
+  return e.entidades.find((x) => x.tipo === 'aliado' && x.estado === 'seguindo' && x.vida > 0 && !x.aparencia && distancia(x, e.jogador) <= 1) ?? null;
+}
+
+/** Teste do personagem: soma a ajuda da companhia ao lado e, nos do Corpo, desconta o ferimento. */
+function testarJunto(e, opcoes, { doCorpo = false } = {}) {
+  const amigo = companhiaAoLado(e);
+  const ajuda = amigo ? PARAM.aliado.ajuda : 0;
+  const t = clip.testar({ ...opcoes, nivel: opcoes.nivel + ajuda, dificuldade: opcoes.dificuldade + (doCorpo ? penalFerido(e) : 0) });
+  if (amigo && t.sucesso) {
+    e.stats.unindoForcas = (e.stats.unindoForcas ?? 0) + 1;
+    msg(e, `${Maiuscula(artigo(especie(e, amigo).nome))} faz junto com você.`, 'info');
+  }
+  return t;
+}
+
 export const ferimento = (e) => Math.max(0, nivelVida(e.vida, derivados(e).vidaMax));
 const idx = (e, x, y) => y * e.mapa.w + x;
 const rng = (e) => comoFuncao(e.rDados);
@@ -937,10 +964,10 @@ function empurrar(e, alvoId) {
     return true;
   }
   const dx = Math.sign(alvo.x - e.jogador.x), dy = Math.sign(alvo.y - e.jogador.y);
-  const t = clip.testar({
+  const t = testarJunto(e, {
     nivel: n(e, 'forca'), objeto: Math.max(n(e, 'ataqueCorporal'), n(e, 'agilidade')),
     dificuldade: PARAM.empurrar.base + (alvo.defesa ?? 1) + (alvo.ronda ? 2 : 0), rng: rng(e),
-  });
+  }, { doCorpo: true });
   if (alvo.tipo === 'aliado') {
     msg(e, `Você empurra ${artigoDe(nome)}. “Ei! O que é isso?”`, 'perigo');
     if (alvo.aparencia) { alvo.aparencia = null; e.stats.disfarcesRevelados++; }
@@ -1293,7 +1320,7 @@ function golpear(e, ent) {
   }
   const d = derivados(e);
   const extraDef = ent.categoria === 'assombro' ? PARAM.defesaAssombro : 0;
-  const tremor = PARAM.corpo.tremor[ferimento(e)];
+  const tremor = penalFerido(e);
   if (tremor && chance(e.rDados, 0.2)) msg(e, 'Suas mãos tremem.', 'info');
   const r = clip.resolverAtaque({
     ataque: Math.max(0, d.ataque - tremor), defesa: Math.max(0, ent.defesa + extraDef - (ent.pontoFraco ?? 0)), arma: d.arma, armadura: ent.armadura ?? 0, rng: rng(e),
@@ -1394,7 +1421,7 @@ function olhar(e, alvoId) {
   const objeto = Math.max(n(e, 'sentidos'), n(e, 'discernimento'));
   const dificuldade = PARAM.olhar.base + lv;
   const corpo = clip.caminhoDominante(e.ficha).id === 'corpo';
-  let t = clip.testar({ nivel, objeto, dificuldade, insistir: corpo, caminho: corpo ? 'corpo' : null, rng: rng(e) });
+  let t = testarJunto(e, { nivel, objeto, dificuldade, insistir: corpo, caminho: corpo ? 'corpo' : null, rng: rng(e) });
   e.stats.olhares++;
   if (t.insistiu) {
     // Insistir (só o Corpo): o que falta sai da Vida. Acima do teto, desiste.
@@ -1523,7 +1550,7 @@ function conversar(e, ent) {
       msg(e, ent.categoria === 'besta' ? `Não há o que conversar com ${artigoDe(nome)}.` : `${Maiuscula(artigoDe(nome))} não ouve palavras.`);
       return true;
     }
-    const t = clip.testar({
+    const t = testarJunto(e, {
       nivel: n(e, 'presenca'), objeto: Math.max(n(e, 'empatia'), n(e, 'intimidacao'), n(e, 'lideranca')),
       dificuldade: PARAM.convencer + ent.vontade + e.andar, rng: rng(e),
     });
@@ -1630,7 +1657,7 @@ function encarar(e, alvoId) {
   if (distancia(alvo, e.jogador) > 4) { msg(e, 'Longe demais. Chegue mais perto para encarar.'); return false; }
   const nome = nomeAparente(e, alvo);
   const vontade = alvo.vontade ?? 1;
-  const t = clip.testar({
+  const t = testarJunto(e, {
     nivel: Math.max(n(e, 'vontade'), n(e, 'fe')), objeto: Math.max(n(e, 'conviccao'), n(e, 'devocao'), n(e, 'autocontrole')),
     dificuldade: PARAM.encarar + vontade + e.andar, rng: rng(e),
   });
@@ -2101,8 +2128,9 @@ function forcaRelativa(e, m) {
     return r >= 2.5 ? 1 : r >= 1.3 ? 2 : r >= 0.8 ? 3 : 4;
   }
   const domDano = n(e, 'magiaAtaqueFisico') > 0 && e.pm >= PARAM.magia.custo ? PARAM.magia.custo + n(e, 'raciocinio') : 0;
-  const meuDano = Math.max(0.3, Math.max(d.ataque + d.arma - (m.defesa ?? 1), domDano - (m.defesa ?? 1)) + 1.5);
-  const deleDano = Math.max(0.3, (m.ataque ?? 1) + (m.arma ?? 0) - d.defesa - d.armadura + 1.5);
+  const pf = penalFerido(e);
+  const meuDano = Math.max(0.3, Math.max(d.ataque - pf + d.arma - (m.defesa ?? 1), domDano - (m.defesa ?? 1)) + 1.5);
+  const deleDano = Math.max(0.3, (m.ataque ?? 1) + (m.arma ?? 0) - (d.defesa - pf) - d.armadura + 1.5);
   const r = (e.vida / deleDano) / ((m.vida ?? 1) / meuDano);
   return r >= 3 ? 0 : r >= 1.5 ? 1 : r >= 0.75 ? 2 : r >= 0.4 ? 3 : 4;
 }
@@ -2283,7 +2311,7 @@ function ataqueDoMonstro(e, m, bonus, pesado = false) {
   }
   // Quem enxerga o golpe vindo defende melhor: Percepção soma metade (0.3.2).
   const def = e.defendendo ? PARAM.defender.defesa + Math.floor(n(e, 'percepcao') / 2) + (pesado ? PARAM.defender.contraPesado : 0) : 0;
-  const r = clip.resolverAtaque({ ataque: m.ataque, defesa: d.defesa, arma: m.arma + (pesado ? PARAM.preparo.dano : 0), armadura: d.armadura, outrosAtaque: bonus, outrosDefesa: def, rng: rng(e) });
+  const r = clip.resolverAtaque({ ataque: m.ataque, defesa: d.defesa, arma: m.arma + (pesado ? PARAM.preparo.dano : 0), armadura: d.armadura, outrosAtaque: bonus, outrosDefesa: def - penalFerido(e), rng: rng(e) });
   if (pesado) {
     if (r.acertou) e.stats.pesadosRecebidos++; else e.stats.pesadosEvitados++;
     ganharPista(e, 'preparo');
