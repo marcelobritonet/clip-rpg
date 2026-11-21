@@ -103,6 +103,7 @@ function montarComo() {
     <p><b>Ler o inimigo.</b> O alvo diz se a criatura parece mais fraca, parelha ou mais forte que você, e um pingo colorido sobre a cabeça repete isso (verde, amarelo, vermelho). A leitura compara quantos golpes cada um aguenta. Com Percepção alta, ela é certa; com pouca, erra às vezes; sem Percepção, só dá para ler gente (com Empatia), a não ser que você olhe de novo. Com a cabeça ruim, a leitura também mente.</p>
     <p><b>A verdade compensa.</b> Desfazer uma mentira (olhar de novo, falar, encarar o que é falso) devolve um pouco de clareza à cabeça. Acreditar numa mentira (pegar item que não existe, segurar janela onde ninguém bate, empurrar porta pintada) sempre cobra. A Fé segura os sustos; a Percepção nota sozinha o que está errado.</p>
     <p><b>O fôlego.</b> Andar muito sem parar cansa. O próprio personagem vai dizer quando estiver ofegante; escute o que ele sente.</p>
+    <p><b>A voz.</b> O registro fala com você ("Você abre a porta"). Entre aspas e em itálico está o que o personagem pensa, na primeira pessoa ("Estou ofegante").</p>
     <p><b>A tarefa do andar.</b> A passagem para a escada (ou para a saída) fica trancada, com cadeado. Antes, é preciso fazer uma coisa, depois outra, em salas diferentes: pegar uma chave, ligar um quadro de luz, achar uma senha. A ordem importa. O painel mostra a próxima tarefa e a sala; o objeto dela brilha em azul. Com a cabeça ruim, o nome das salas pode mentir.</p>
     <p><b>O caminho.</b> Nos andares 2, 3 e 4 há uma peça do caminho. Cada uma devolve fio e mostra a saída do andar. Com as três, você sai inteiro; sem elas, também dá para sair, mas o fim é outro.</p>
     <p>Fotografias, cartas e corpos fazem mal de olhar, mas mostram coisas: o caminho, um item, algo em que se agarrar. Pisar em cima examina.</p>
@@ -569,7 +570,7 @@ function desenharRegistro() {
   const ol = $('registro');
   const ultimos = e.log.slice(-40);
   const turnoAtual = e.turno;
-  ol.innerHTML = ultimos.map((m) => `<li class="t-${m.tipo}${m.turno < turnoAtual - 1 ? ' velho' : ''}">${m.texto}${depurar && m.mentira ? '<span class="depura">[mentira]</span>' : ''}</li>`).join('');
+  ol.innerHTML = ultimos.map((m) => `<li class="t-${m.tipo}${m.voz ? ' voz' : ''}${m.turno < turnoAtual - 1 ? ' velho' : ''}">${m.texto}${depurar && m.mentira ? '<span class="depura">[mentira]</span>' : ''}</li>`).join('');
   if (e.log.length !== ultimoLog) ol.scrollTop = ol.scrollHeight;
   ultimoLog = e.log.length;
 }

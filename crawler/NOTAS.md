@@ -34,6 +34,7 @@ página. Não mexe na versão das regras nem das ferramentas do Clip.
 | 0.6.0 | 18/11/2026 | **Primeira release pública.** Tela que cabe: no desktop, mapa e painel ocupam a altura da janela e só o registro rola; estado em duas colunas, ações em três, atalhos nos títulos dos botões. No celular, mapa em cima (42% da tela), estado compacto, cruz e ações ao alcance do polegar, sem rolagem lateral; cor de tema para a barra do navegador. Publicada em https://marcelobritonet.github.io/clip-rpg/crawler/ (tag `desvario-v0.6.0`). |
 | 0.6.1 | 18/11/2026 | **Fôlego na voz do personagem**, sem ensinar tecla: "Estou ofegante. O peito arde e o corredor parece mais comprido. Seria prudente parar um pouco, ou recorrer ao que trago comigo."; no limite, "As pernas pesam e o ar não vem..."; ao recuperar, "O ar volta aos poucos. Já consigo seguir." O item de fôlego também devolve o ar. |
 | 0.6.2 | 18/11/2026 | **Descansar e paredes falsas.** Botão e tecla *Descansar* (R), que espera turno a turno até a cabeça clarear ou algo acontecer; o centro da cruz vira ⏸. Ao descansar: "Fico quieto um pouco, encostado na parede. A cabeça desanuvia devagar." Com perigo à vista, uma vez: "Não consigo fechar os olhos com … ali. Preciso de um canto sem ninguém à vista." Parede falsa fechando o caminho a até 2 casas: "Essa parede bem aí na frente… não lembro dela. Ou lembro? Talvez valha encostar a mão." |
+| 0.7.0 | 21/11/2026 | **Equilíbrio e voz.** O fio do andar ficou mais longo (420 + 30 por andar + 100 por tarefa, antes 330 + 20 + 40), Vida +4 (bônus 12) e Sanidade +3 (motor × 0,75 + 12). Robô atento, 30 partidas por tema, fuga média: Corpo 9% (igual), Mente 22% (antes 10%), Espírito 37% (antes 13%). O Corpo ainda enlouquece em ~60% das partidas, matando gente e apanhando de vulto (a consequência que se queria, mas pesada). **Voz:** a narração fala com você; o que o personagem pensa (fôlego, descanso, parede suspeita) aparece em itálico e entre aspas, e o "Como jogar" explica. As dúvidas de regra sem item foram para o `PENDENCIAS.md`, seção 7. |
 
 ## Como se joga
 
@@ -551,6 +552,8 @@ Todos ficam em `PARAM` (`crawler/jogo.js`) ou em `temas.js`; o motor não foi al
 | 25 | Fé reduz sustos | Metade da Fé soma à Serenidade na redução | Proposta: Fé como resistência a medo | PENDENCIAS 2 |
 
 ## Dúvidas de regra que o protótipo levantou
+
+As que ainda não tinham item foram levadas ao [`PENDENCIAS.md`](../PENDENCIAS.md), seção 7, que é a fonte da verdade.
 
 | # | Tema | O que o protótipo fez | Por que importa | Ver |
 |---|---|---|---|---|

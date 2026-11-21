@@ -29,12 +29,12 @@ import { TEMAS } from './temas.js';
 export const PARAM = {
   andares: 5,
   /** Fôlego de aventureiro: soma à Vida do motor (Vida 5 morre com um golpe). */
-  bonusVida: 8,
+  bonusVida: 12,
   /**
    * Sanidade do jogo a partir da do motor: comprime a distância (Espírito
    * começa com 18 e Corpo com 4 no manual) e dá fôlego a todos.
    */
-  sanidade: (motor) => Math.round(motor * 0.75) + 9,
+  sanidade: (motor) => Math.round(motor * 0.75) + 12,
   /** Raio de visão por nível de Consciência (0 Alerta … 5 Apagado): o cansaço fecha a vista. */
   raioVisao: [7, 7, 7, 6, 5, 4],
   /**
@@ -72,7 +72,7 @@ export const PARAM = {
    * entra pela porta por onde você entrou, caça você sem parar e o tempo pesa
    * o dobro na cabeça. Cada peça do caminho devolve um pedaço do fio.
    */
-  fio: { turnos: (a) => 330 + 20 * a + 40 * (a <= 2 ? 1 : a <= 4 ? 2 : 3), peca: 50, avisos: [0.5, 0.25, 0.1] },
+  fio: { turnos: (a) => 420 + 30 * a + 100 * (a <= 2 ? 1 : a <= 4 ? 2 : 3), peca: 50, avisos: [0.5, 0.25, 0.1] },
   /** A ronda anda dois de cada três turnos: quem corre escapa; quem para, não. */
   ronda: { ataque: 1, defesa: 2, arma: 1, vontade: 6, passo: 3 },
   /**
@@ -550,6 +550,9 @@ function msg(e, texto, tipo = 'info', extra = {}) {
   if (e.log.length > 200) e.log.splice(0, e.log.length - 200);
 }
 
+/** O que o personagem pensa, na primeira pessoa; a narração fala com você. */
+const VOZ = { voz: true };
+
 const efeito = (e, tipo) => e.efeitos.push({ tipo, turno: e.turno });
 
 export const lucidez = (e) => nivelLucidez(e.san, derivados(e).sanMax);
@@ -713,7 +716,7 @@ export function agir(e, acao) {
   if (gastou && !andou) {
     const antesCorrida = e.corrida;
     e.corrida = Math.max(0, e.corrida - PARAM.folego.recupera);
-    if (antesCorrida > PARAM.folego.limite && e.corrida <= PARAM.folego.limite) msg(e, 'O ar volta aos poucos. Já consigo seguir.', 'bom');
+    if (antesCorrida > PARAM.folego.limite && e.corrida <= PARAM.folego.limite) msg(e, 'O ar volta aos poucos. Já consigo seguir.', 'bom', VOZ);
   }
   // Quanto cada medida mudou neste turno (a tela mostra a direção, não o número).
   e.variacao = { vida: e.vida - antes.vida, cons: e.cons - antes.cons, san: e.san - antes.san, pm: e.pm - antes.pm };
@@ -758,7 +761,7 @@ function esperar(e) {
     const quem = e.entidades.find((m) => perigoVisivel(e, m));
     if (quem) {
       e.avisoSemDescanso = true;
-      msg(e, `Não consigo fechar os olhos com ${artigoDe(nomeAparente(e, quem))} ali. Preciso de um canto sem ninguém à vista.`, 'perigo');
+      msg(e, `Não consigo fechar os olhos com ${artigoDe(nomeAparente(e, quem))} ali. Preciso de um canto sem ninguém à vista.`, 'perigo', VOZ);
     }
   }
   return true;
@@ -883,14 +886,14 @@ function mover(e, dx, dy, forcarAtaque) {
   const F = PARAM.folego;
   e.corrida++;
   // Os avisos são o que o personagem sente, não instrução de jogo.
-  if (e.corrida === F.limite + 1) { msg(e, 'Estou ofegante. O peito arde e o corredor parece mais comprido. Seria prudente parar um pouco, ou recorrer ao que trago comigo.', 'perigo'); ganharPista(e, 'folego'); }
-  if (e.corrida === F.forte + 1) msg(e, 'As pernas pesam e o ar não vem. Se eu continuar correndo assim, vou cair. Preciso parar.', 'dano');
+  if (e.corrida === F.limite + 1) { msg(e, 'Estou ofegante. O peito arde e o corredor parece mais comprido. Seria prudente parar um pouco, ou recorrer ao que trago comigo.', 'perigo', VOZ); ganharPista(e, 'folego'); }
+  if (e.corrida === F.forte + 1) msg(e, 'As pernas pesam e o ar não vem. Se eu continuar correndo assim, vou cair. Preciso parar.', 'dano', VOZ);
   if (e.corrida > F.limite) {
     e.stats.ofegante++;
     if ((e.corrida - F.limite) % F.custo === 0) perderCons(e, 1, 'corrida');
     if (e.corrida > F.forte && chance(e.rDados, F.passoDuplo)) {
       e.arrastou = true;
-      if (!e.ultimoFolego || e.turno - e.ultimoFolego > 10) msg(e, 'Sem ar, paro a cada poucos passos, apoiado na parede.', 'dano');
+      if (!e.ultimoFolego || e.turno - e.ultimoFolego > 10) msg(e, 'Sem ar, paro a cada poucos passos, apoiado na parede.', 'dano', VOZ);
       e.ultimoFolego = e.turno;
     }
   }
@@ -1845,7 +1848,7 @@ function mundo(e) {
   if (e.descansou && semPerigo(e)) {
     e.descanso++;
     if (e.descanso % C.descanso === 0 && e.cons < d.consMax) {
-      if (e.descanso === C.descanso) msg(e, 'Fico quieto um pouco, encostado na parede. A cabeça desanuvia devagar.', 'bom');
+      if (e.descanso === C.descanso) msg(e, 'Fico quieto um pouco, encostado na parede. A cabeça desanuvia devagar.', 'bom', VOZ);
       ganharCons(e, 1);
       if (e.cons >= d.consMax) msg(e, 'Você abre os olhos. A vista está limpa de novo.', 'bom');
     }
@@ -2454,7 +2457,7 @@ function desconfiarDeParedes(e, notar) {
     if (distancia({ x, y }, e.jogador) > 2) continue;
     if (!chance(e.rAlu, 0.4 + notar)) continue;
     e.paredesSuspeitas.add(k);
-    msg(e, 'Essa parede bem aí na frente… não lembro dela. Ou lembro? Talvez valha encostar a mão.', 'pista');
+    msg(e, 'Essa parede bem aí na frente… não lembro dela. Ou lembro? Talvez valha encostar a mão.', 'pista', VOZ);
     return;
   }
 }

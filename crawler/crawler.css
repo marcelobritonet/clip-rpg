@@ -102,6 +102,10 @@ kbd {
 .registro .t-dano, .registro .t-perigo { color: var(--erro); }
 .registro .t-bom { color: var(--ok); }
 .registro .t-pista { color: var(--accent); font-style: italic; }
+/* Voz do personagem: o que ele pensa, na primeira pessoa, entre aspas. */
+.registro .voz { font-style: italic; }
+.registro .voz::before { content: '“'; }
+.registro .voz::after { content: '”'; }
 .registro .t-narra, .registro .t-fim { font-family: var(--serif); }
 .registro .t-surto { color: var(--espirito); font-weight: 700; }
 .registro .t-sala { color: var(--ink-2); font-variant: small-caps; letter-spacing: 0.04em; }

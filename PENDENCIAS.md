@@ -87,3 +87,19 @@ Hoje Inteligência, Percepção, Sabedoria, Vontade e Fé não têm Aprimorament
 | 6.6 | Antecedentes | "ser poder ser modificado" → "sem poder ser modificado" |
 | 6.7 | Sequência de Combate | Numeração das sublistas quebrada (passos 7 a 14 dentro de 1 a 3) |
 | 6.8 | Seções vazias | "Testando o Caminho da Mente", "Testando o Caminho do Espírito" e "Glossário" estão vazias |
+
+## 7. Dúvidas levantadas pelo Desvario (crawler)
+
+O protótipo [`crawler/`](crawler/) precisou decidir estas regras para funcionar. A coluna "Proposta" é o que ele faz hoje; o detalhe está em [`crawler/NOTAS.md`](crawler/NOTAS.md), seção "Dúvidas de regra". Itens já cobertos acima: Sanidade fora de magia (5.6), Fé e Vontade como ação e Serenidade/Memória (seção 2).
+
+| # | Tópico | Situação | Proposta | Decisão |
+|---|---|---|---|---|
+| 7.1 | Sanidade 0 | "Perde o controle" não diz por quanto tempo nem se volta | Surto curto (5 turnos), volta com metade e uma cicatriz; o terceiro surto encerra | ☐ |
+| 7.2 | Teste de "isto é real?" | O manual não tem teste contra ilusão | Percepção ou Sabedoria contra a lucidez de quem olha | ☐ |
+| 7.3 | Convencer em conflito | Não há regra para convencer um inimigo no meio da luta | Presença + Aprimoramento social contra 3 + Vontade + andar | ☐ |
+| 7.4 | Defesa mental | Igual à arena e às cartas | Vontade + Fé + Autocontrole (proposto na seção 2) | ☐ |
+| 7.5 | Caminho dominante muda | O manual não diz o que acontece ao evoluir e trocar de Caminho | Vida e Sanidade recalculadas pelo novo Caminho, mantendo o dano sofrido | ☐ |
+| 7.6 | Aliados e Unindo forças | O manual soma Atributos ao unir forças | A companhia luta ao lado com números fixos e faz o tempo pesar menos | ☐ |
+| 7.7 | Cansaço | O Clip tem Vida, Magia e Sanidade, sem fadiga | Consciência como terceiro recurso (cai com o tempo e as pancadas, volta descansando). Ou cabe nos Pontos de Magia? | ☐ |
+| 7.8 | Penalidade por ferimento | O manual não diz se o personagem ferido luta pior | Lentidão e tremor com Vida baixa | ☐ |
+| 7.9 | Manobras de combate | Não há defesa total, empurrar nem preparar golpe | Defender (+2 na defesa e contra-golpe), empurrar (teste de Força), golpe preparado (avisado, +2 no ataque) | ☐ |
