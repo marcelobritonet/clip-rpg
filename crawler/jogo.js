@@ -140,7 +140,7 @@ export const PARAM = {
   /** Perdas de Sanidade por evento. */
   perda: { golpeNoVazio: 1, miragem: 1, emboscada: 1, matarHumano: 1, ferirAliado: 2, matarAliado: 4, encararFalhou: 1, verAssombro: 1, atacarInocente: 1, matarInocente: 2, antipatia: 1 },
   /** Surto: turnos fora de controle; depois volta com metade da Sanidade e uma cicatriz. */
-  surto: { turnos: 5, sanidadeDepois: 0.5, calmaDepois: 15, cicatriz: 3, maximo: 3 },
+  surto: { turnos: 5, sanidadeDepois: 0.5, calmaDepois: 15, cicatriz: 3, maximo: 3, perdeItem: true, quebrar: 0.35 },
   ancora: { turnos: 12, dificuldade: 3, ganho: 2 },
   /** Dificuldade de Olhar de novo: base + nível de lucidez. */
   olhar: { base: 2, insistirMaximo: 2 },
@@ -981,7 +981,7 @@ function empurrar(e, alvoId) {
 function fecharPorta(e) {
   for (const [dx, dy] of VIZINHOS) {
     const x = e.jogador.x + dx, y = e.jogador.y + dy;
-    if (tile(e.mapa, x, y) !== T.ABERTA || reaisEm(e, x, y)) continue;
+    if (tile(e.mapa, x, y) !== T.ABERTA || reaisEm(e, x, y) || e.portasArrancadas?.has(idx(e, x, y))) continue;
     por(e.mapa, x, y, T.PORTA);
     e.stats.portasFechadas++;
     msg(e, 'Você fecha a porta. Bichos não abrem portas; gente abre.', 'info');
@@ -1914,6 +1914,17 @@ function entrarNoSurto(e) {
   msg(e, temaDe(e).surto, 'surto');
   efeito(e, 'surto');
   anotar(e, 'Perdeu o controle.');
+  // 0.9.0: o corpo dispara numa direção, e algo cai do bolso no caminho.
+  e.surtoDir = escolher(e.rIA, VIZINHOS);
+  if (e.inventario.length && PARAM.surto.perdeItem) {
+    const i = inteiro(e.rIA, 0, e.inventario.length - 1);
+    const [it] = e.inventario.splice(i, 1);
+    const casas = casasLivresVisiveis(e, 1).filter((c) => distancia(c, e.jogador) <= 3);
+    const c = casas.length ? escolher(e.rIA, casas) : { x: e.jogador.x, y: e.jogador.y };
+    e.objetos.push({ tipo: 'item', x: c.x, y: c.y, real: true, item: it, id: 'o' + e.proximoId++ });
+    e.stats.itensPerdidosNoSurto = (e.stats.itensPerdidosNoSurto ?? 0) + 1;
+    msg(e, `${Maiuscula(artigo(it.nome))} escapa da sua mão e rola para longe.`, 'dano');
+  }
   ganharPista(e, 'palavras');
 }
 
@@ -1931,14 +1942,50 @@ function sairDoSurto(e) {
   msg(e, 'Você volta a si, de joelhos, sem saber quanto tempo passou. Algo ficou quebrado.', 'perigo');
 }
 
+/**
+ * No surto, o jogador não manda: o personagem ataca quem estiver ao lado
+ * (aliado também), quebra o que encontra e corre numa direção até bater.
+ */
 function acaoDoSurto(e) {
+  const S = PARAM.surto;
   const perto = e.entidades.filter((x) => (x.vida > 0 || x.tipo === 'fantasma') && distancia(x, e.jogador) === 1);
   if (perto.length && chance(e.rIA, 0.7)) {
     const alvo = escolher(e.rIA, perto);
     return { tipo: 'atacar', dx: alvo.x - e.jogador.x, dy: alvo.y - e.jogador.y };
   }
-  const [dx, dy] = escolher(e.rIA, VIZINHOS);
-  return { tipo: 'mover', dx, dy };
+  quebrarNoSurto(e, S);
+  // Corre sem rumo: mantém a direção até bater, então dispara para outro lado.
+  const anda = ([dx, dy]) => {
+    const t = tile(e.mapa, e.jogador.x + dx, e.jogador.y + dy);
+    return t === T.CHAO || t === T.PORTA || t === T.ABERTA;
+  };
+  if (!e.surtoDir || !anda(e.surtoDir)) {
+    const saidas = VIZINHOS.filter(anda);
+    e.surtoDir = saidas.length ? escolher(e.rIA, saidas) : escolher(e.rIA, VIZINHOS);
+  }
+  return { tipo: 'mover', dx: e.surtoDir[0], dy: e.surtoDir[1] };
+}
+
+/** Quebra um item no chão ao lado, ou arranca uma porta (que depois não fecha mais). */
+function quebrarNoSurto(e, S) {
+  if (!chance(e.rIA, S.quebrar)) return;
+  const item = e.objetos.find((o) => o.tipo === 'item' && !o.usado && distancia(o, e.jogador) <= 1);
+  if (item) {
+    item.usado = true;
+    e.stats.itensQuebradosNoSurto = (e.stats.itensQuebradosNoSurto ?? 0) + 1;
+    msg(e, `Você chuta ${artigo(item.item.nome)} contra a parede. Quebra.`, 'dano');
+    return;
+  }
+  e.portasArrancadas ??= new Set();
+  for (const [dx, dy] of VIZINHOS) {
+    const x = e.jogador.x + dx, y = e.jogador.y + dy;
+    const k = idx(e, x, y);
+    if (![T.PORTA, T.ABERTA].includes(tile(e.mapa, x, y)) || e.portasArrancadas.has(k)) continue;
+    e.portasArrancadas.add(k);
+    por(e.mapa, x, y, T.ABERTA);
+    msg(e, 'Você arranca a porta das dobradiças. Ela não fecha mais.', 'dano');
+    return;
+  }
 }
 
 // Bestas não abrem portas fechadas (a ronda abre tudo).

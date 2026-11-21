@@ -147,6 +147,7 @@ function montarDiario() {
 /* Começar ----------------------------------------------------------------- */
 
 function comecar(semente = $('semente').value.trim() || sementeNova(Date.now())) {
+  if (surtoTimer) { clearTimeout(surtoTimer); surtoTimer = null; }
   e = J.novaPartida({ semente, tema: escolhaTema, origem: escolhaOrigem, depurar });
   pistasAntes = [...diario.pistas];
   alvoId = null;
@@ -169,10 +170,22 @@ function comecar(semente = $('semente').value.trim() || sementeNova(Date.now()))
 
 /* Ações ------------------------------------------------------------------- */
 
-function fazer(acao) {
+let surtoTimer = null;
+function fazer(acao, doSurto = false) {
   if (!e || e.fim) return;
   if (e.escolha && acao.tipo !== 'escolher') return;
+  // No surto o jogador não manda: os turnos correm sozinhos e o que ele aperta é ignorado.
+  if (e.surto > 0 && !doSurto) return;
   J.agir(e, acao);
+  if (e.surto > 0 && !e.fim && !surtoTimer) {
+    pararViagem();
+    const seguir = () => {
+      surtoTimer = null;
+      if (!e || e.fim || e.surto <= 0) return;
+      fazer({ tipo: 'esperar' }, true);
+    };
+    surtoTimer = setTimeout(seguir, movimentoReduzido.matches ? 120 : 420);
+  }
   anotarMudancas(J.percebido(e));
   for (const f of e.efeitos) {
     const cor = { golpe: 'rgba(180,20,20,', mente: 'rgba(120,60,170,', surto: 'rgba(230,230,230,', magia: TEMAS[e.tema].dom.cor, desmaio: 'rgba(0,0,0,' }[f.tipo];

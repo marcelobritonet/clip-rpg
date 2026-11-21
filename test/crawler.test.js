@@ -846,3 +846,43 @@ test('Corpo: a Resistência segura na cabeça o golpe de vulto, e derrubar uma f
   assert.ok(fera.vida <= 0, 'a fera cai');
   assert.ok(corpo.log.some((m) => m.texto.includes('As mãos param de tremer') && m.voz));
 });
+
+test('surto: o personagem corre sem rumo, deixa cair um item e quebra coisas; o jogador não manda', () => {
+  const e = J.novaPartida({ semente: 'surto-1', tema: 'sanatorio', origem: 'corpo' });
+  e.entidades = e.entidades.filter((m) => m.tipo !== 'monstro');
+  e.inventario.push({ tipo: 'calma', nome: 'chá de camomila' }, { tipo: 'cura', nome: 'atadura' });
+  const objetosAntes = e.objetos.length;
+  e.san = 0;
+  J.agir(e, { tipo: 'esperar' });
+  assert.ok(e.surto > 0, 'entrou no surto');
+  assert.equal(e.inventario.length, 1, 'perdeu um item');
+  assert.equal(e.objetos.length, objetosAntes + 1, 'o item ficou no chão');
+  const caido = e.objetos.at(-1);
+  assert.ok(caido.real && caido.item && !caido.usado);
+  const inicio = { ...e.jogador };
+  for (let i = 0; i < 3 && e.surto > 0; i++) J.agir(e, { tipo: 'esperar' }); // o pedido do jogador é ignorado
+  assert.notDeepEqual(e.jogador, inicio, 'andou sozinho');
+});
+
+test('surto: porta arrancada não fecha mais', () => {
+  const e = J.novaPartida({ semente: 'surto-2', tema: 'masmorra', origem: 'corpo' });
+  // Acha uma porta e põe o jogador ao lado dela.
+  let porta = null;
+  for (let y = 1; y < e.mapa.h - 1 && !porta; y++) for (let x = 1; x < e.mapa.w - 1 && !porta; x++) {
+    if (tile(e.mapa, x, y) !== T.PORTA) continue;
+    const viz = [[1, 0], [-1, 0], [0, 1], [0, -1]].map(([dx, dy]) => ({ x: x + dx, y: y + dy })).find((c) => tile(e.mapa, c.x, c.y) === T.CHAO);
+    if (viz) porta = { x, y, viz };
+  }
+  assert.ok(porta);
+  e.entidades = e.entidades.filter((m) => m.tipo !== 'monstro');
+  e.objetos = e.objetos.filter((o) => o.tipo !== 'item');
+  e.jogador.x = porta.viz.x; e.jogador.y = porta.viz.y;
+  J.PARAM.surto.quebrar = 1;
+  try {
+    e.san = 0;
+    J.agir(e, { tipo: 'esperar' });
+    while (e.surto > 0 && !e.log.some((m) => m.texto.includes('arranca a porta'))) J.agir(e, { tipo: 'esperar' });
+  } finally { J.PARAM.surto.quebrar = 0.35; }
+  assert.ok(e.log.some((m) => m.texto.includes('arranca a porta')));
+  assert.ok(e.portasArrancadas.size >= 1);
+});
