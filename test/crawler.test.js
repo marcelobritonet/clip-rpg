@@ -828,3 +828,21 @@ test('descansar: com perigo à vista não rende, e o personagem diz por quê uma
   const avisos = e.log.filter((x) => x.texto.includes('Não consigo fechar os olhos'));
   assert.equal(avisos.length, 1);
 });
+
+test('Corpo: a Resistência segura na cabeça o golpe de vulto, e derrubar uma fera acalma', () => {
+  const corpo = J.novaPartida({ semente: 'corpo-1', tema: 'masmorra', origem: 'corpo' });
+  const mente = J.novaPartida({ semente: 'corpo-1', tema: 'masmorra', origem: 'mente' });
+  assert.ok(J.PARAM.resistenciaNaCabeca && J.PARAM.alivioCorpo > 0);
+  assert.equal(corpo.ficha.aprimoramentos.resistencia ?? 0, 1);
+  assert.equal(mente.ficha.aprimoramentos.resistencia ?? 0, 0);
+  // Derrubar uma besta de verdade, com a cabeça abalada.
+  const fera = corpo.entidades.find((m) => m.tipo === 'monstro');
+  const besta = TEMAS.masmorra.monstros.find((q) => q.categoria === 'besta');
+  Object.assign(fera, { especie: besta.id, categoria: 'besta' });
+  const livre = [[1, 0], [0, 1], [-1, 0], [0, -1]].map(([dx, dy]) => ({ x: corpo.jogador.x + dx, y: corpo.jogador.y + dy })).find((c) => tile(corpo.mapa, c.x, c.y) === T.CHAO);
+  Object.assign(fera, livre, { vida: 1, aparencia: null, estado: 'cacando' });
+  corpo.san = 5;
+  for (let i = 0; i < 12 && fera.vida > 0; i++) J.agir(corpo, { tipo: 'atacar', dx: fera.x - corpo.jogador.x, dy: fera.y - corpo.jogador.y });
+  assert.ok(fera.vida <= 0, 'a fera cai');
+  assert.ok(corpo.log.some((m) => m.texto.includes('As mãos param de tremer') && m.voz));
+});

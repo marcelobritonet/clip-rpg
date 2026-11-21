@@ -128,6 +128,10 @@ export const PARAM = {
   defesaAssombro: 0,
   /** Teto de Sanidade perdida por sussurro de assombro (o dano pela diferença dos dados é letal com Sanidade baixa). */
   danoMentalMaximo: 2,
+  /** Sanidade que o Corpo recupera ao derrubar uma fera de verdade (0.8.0). */
+  alivioCorpo: 1,
+  /** Resistência reduz a Sanidade perdida para golpes de vulto e de assombro (0.8.0). */
+  resistenciaNaCabeca: true,
   aliado: { vida: 6, ataque: 1, defesa: 1, arma: 1 },
   inventario: 5,
   /** Vida recuperada ao trocar de andar. */
@@ -187,7 +191,7 @@ export const ORIGENS = {
     aprimoramentos: { ataqueCorporal: 2, resistencia: 1 },
     pericias: [],
     arma: true,
-    resumo: 'Luta bem e aguenta pancada. Enxerga mal o que é falso: para olhar de novo, insiste com o corpo.',
+    resumo: 'Luta bem e aguenta pancada, até as que vêm da cabeça. Enxerga mal o que é falso: para olhar de novo, insiste com o corpo. Derrubar uma fera assenta os nervos.',
   },
   mente: {
     caminho: 'mente',
@@ -585,7 +589,9 @@ function vizinhoLivre(e, p) {
 
 function perderSan(e, quanto, { reduzivel = true, motivo = 'outro' } = {}) {
   // Serenidade e Fé seguram os sustos (0.4.0: a Fé passa a contar).
-  const red = reduzivel ? n(e, 'serenidade') + Math.floor(n(e, 'fe') / 2) : 0;
+  // 0.8.0: pancada de vulto ou de assombro é pancada; quem tem Resistência aguenta também na cabeça.
+  const fisico = PARAM.resistenciaNaCabeca && (motivo === 'vulto' || motivo === 'assombro') ? n(e, 'resistencia') : 0;
+  const red = reduzivel ? n(e, 'serenidade') + Math.floor(n(e, 'fe') / 2) + fisico : 0;
   const q = Math.min(e.san, Math.max(0, quanto - red));
   e.stats.perdas[motivo] = (e.stats.perdas[motivo] ?? 0) + q;
   e.san = Math.max(0, e.san - q);
@@ -1355,6 +1361,12 @@ function ferir(e, ent, dano, nome, prefixo = '') {
     if (ent.aparencia && ent.aparencia.categoria === 'aliado') {
       // matou algo que parecia aliado: era monstro, mas a cabeça pesa
       perderSan(e, 1, { motivo: 'matar' });
+    }
+    // 0.8.0: o Corpo assenta a cabeça agindo. Derrubar uma fera de verdade (não gente) acalma.
+    const alivio = PARAM.alivioCorpo;
+    if (alivio && ent.categoria !== 'humano' && !ent.aparencia && clip.caminhoDominante(e.ficha).id === 'corpo' && e.san < derivados(e).sanMax) {
+      ganharSan(e, alivio, 'luta');
+      msg(e, 'Derrubei. As mãos param de tremer e o mundo volta para o lugar.', 'bom', VOZ);
     }
     if (ent.categoria === 'humano') {
       // 0.4.0: pesa para todos, até para o Corpo. Quem só vigiava pesa mais.
