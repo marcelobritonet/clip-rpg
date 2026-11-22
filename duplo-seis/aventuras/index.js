@@ -5,12 +5,14 @@
  */
 import { brasa } from './brasa/index.js';
 import { ar } from './ar/index.js';
+import { sino } from './sino/index.js';
 import { brasa as brasaEn } from './brasa/en/index.js';
 import { ar as arEn } from './ar/en/index.js';
 
 const POR_IDIOMA = {
-  pt: [brasa, ar],
-  en: [brasaEn, arEn],
+  pt: [brasa, ar, sino],
+  // O Sino Afogado ainda não tem tradução (PENDENCIAS 8.11): aparece em português.
+  en: [brasaEn, arEn, sino],
 };
 
 export const aventurasPara = (idioma = 'pt') => POR_IDIOMA[idioma] ?? POR_IDIOMA.pt;

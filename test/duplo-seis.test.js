@@ -431,6 +431,7 @@ test('toda aventura em inglês tem exatamente a mecânica da original', () => {
   assert.equal(en.length, AVENTURAS.length, 'toda aventura tem tradução');
   for (const tr of en) {
     const original = AVENTURAS.find((a) => a.id === tr.id);
+    if (tr === original) continue; // ainda sem tradução (8.11): a mesa mostra em português
     // Cenas novas podem esperar a tradução; o que existe nos dois tem de ser igual.
     const { original: alinhado } = alinhar(original, tr);
     assert.deepEqual(diferencas(alinhado, tr), [], tr.id);

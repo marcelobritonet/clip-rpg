@@ -64,6 +64,9 @@ const CEUS = {
   tarde: ['#3d2b4f', '#b4593f', '#f0a04b'],
   noite: ['#0a0d1c', '#141a33', '#2a2f4d'],
   breu: ['#05060c', '#0a0d1c', '#1a1d30'],
+  crepusculo: ['#1b1626', '#4a2f3a', '#8a5a3c'],
+  lama: ['#0b0d12', '#1a1f24', '#3a3a34'],
+  neblina: ['#14171b', '#2c3135', '#4c524f'],
   estacao: ['#060913', '#0d1830', '#163a4a'],
   vazio: ['#020308', '#060913', '#0d1426'],
 };
@@ -106,6 +109,44 @@ const PAISAGENS = {
       + serra(r, 96, 30, 6, '#141829')
       + `<path d="M236 100 l6 -70 l16 0 l6 70 Z" fill="#06070d"/><rect x="238" y="22" width="24" height="9" fill="#06070d"/><path d="M240 22 l10 -9 l10 9 Z" fill="#06070d"/><rect x="246" y="23.5" width="8" height="6" fill="#2a2f4d"/>`
       + `<rect y="100" width="${W}" height="14" fill="#06070d"/>`;
+  },
+  // O Sino Afogado
+  oratorio(r) {
+    let s = ceu('crepusculo') + estrelas(r, 10, '#ffe9c0');
+    s += colinas(r, 84, 18, '#2a2128');
+    s += casa(60, 96, 34, '#1a1418', '#ffd27a') + casa(210, 95, 26, '#1a1418', '#ffd27a') + casa(268, 96, 22, '#1a1418', '#ffcf7a');
+    s += `<path d="M150 96 v-24 l12 -10 l12 10 v24 Z" fill="#120d10"/><rect x="157" y="76" width="10" height="12" rx="5" fill="#ffd27a" opacity="0.85"/>`;
+    return s + `<rect y="96" width="${W}" height="18" fill="#100c0e"/>`;
+  },
+  vilanova(r) {
+    let s = ceu('crepusculo') + estrelas(r, 18, '#ffe9c0') + `<circle cx="290" cy="22" r="9" fill="#f4e2c0" opacity="0.8"/>`;
+    s += `<path d="M0 62 Q120 40 210 58 T${W} 52 L${W} ${H} L0 ${H} Z" fill="#2b2230"/>`;
+    for (let i = 0; i < 7; i++) s += casa(10 + i * 46 + r() * 10, 70 + r() * 6, 18 + r() * 8, '#1c1620', r() > 0.2 ? '#ffd27a' : '#3a2f3a');
+    s += `<path d="M232 66 v-30 l7 -9 l7 9 v30 Z" fill="#1c1620"/><circle cx="239" cy="40" r="2.5" fill="#c9a76a"/>`;
+    return s + `<path d="M0 98 Q170 90 ${W} 100 L${W} ${H} L0 ${H} Z" fill="#20242a"/><path d="M0 104 h${W}" stroke="#6f7b84" stroke-width="0.8" opacity="0.4"/>`;
+  },
+  margem(r) {
+    let s = ceu('lama') + estrelas(r, 30, '#dfe6ff') + `<circle cx="70" cy="26" r="11" fill="#e8ecf4" opacity="0.85"/>`;
+    for (let i = 0; i < 12; i++) s += `<rect x="${(r() * W).toFixed(1)}" y="${40 + r() * 20}" width="2.2" height="${40 + r() * 20}" fill="#151a1d"/>`;
+    s += `<path d="M0 82 L${W} 78 L${W} ${H} L0 ${H} Z" fill="#3b372e"/>`;
+    for (let i = 0; i < 14; i++) { const x = r() * W; const y = 86 + r() * 22; s += `<path d="M${x.toFixed(1)} ${y.toFixed(1)} l${(6 + r() * 14).toFixed(1)} ${(r() * 4 - 2).toFixed(1)} l${(4 + r() * 8).toFixed(1)} ${(r() * 4).toFixed(1)}" stroke="#1d1b17" stroke-width="1" fill="none"/>`; }
+    for (let i = 0; i < 4; i++) { const x = 180 + i * 30 + r() * 10; s += `<path d="M${x} 94 v-14 M${x - 5} 85 h10" stroke="#5a5448" stroke-width="2"/>`; }
+    return s;
+  },
+  afogada(r) {
+    let s = ceu('neblina');
+    for (let i = 0; i < 6; i++) { const x = i * 58 + r() * 14; const hh = 22 + r() * 18; s += `<path d="M${x} 98 v-${hh} h${30 + r() * 10} v${hh} Z" fill="#23282a"/><rect x="${x + 8}" y="${98 - hh + 8}" width="7" height="10" fill="#0e1112"/>`; }
+    s += `<rect y="90" width="${W}" height="24" fill="#2e2f2a"/><path d="M0 92 h${W}" stroke="#5c615b" stroke-width="0.8" opacity="0.5"/>`;
+    for (let i = 0; i < 4; i++) s += `<ellipse cx="${(r() * W).toFixed(1)}" cy="${(50 + r() * 40).toFixed(1)}" rx="${(60 + r() * 60).toFixed(1)}" ry="8" fill="#8a918c" opacity="0.18"/>`;
+    return s;
+  },
+  torre(r) {
+    let s = ceu('neblina') + estrelas(r, 8, '#dfe6ff');
+    s += `<path d="M200 100 v-46 h60 v46 Z" fill="#1d2224"/><path d="M215 54 v-30 h18 v30 Z" fill="#1a1e20"/><path d="M212 24 l12 -12 l12 12 Z" fill="#1a1e20"/>`;
+    s += `<rect x="219" y="28" width="10" height="10" fill="#0b0d0e"/><path d="M224 30 q-4 6 0 7 q4 -1 0 -7 Z" fill="#5f7a5a"/>`;
+    s += `<path d="M0 96 L${W} 94 L${W} ${H} L0 ${H} Z" fill="#2a2a25"/>`;
+    for (let i = 0; i < 3; i++) s += `<ellipse cx="${(r() * W).toFixed(1)}" cy="${(70 + r() * 20).toFixed(1)}" rx="${(80 + r() * 50).toFixed(1)}" ry="7" fill="#9aa19b" opacity="0.2"/>`;
+    return s;
   },
   anel(r) {
     let s = ceu('estacao') + estrelas(r, 24, '#bfe');

@@ -168,6 +168,43 @@ O Piloto de Rebocador chegava ao final de 3 estrelas do Ar em 16% das sessões (
 
 Os outros cinco passados ficaram com os mesmos números. O inglês recebeu as mudanças da viga e do apagão (cenas que já existiam lá); a Andorinha ainda não foi traduzida (8.11).
 
+## O Sino Afogado (22/11/2026, 8.7, só pt)
+
+Terceira aventura, de horror com investigação, para a Sanidade pesar. A represa afogou a velha
+Pedra-Funda há trinta anos; na seca, a torre da igreja reaparece e um sino toca de madrugada. Quem
+ouve dormindo desce até a água e acorda sem o próprio nome. O personagem desce com a vela da última
+missa, que é o relógio (por dentro, o mesmo efeito `brasa`). A verdade, que só o final conta: Damião,
+o sineiro, não quis sair da torre, e a vila combinou nunca mais dizer o nome dele.
+
+| Peça | Como ficou |
+|---|---|
+| Atos | 1. A Vila Nova · 2. A Margem · 3. A Cidade Afogada · Torre (2 cenas fixas) |
+| Investigação | A marca `retrato` (a chapa de vidro, a carta, o livro de tombo, o caderno do barqueiro, a gaveta do sineiro...) abre na porta da torre a saída que dá `damiao`, o nome. Sem ela, o nome vem perguntando com educação ou com 5 laços na subida |
+| Finais | `nome` (3★: vela ≥ 2, nome e 5 laços), `acordado` (3★: vela 0 e 6 laços), `silencio` (2★), `madrugada` (1★), `agua` (0★); quedas `morte` e `perdido` |
+| Companheiros | Tião, o menino surdo que não ouve o sino (ato 1, ou no ato 3 se não veio antes) e Luzia, a pescadora (ato 2) |
+| Cenários | `oratorio`, `vilanova`, `margem`, `afogada`, `torre` em `cenario.js` |
+| Inglês | Sem tradução (8.11). A lista em inglês mostra a aventura em português, como a interface já previa. O teste de paridade pula aventura sem tradução |
+
+Equilíbrio, robô atento, 1500 sessões por passado (final de 3 estrelas):
+
+| Passado | 1ª versão | Final |
+|---|---|---|
+| Barqueiro | 44% | 50% |
+| Trapezista | 12% | 32% |
+| Professora | 27% | 50% |
+| Farmacêutico | 17% | 52% |
+| Locutor | 53% | 57% |
+| Benzedeira | 26% | 37% |
+
+O que subiu os de baixo foi o mesmo da 8.12: dar uso aos antecedentes que nenhuma cena pedia
+(`aliado` na banda, no cavalo e na roda; `semRecursos` no mascate), laço na saída de Mente de três
+cenas de gente (padre, engenheiro, comporta) e especiais da Trapezista e da Benzedeira (a bala na
+orelha de Marina, a crista da barragem, benzer a tristeza de Dona Cândida por 1 PM).
+
+Ressalva: como nas outras aventuras, o robô quase nunca chega à queda `perdido`. A Sanidade cai
+mais aqui (muitas falhas custam 2 a 4), mas ainda não derruba ninguém nas simulações. Vale o seu
+teste de mão (8.3) para dizer se o medo pesa o bastante.
+
 ## Próximos passos
 
 Estão no `PENDENCIAS.md`, seção 8.
