@@ -641,7 +641,7 @@ export const cenas = [
         resultado: {
           texto: 'Your name and the raised lantern are enough. The people who were giving advice roll up their sleeves without waiting for the end of the sentence. The ferry comes off in three heaves, and the ferryman makes you a gift of a coil of rope.',
           cronica: '{nome} spoke a name on the riverbank, and the whole bank came to help.',
-          efeitos: { lacos: 1, item: 'corda' },
+          efeitos: { item: 'corda' },
         },
       },
     ],
@@ -660,6 +660,7 @@ export const cenas = [
         vitoria: {
           texto: 'After a great many feathers in the air, Anselmo retires to the roof, offended. The grandchildren fill the buckets. The grandmother thanks you with her lips pressed shut, looking at the goose the way one looks at a portrait.',
           cronica: '{nome} beat a goose in combat and was not very proud of it.',
+          efeitos: { lacos: 1 },
         },
         derrota: {
           texto: 'You wake under the fig tree, with the grandmother fanning you and the grandchildren counting the pecks out loud. Anselmo is still at the well. The lantern he did not want.',

@@ -136,7 +136,7 @@ export const desfecho = [
         sucesso: {
           texto: 'You do not argue. You tell him about the valley, the windows, the people left waiting. The silence lasts a long time. Then the bolt slides back. "I\'ll climb with you," says the old man.',
           cronica: '{nome} persuaded the Keeper to open the door and climb along.',
-          efeitos: { marca: 'faroleiro', lacos: 1 },
+          efeitos: { marca: 'faroleiro' },
         },
         falha: {
           texto: '"Words," says the voice, and moves away. You go on talking to the iron until you find an arrow slit to squeeze through.',

@@ -457,7 +457,7 @@ export const cenas = [
         sucesso: {
           texto: 'The jug is heavy and the bowls are shallow. You fill all four to the brim, the old woman\'s first, and lose not a drop. The masks bow. As you leave, someone hangs a wool cloak on your shoulder.',
           cronica: '{nome} served at the table of the wood folk without spilling a drop and left in a new cloak.',
-          efeitos: { item: 'manto' },
+          efeitos: { item: 'manto', lacos: 1 },
         },
         falha: {
           texto: 'The broth runs across the stone and into the eldest\'s lap. Nobody says a word, and that is the worst of it. The three of them stand, gather the bowls and leave you alone with an empty table.',

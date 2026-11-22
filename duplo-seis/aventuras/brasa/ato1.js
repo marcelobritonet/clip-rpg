@@ -641,7 +641,7 @@ export const cenas = [
         resultado: {
           texto: 'Basta o seu nome e a lanterna erguida. Quem dava palpite arregaça as mangas sem esperar o fim da frase. A balsa sai em três puxões, e o balseiro lhe presenteia com um rolo de corda.',
           cronica: '{nome} disse o nome na margem do rio, e a margem inteira veio ajudar.',
-          efeitos: { lacos: 1, item: 'corda' },
+          efeitos: { item: 'corda' },
         },
       },
     ],
@@ -660,6 +660,7 @@ export const cenas = [
         vitoria: {
           texto: 'Depois de muita pena no ar, Anselmo se retira para o telhado, ofendido. Os netos enchem os baldes. A avó agradece de boca fechada, olhando o ganso como quem olha um retrato.',
           cronica: '{nome} venceu um ganso em combate e não se orgulhou muito disso.',
+          efeitos: { lacos: 1 },
         },
         derrota: {
           texto: 'Você acorda debaixo da figueira, com a avó abanando e os netos contando as bicadas em voz alta. Anselmo continua no poço. A lanterna, ele não quis.',

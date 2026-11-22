@@ -70,7 +70,32 @@ final, textos), `passados.js`, três atos e um `index.js`; a tradução fica num
 `node duplo-seis/simular.mjs [sessões] [atento|teimoso|acaso] [brasa|ar]` imprime a tabela de finais por passado.
 `node duplo-seis/aventuras/validar.js brasa/ato1.js` confere um arquivo de cenas contra `aventuras/FORMATO.md`.
 
+### Equilíbrio dos passados da Brasa (22/11/2026, ainda sem versão publicada)
+
+O Espírito juntava laços demais: a Presença abria a porta do Farol e ainda rendia um laço, e a fama
+rendia outro sem ajudar ninguém. Quatro mudanças, só em efeitos (texto intocado), espelhadas em `en/`:
+
+| Cena | Saída | Antes | Agora | Por quê |
+|---|---|---|---|---|
+| A porta do Farol | Falar com o Faroleiro | Faroleiro e +1 laço | Só o Faroleiro | O Faroleiro já é a recompensa; o laço contava em dobro |
+| A balsa | Fama (livre) | +1 laço e corda | Só a corda | Laço é gente que você ajudou; ali é a fama que ajuda você |
+| A mesa na clareira | Servir sem derramar | Manto | Manto e +1 laço | Era a única saída bem-sucedida da cena sem laço |
+| O ganso do poço | Vitória no combate | Nada | +1 laço | A família volta ao poço; vale o mesmo que a saída pacífica, como manda o FORMATO |
+
+Final de 3 estrelas, robô atento:
+
+| Passado | Antes (400) | Agora (400) | Agora (1500) | Teimoso antes | Teimoso agora |
+|---|---|---|---|---|---|
+| A Desertora | 21% | 37% | 38% | 18% | 32% |
+| O Caçador | 33% | 44% | 48% | 34% | 46% |
+| A Boticária | 45% | 45% | 45% | 43% | 43% |
+| O Aprendiz | 54% | 54% | 56% | 51% | 51% |
+| O Menestrel | 82% | 52% | 54% | 75% | 39% |
+| A Peregrina | 73% | 53% | 55% | 70% | 55% |
+
+Alvo era todos entre 30% e 60%. Média de estrelas ficou entre 1,95 e 2,53 (antes 1,73 a 2,74).
+O robô ao acaso continua quase sempre em "Cinza".
+
 ## Próximos passos
 
-Equilíbrio entre os passados da Brasa (o Espírito junta laços demais para o robô), Antecedentes na ficha livre,
-mais cenas por ato, terceira aventura de outro gênero (investigação, horror), espanhol.
+Estão no `PENDENCIAS.md`, seção 8.

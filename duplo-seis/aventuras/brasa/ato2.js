@@ -457,7 +457,7 @@ export const cenas = [
         sucesso: {
           texto: 'A jarra é pesada e as cuias são rasas. Você enche as quatro até a borda, a da velha primeiro, sem perder uma gota. As máscaras se inclinam. Na saída, alguém pendura um manto de lã no seu ombro.',
           cronica: '{nome} serviu a mesa do povo da mata sem derramar uma gota e saiu de manto novo.',
-          efeitos: { item: 'manto' },
+          efeitos: { item: 'manto', lacos: 1 },
         },
         falha: {
           texto: 'O caldo escorre pela pedra até o colo da mais velha. Ninguém diz nada, e isso é o pior. As três se levantam, recolhem as cuias e deixam você sozinho com uma mesa vazia.',

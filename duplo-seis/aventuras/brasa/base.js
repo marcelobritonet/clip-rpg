@@ -136,7 +136,7 @@ export const desfecho = [
         sucesso: {
           texto: 'Você não discute. Conta do vale, das janelas, de quem ficou esperando. O silêncio dura muito. Depois, a tranca corre. "Eu subo com você", diz o velho.',
           cronica: '{nome} convenceu o Faroleiro a abrir a porta e a subir junto.',
-          efeitos: { marca: 'faroleiro', lacos: 1 },
+          efeitos: { marca: 'faroleiro' },
         },
         falha: {
           texto: '"Palavras", diz a voz, e se afasta. Você fica falando com o ferro até achar uma seteira por onde se espremer.',
