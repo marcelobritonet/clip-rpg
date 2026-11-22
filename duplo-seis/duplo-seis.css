@@ -78,6 +78,9 @@ a { color: var(--fogo-2); }
 .capa h1 { font-size: 3rem; font-weight: 800; letter-spacing: -0.01em; color: var(--fogo-2); text-shadow: 0 0 28px rgb(240 145 58 / 0.45); }
 .lema { color: var(--claro-2); max-width: 24rem; margin: 0.5rem auto 0; }
 .selo { display: flex; gap: 0.5rem; justify-content: center; margin-bottom: 0.9rem; }
+.idiomas { display: flex; justify-content: flex-end; gap: 0.3rem; margin-bottom: -2.2rem; position: relative; z-index: 1; }
+.idiomas button { min-width: 2.4rem; min-height: 1.9rem; padding: 0 0.5rem; border-radius: 999px; background: transparent; border: 1px solid var(--linha); color: var(--claro-2); font-size: 0.72rem; font-weight: 700; letter-spacing: 0.08em; }
+.idiomas button[aria-pressed='true'] { border-color: var(--fogo); color: var(--fogo-2); background: rgb(240 145 58 / 0.14); }
 #inicio { display: grid; grid-template-columns: minmax(0, 1fr); gap: 1.2rem; }
 .caixa { background: var(--mesa); border: 1px solid var(--linha); border-radius: 14px; padding: 0.9rem 1rem; display: grid; gap: 0.5rem; }
 .caixa.destaque { border-color: var(--fogo); box-shadow: 0 0 0 1px var(--fogo), 0 8px 26px rgb(240 145 58 / 0.18); }

@@ -1,0 +1,88 @@
+/**
+ * "Content is King": the past comes before the points. Each past is a
+ * Beginner Specialist sheet (12 Evolution Points) checked by `validar`.
+ */
+export const PONTOS_INICIAIS = 12;
+
+export const PASSADOS = [
+  {
+    id: 'desertora',
+    titulo: 'The Deserter',
+    nome: 'Brena',
+    caminho: 'corpo',
+    quem: 'You served six winters in the border guard and dropped the uniform the night they ordered a village burned. You came back to Bellford owing everyone an explanation.',
+    motivo: 'Carrying the ember is how you pay what you owe without having to talk about it.',
+    atributos: { forca: 3, destreza: 2, fisico: 1, percepcao: 1, vontade: 1 },
+    aprimoramentos: { ataqueCorporal: 2, reflexo: 1, resistencia: 1 },
+    pericias: {},
+    antecedentes: { maFama: { nivel: 1, mau: true }, aliado: { nivel: 1 } },
+    itens: ['espadaCurta', 'gibao'],
+  },
+  {
+    id: 'cacador',
+    titulo: 'The Hunter',
+    nome: 'Ivo',
+    caminho: 'corpo',
+    quem: 'You know the Old Wood by its smell and prefer animals to people. When someone goes missing in the wood, you are the one they send for. The ones who come back seldom say thanks.',
+    motivo: 'Without the Beacon, the wood turns into something else. And the wood is where you live.',
+    atributos: { forca: 1, destreza: 3, fisico: 1, percepcao: 2 },
+    aprimoramentos: { precisao: 2, agilidade: 1 },
+    pericias: { sobrevivencia: 1, furtividade: 1 },
+    antecedentes: {},
+    itens: ['arco', 'faca', 'isca'],
+  },
+  {
+    id: 'boticaria',
+    titulo: 'The Apothecary',
+    nome: 'Maina',
+    caminho: 'mente',
+    quem: 'Half the village was born into your hands and the other half owes you for a syrup. You know the name of every herb in the valley and nearly every sickness.',
+    motivo: 'You have seen what the cold of the Long Night does to a lung. You will not see it again.',
+    atributos: { inteligencia: 3, percepcao: 1, sabedoria: 2, fisico: 1, vontade: 1 },
+    aprimoramentos: {},
+    pericias: { medicina: 2, magiaSuporte: 1, investigacao: 1 },
+    antecedentes: { recursos: { nivel: 1 } },
+    itens: ['ervas', 'unguento', 'cajado'],
+  },
+  {
+    id: 'aprendiz',
+    titulo: 'The Apprentice',
+    nome: 'Caio',
+    caminho: 'mente',
+    quem: 'Your master died in the autumn and left half a library and no instructions. What you know of magic you taught yourself, at night, by getting it wrong.',
+    motivo: 'One of the books has a drawing of the Beacon with a note in the margin: "do not let it go out". The handwriting is your master\'s.',
+    atributos: { inteligencia: 3, percepcao: 2, sabedoria: 1, vontade: 1 },
+    aprimoramentos: {},
+    pericias: { magiaAtaqueFisico: 1, magiaEncantamento: 2, magiaElemental: 1, historia: 1 },
+    antecedentes: {},
+    itens: ['almanaque', 'lamparina'],
+  },
+  {
+    id: 'menestrel',
+    titulo: 'The Minstrel',
+    nome: 'Tome',
+    caminho: 'espirito',
+    quem: 'You sing at every fair from here to the sea and have never paid for a bowl of soup. You know everyone, and everyone thinks they know you.',
+    motivo: 'There is no song yet about someone who lit the Beacon. You intend to write it in the first person.',
+    atributos: { presenca: 3, vontade: 1, fe: 1, destreza: 1, percepcao: 1, sabedoria: 1 },
+    aprimoramentos: { empatia: 2, agilidade: 1 },
+    pericias: { prestidigitacao: 1 },
+    antecedentes: { boaFama: { nivel: 1 } },
+    itens: ['flauta', 'faca'],
+  },
+  {
+    id: 'peregrina',
+    titulo: 'The Pilgrim',
+    nome: 'Auta',
+    caminho: 'espirito',
+    quem: 'You have walked from chapel to chapel for so long that you forgot the vow that started the walking. Animals trust you. People, after a while, do too.',
+    motivo: 'A light on top of a hill. You know a calling when you see one.',
+    atributos: { fe: 3, vontade: 2, presenca: 1, sabedoria: 2, fisico: 1 },
+    aprimoramentos: {},
+    pericias: { magiaControle: 2, lidarAnimais: 1 },
+    antecedentes: { aliado: { nivel: 1 } },
+    itens: ['amuleto', 'cajado'],
+  },
+];
+
+export const passado = (id) => PASSADOS.find((p) => p.id === id);

@@ -362,3 +362,76 @@ test('companheiro que une forças numa falha fica de fora da cena seguinte', () 
   }
   assert.fail('nenhuma semente falhou');
 });
+
+/* ---------- 0.2.0: as mesmas regras, outra aventura ---------- */
+
+import { AVENTURAS } from '../duplo-seis/aventuras/index.js';
+
+test('toda aventura fecha com o formato, tem passados válidos e cenas que bastam', () => {
+  assert.ok(AVENTURAS.length >= 2);
+  const idsDeCena = new Set();
+  for (const av of AVENTURAS) {
+    const erros = validarCenas({ cenas: [av.abertura, ...av.cenas, ...av.desfecho], itens: av.itens, companheiros: av.companheiros, inimigos: av.inimigos });
+    assert.deepEqual(erros, [], av.id);
+    for (const c of [av.abertura, ...av.cenas, ...av.desfecho]) { assert.ok(!idsDeCena.has(`${av.id}:${c.id}`)); idsDeCena.add(`${av.id}:${c.id}`); }
+    for (const ato of [1, 2, 3]) assert.ok(av.cenas.filter((c) => c.ato === ato && !c.requer).length >= J.MESA.cenasPorAto, `${av.id} ato ${ato}`);
+    assert.equal(av.passados.length, 6, av.id);
+    for (const p of av.passados) {
+      const f = R.novaFicha(p);
+      assert.deepEqual(R.validar(f, PONTOS_INICIAIS), [], `${av.id} ${p.id}`);
+      assert.equal(R.pontosGastos(f), PONTOS_INICIAIS, `${av.id} ${p.id}`);
+      assert.equal(R.caminhoDominante(f), p.caminho, `${av.id} ${p.id}`);
+      for (const i of p.itens) assert.ok(av.itens[i], `${av.id} ${p.id}: item ${i}`);
+    }
+    for (const k of ['velar', 'velou', 'subir']) assert.ok(av.textos[k], `${av.id}: texto ${k}`);
+    assert.equal(av.relogio.palavras.length, 6, av.id);
+    assert.equal(av.cenarios.length, 5, av.id);
+    for (const c of [...av.cenas, ...av.desfecho]) for (const a of c.abordagens) {
+      if (a.combate) for (const d of ['vitoria', 'derrota', 'fuga']) assert.ok(!a[d].efeitos?.marco, `${c.id}/${a.id}`);
+    }
+  }
+});
+
+test('o robô termina a sessão em toda aventura, e todo final é alcançável', () => {
+  for (const av of AVENTURAS) {
+    const vistos = new Set();
+    for (const p of av.passados) for (const perfil of ['atento', 'acaso']) {
+      for (let i = 0; i < 150; i++) {
+        const e = jogar({ semente: `av-${i}`, passado: p.id, aventura: av, perfil });
+        assert.equal(e.fase, 'fim', `${av.id} ${p.id} ${perfil} ${i}`);
+        assert.deepEqual(R.validar(e.ficha), []);
+        vistos.add(e.fim.id);
+      }
+    }
+    for (const f of [...av.finais.map((x) => x.id), ...Object.keys(av.quedas)]) assert.ok(vistos.has(f), `${av.id}: final ${f}`);
+  }
+});
+
+test('toda marca exigida por alguma cena é dada por outra', () => {
+  for (const av of AVENTURAS) {
+    const dadas = new Set();
+    const pedidas = new Set();
+    const ver = (d) => { for (const m of [d?.efeitos?.marca].flat()) if (m) dadas.add(m); };
+    for (const c of [av.abertura, ...av.cenas, ...av.desfecho]) {
+      if (c.requer?.marca) pedidas.add(c.requer.marca);
+      for (const a of c.abordagens) {
+        if (a.requer?.marca) pedidas.add(a.requer.marca);
+        for (const k of ['sucesso', 'falha', 'critico', 'desastre', 'vitoria', 'derrota', 'fuga', 'resultado']) ver(a[k]);
+      }
+    }
+    for (const m of pedidas) assert.ok(dadas.has(m), `${av.id}: marca ${m}`);
+  }
+});
+
+import { aventurasPara } from '../duplo-seis/aventuras/index.js';
+import { diferencas } from '../duplo-seis/aventuras/paridade.js';
+
+test('toda aventura em inglês tem exatamente a mecânica da original', () => {
+  const en = aventurasPara('en');
+  assert.equal(en.length, AVENTURAS.length, 'toda aventura tem tradução');
+  for (const tr of en) {
+    const original = AVENTURAS.find((a) => a.id === tr.id);
+    assert.deepEqual(diferencas(original, tr), [], tr.id);
+    assert.notEqual(tr.nome, original.nome);
+  }
+});

@@ -12,6 +12,7 @@ as regras foram reescritas do zero em `regras.js`, cada função citando a seç�
 
 | Versão | Data | O que mudou |
 |---|---|---|
+| 0.2.0 | 21/11/2026 | **Genérico e adaptável: outra aventura, outro idioma, as mesmas regras.** Segunda aventura, "Ar Rarefeito", ficção científica numa estação orbital: 27 cenas, seis passados, sete finais; a magia do suplemento vira "sintonia" (o manual prevê poderes psíquicos ou nascidos com o personagem) sem mudar regra nenhuma. O jogo inteiro em inglês ("Double Six": interface, "The Last Ember" e "Thin Air"), com um teste que confere que a tradução tem exatamente a mesma mecânica. Robô atento, 400 sessões por passado, final de 3 estrelas: na Brasa de 21% (Desertora) a 82% (Menestrel); no Ar de 17% (Piloto) a 56% (Sensitiva). |
 | 0.1.1 | 21/11/2026 | **A mesa ganha rosto e memória.** Cenário desenhado em código no alto de cada cena (vila, vale, mata, montanha, farol), com a lanterna brilhando conforme a brasa. Sessão guardada no aparelho, para continuar depois. Ficha livre: o jogador escreve o passado e distribui os 12 pontos, com os tetos do manual. Aventura do dia (a mesma semente para todos), caderno de finais, palpite do Mestre antes de rolar, e companheiro que une forças numa falha fica de fora da cena seguinte. Instalável no celular e joga sem rede. Velar a brasa passa a valer +2. Robô atento, 300 sessões: 3 estrelas entre 20% (Desertora) e 82% (Menestrel). |
 | 0.1.0 | 21/11/2026 | **Primeira sessão completa.** Aventura "A Última Brasa": abertura (a porta de Dificuldade 10 do manual), três atos de quatro cenas sorteadas entre 27, o Farol em duas cenas e sete finais. Seis passados, todos fichas válidas de 12 pontos. Teste com objeto, unir forças, insistir, nível 0 e dado da sorte; combate por rodadas; magia por Ponto de Magia; Sanidade e perda de controle; evolução por marcos no acampamento; crônica da sessão; dados animados e som em código. Robô atento, 500 sessões por passado: final de 3 estrelas entre 20% (Desertora) e 79% (Menestrel); sucesso por teste entre 76% e 84%. Robô ao acaso: 85% de "Cinza". |
 
@@ -53,16 +54,22 @@ Tudo isto está no bloco `MESA` de `jogo.js`. Nada aqui muda regra escrita.
 
 ## Coisas do jogo que não são do Clip
 
-- **A brasa:** o relógio da jornada. Começa em 10, perde 2 por noite e o que as falhas custarem.
+- **O relógio da jornada:** a brasa na Brasa, o ar no Ar. Começa em 10, perde 2 por noite e o que as falhas custarem.
 - **Laços:** gente que você ajudou. Com cinco, o Faroleiro sobe com você.
 - **A crônica:** uma frase por cena, no passado, que vira a história da sessão.
 
+## Escrever uma aventura
+
+`aventuras/FORMATO.md` descreve o formato das cenas. Cada aventura é uma pasta com `base.js` (catálogo, abertura,
+final, textos), `passados.js`, três atos e um `index.js`; a tradução fica numa subpasta `en/` com os mesmos arquivos.
+`node duplo-seis/aventuras/paridade.js ar en` confere que a tradução não mexeu na mecânica.
+
 ## Medir a mesa
 
-`node duplo-seis/simular.mjs [sessões] [atento|teimoso|acaso]` imprime a tabela de finais por passado.
+`node duplo-seis/simular.mjs [sessões] [atento|teimoso|acaso] [brasa|ar]` imprime a tabela de finais por passado.
 `node duplo-seis/aventuras/validar.js brasa/ato1.js` confere um arquivo de cenas contra `aventuras/FORMATO.md`.
 
 ## Próximos passos
 
-Segunda aventura de outro gênero, ficha livre, aventura do dia, inglês, instalar no celular,
-equilíbrio entre os passados (o Espírito está forte demais para o robô).
+Equilíbrio entre os passados da Brasa (o Espírito junta laços demais para o robô), Antecedentes na ficha livre,
+mais cenas por ato, terceira aventura de outro gênero (investigação, horror), espanhol.

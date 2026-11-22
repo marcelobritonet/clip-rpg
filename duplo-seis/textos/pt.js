@@ -1,0 +1,293 @@
+/**
+ * Duplo Seis em português: o idioma de origem. Toda chave daqui existe, com
+ * os mesmos marcadores {…}, em cada tradução (test/duplo-seis-idioma.test.js).
+ *
+ * Os nomes do manual (Atributos, Aprimoramentos, Perícias, Dificuldades) vêm
+ * de regras.js, que é a fonte deles em português.
+ */
+import * as R from '../regras.js';
+
+const nomes = (tabela) => Object.fromEntries(Object.entries(tabela).map(([k, v]) => [k, v.nome]));
+
+export default {
+  nomes: {
+    caminhos: nomes(R.CAMINHOS),
+    chaves: { ...nomes(R.ATRIBUTOS), ...nomes(R.APRIMORAMENTOS), ...nomes(R.PERICIAS) },
+    dificuldades: R.DIFICULDADES.map((d) => d.nome),
+    antecedentes: { aliado: 'Aliado', inimigo: 'Inimigo', boaFama: 'Boa Fama', maFama: 'Má Fama', recursos: 'Recursos', semRecursos: 'Sem Recursos' },
+    medidas: { vida: 'Vida', magia: 'Magia', sanidade: 'Sanidade', brasa: 'Brasa', lacos: 'Laço' },
+  },
+
+  plural: {
+    dado: ['dado', 'dados'],
+    ponto: ['ponto', 'pontos'],
+    porMarco: ['deles por marco', 'deles por marcos'],
+    pontoGasto: ['Ponto de Evolução gasto', 'Pontos de Evolução gastos'],
+  },
+
+  /* ---------- A sessão (jogo.js) ---------- */
+
+  sistema: {
+    desmaio: 'Tudo escurece. Quando você abre os olhos, a brasa está menor e o mundo dói.',
+    desmaioAcompanhado: 'Tudo escurece. Você acorda com {quem} segurando a lanterna e a sua cabeça.',
+    furia: 'Algo se rompe. Quando a vista volta, suas mãos estão fechadas e doendo, e há alguém se afastando de você com medo.',
+    furiaSozinho: 'Algo se rompe. Quando a vista volta, seus punhos estão esfolados na casca de uma árvore que não lhe fez nada.',
+    impulso: 'Você corre. Não sabe de quê. Larga o que pesa, ri alto, corre mais. Quando para, falta alguma coisa na sacola.',
+    convulsao: 'O chão sobe. O corpo treme sozinho, os dentes batem, a língua sangra. Passa. Demora, mas passa.',
+    torpor: 'Você se senta. Só um pouco. A lanterna queima ao seu lado enquanto você olha para nada, por muito tempo.',
+    noite: 'Você acha um canto abrigado e acende um fogo pequeno ao lado da lanterna. A brasa come a noite devagar.',
+    cronicaDesmaio: '{nome} caiu sem sentidos e acordou com a brasa menor.',
+    cronicaSurto: '{nome} ficou fora de si por um tempo, e não gosta de lembrar.',
+  },
+
+  escala: {
+    vida: ['caído', 'por um fio', 'muito ferido', 'ferido', 'arranhado', 'inteiro'],
+    sanidade: ['fora de si', 'em pedaços', 'abalado', 'inquieto', 'firme', 'sereno'],
+    magia: ['esgotado', 'quase seco', 'gasto', 'pela metade', 'disposto', 'pleno'],
+    brasa: ['cinza', 'um ponto vermelho', 'fraca', 'viva', 'forte', 'gorda e clara'],
+  },
+
+  inimigo: { inteiro: 'inteiro', arranhado: 'arranhado', ferido: 'ferido', quaseCaindo: 'quase caindo', caido: 'caído' },
+
+  palpite: {
+    impossivel: 'impossível assim',
+    muitaSorte: 'só com muita sorte',
+    arriscado: 'arriscado',
+    qualquerLado: 'pode ir para qualquer lado',
+    provavel: 'provável',
+    quaseCerto: 'quase certo',
+  },
+
+  cronica: {
+    cabecalho: 'Duplo Seis · {aventura}',
+    personagem: '{nome}, {titulo}',
+    semente: 'semente {semente}',
+  },
+
+  acoes: {
+    golpearCom: 'Golpear com {arma}',
+    maosNuas: 'Golpear de mãos nuas',
+    atirarCom: 'Atirar com {arma}',
+    ataqueMagico: 'Ataque mágico',
+    ataqueMente: 'Ataque à mente',
+    recuar: 'Recuar',
+  },
+
+  /* ---------- A mesa na tela (ui.js e index.html) ---------- */
+
+  pagina: {
+    marca: 'Duplo Seis',
+    titulo: 'Duplo Seis · uma mesa de RPG para um',
+    descricao: 'Uma sessão de RPG de mesa para um jogador, em dez minutos, sobre o Sistema Clip. O Mestre narra, você decide, os dados rolam.',
+    lema: 'Uma mesa de RPG para um. O Mestre narra, você decide, os dados rolam.',
+    idioma: 'Idioma',
+    manual: 'Manual do Sistema Clip',
+    versao: 'Duplo Seis {numero}',
+    ficha: 'ficha',
+    som: 'Som',
+  },
+
+  inicio: {
+    emAndamento: 'Sessão em andamento',
+    emAventura: ' em {aventura}',
+    continuar: 'Continuar',
+    abandonar: 'Abandonar',
+    doDia: 'Aventura do dia · {data}',
+    doDiaExplica: ': a mesma semente para todo mundo, uma chance por dia de comparar crônicas.',
+    hoje: 'Hoje: {estrelas} {titulo}',
+    vaiJogarHoje: '✓ Você vai jogar a de hoje. Escolha quem você é.',
+    jogarHoje: 'Jogar a de hoje',
+    aAventura: 'A aventura',
+    aventura: 'Aventura',
+    finaisDescobertos: 'Finais descobertos: {vistos} de {total}',
+    antesDosDados: 'Antes dos dados, o passado. Quem é você?',
+    passado: 'Passado do personagem',
+    melhorFinal: 'Melhor final',
+    fichaLivre: 'Ficha livre',
+    seuPassado: 'Seu próprio passado',
+    numeros: 'Vida {vida} · Magia {magia} · Sanidade {sanidade}',
+    leva: 'Leva: ',
+    antecedentes: ' · Antecedentes: {lista}',
+    nome: 'Nome',
+    sentar: 'Sentar à mesa',
+    sementeDoDia: 'Semente do dia: {semente}',
+    sementeDaSessao: 'Semente da sessão',
+    sementeExplica: 'A mesma semente conta a mesma história',
+    sementeEmBranco: 'em branco: sorteia uma',
+    pericias: 'Perícias: ',
+  },
+
+  livre: {
+    conteudoRei: 'Conteúdo é o Rei: escreva o passado antes dos pontos.',
+    faltam: 'Faltam {pontos} para distribuir.',
+    exemploQuem: 'Quem você foi, o que viveu, por que aceitou esta viagem.',
+    exemploTitulo: 'ex.: A Ferreira',
+    exemploNome: 'ex.: Lia',
+    manual: 'O manual começa assim: sem um passado interessante, as regras não podem ser aplicadas. Primeiro a história, depois os pontos.',
+    quemEVoce: 'Quem é você?',
+    comoChamam: 'Como chamam você',
+    pontos: 'Pontos de Evolução: {gastos} de {total}',
+    nivelInicial: ' · Especialista Iniciante',
+    pericias: 'Perícias',
+    periciasAparecem: 'As Perícias aparecem conforme os Atributos que elas exigem.',
+    numeros: 'Vida {vida} · Magia {magia} · Sanidade {sanidade} · Ataque {ataque} · Defesa {defesa} · Caminho do {caminho}',
+    sacola: 'Leva na sacola ({n} de {total})',
+    baixar: 'Baixar {nome}',
+    subir: 'Subir {nome}',
+    semTitulo: 'Alguém do caminho',
+    semNome: 'Sem-Nome',
+  },
+
+  mesa: {
+    acampamento: 'Acampamento',
+    ato: 'Ato {n} · {nome}',
+    medida: '{nome}: {atual} de {max}',
+  },
+
+  cena: {
+    magica: '{chave} · 1 dado por Ponto de Magia · {dificuldade} {valor}',
+    semPM: '{chave} · sem Pontos de Magia',
+    umDadoMenos2: '1 dado −2',
+    teste: '{chave} · {dados} · {dificuldade} {valor}',
+    combate: 'Combate · {inimigo}',
+    semDadosCusta: 'Sem dados · custa {custo}',
+    custo: '{valor} de {medida}',
+    semDados: 'Sem dados',
+    especial: 'Só para quem tem esse passado ou esse objeto',
+    pergunta: 'O que você faz?',
+    lutar: 'Partir para a luta',
+    fazer: 'Fazer isso',
+    rolar: 'Rolar {dados} contra {dificuldade}',
+    rolarIncapaz: 'Rolar 1 dado −2 contra {dificuldade}',
+    mestreAvisa: 'O Mestre avisa: {palpite}.',
+    semNivel: 'Você não tem nível em {chave}: rola um dado e tira 2, e não pode insistir.',
+    notaCorpo: 'Teste do Corpo: se falhar, dá para insistir pagando em Vida o que faltar.',
+    usar: 'Usar {nome}',
+    maisDados: '+{dados}',
+    unir: 'Unir forças com {nome}',
+    notaMagia: 'Magia: cada Ponto de Magia gasto rola um dado. Seu limite nesta perícia é {max}.',
+    pm: '{n} PM',
+    notaCombate: 'Combate é por rodadas: seu valor mais um dado contra o do inimigo. Custa caro para quem não é do Corpo.',
+  },
+
+  rolagem: {
+    sobre: '{rotulo} · {chave} contra {dificuldade}',
+    sorteCaiu: 'O dado da sorte caiu {valor}. O Mestre manda rolar de novo.',
+    duploSeis: 'Duplo seis! Sucesso crítico.',
+    duploUm: 'Duplo um. Falha crítica.',
+    naoRepetiu: 'Não se repetiu. Segue o jogo.',
+    faltou: 'Faltou {falta}',
+    daParaInsistir: 'Dá para insistir: um esforço acima das suas forças. Custa {custo} de Vida (você tem {vida}).',
+    insistir: 'Insistir (−{custo} Vida)',
+    aceitar: 'Aceitar a falha',
+    sorteVirou: 'A sorte virou: sucesso',
+    sucesso: 'Sucesso',
+    falhaFaltou: 'Falha: faltou {falta}',
+  },
+
+  mudou: {
+    ganhou: 'Ganhou: {nome}',
+    perdeu: 'Perdeu: {nome}',
+    segue: '{nome} segue com você',
+    foiEmbora: '{nome} foi embora',
+    cansado: '{nome} precisa de fôlego',
+    marco: 'Marco da história',
+  },
+
+  combate: {
+    duploUmMeu: 'Duplo um: seu golpe se perde no ar.',
+    duploUmDele: 'Duplo um: o ataque dele se perde.',
+    defesaSeisDele: 'Duplo seis na defesa: ele escapa por um fio.',
+    defesaSeisMinha: 'Duplo seis na defesa: você sai ileso.',
+    defendido: 'Defendido.',
+    voceDefende: 'Você defende.',
+    acertou: 'Acertou: {dano} de dano.',
+    acertouVoce: 'Acertou você: −{dano} de {alvo}.',
+    comDuploSeis: 'Duplo seis! {texto}',
+    guardaAbriu: 'A guarda abriu. {texto}',
+    ataca: '{nome} ataca',
+    contra: 'contra',
+    comPM: '{rotulo} ({n} PM)',
+    dadoMais: '1 dado + {n}',
+    armaNoDano: ' · arma +{n} no dano',
+    recuarDetalhe: 'Ele ainda ataca uma vez',
+    estado: 'Está {estado}. {resto}',
+    voceMaisRapido: 'Você é mais rápido: ataca primeiro.',
+    eleMaisRapido: 'Ele é mais rápido: ataca primeiro.',
+    rodada: 'Rodada {n}.',
+  },
+
+  desfecho: {
+    resumo: '{chave}: {total} contra {dificuldade}',
+    insistiu: ' · insistiu',
+    sucessoCritico: 'Sucesso crítico',
+    sucessoMas: 'Sucesso, mas…',
+    falhaCritica: 'Falha crítica',
+    vitoria: 'Vitória',
+    derrota: 'Derrota',
+    fuga: 'Recuo',
+    sucesso: 'Sucesso',
+    falha: 'Falha',
+    morte: 'Desta vez o corpo não levanta.',
+    perdido: 'Desta vez a cabeça não volta.',
+    verFim: 'Ver o fim',
+    continuar: 'Continuar',
+  },
+
+  surto: {
+    titulo: 'Fora de si',
+    ultimaVez: 'Da próxima vez, você não volta.',
+    volta: 'A cabeça volta aos poucos. Não vai aguentar isso muitas vezes.',
+    levantar: 'Levantar e seguir',
+  },
+
+  acampamento: {
+    feridas: 'Você trata as feridas.',
+    cabeca: 'Você deixa a cabeça assentar.',
+    umaCoisa: 'A noite dá para uma coisa só',
+    tratar: 'Tratar as feridas',
+    tratarDetalhe: 'Recupera 1 dado de Vida',
+    aquietar: 'Aquietar a cabeça',
+    aquietarDetalhe: 'Recupera 1 dado de Sanidade',
+    fimDoAto: 'Fim do Ato {n}',
+    pontos: 'Pontos de Evolução: {n}',
+    ensinouComMarcos: 'O caminho ensinou: {pontos} neste ato, {marcos} da história. Ninguém aprende nada por derrubar inimigo.',
+    ensinou: 'O caminho ensinou: {pontos} neste ato. Marcos da história valem mais.',
+    seguir: 'Seguir viagem',
+  },
+
+  fim: {
+    daSessao: 'Fim da sessão',
+    estrelas: '{n} de 3 estrelas',
+    cronicaDe: 'A crônica de {nome}',
+    copiada: 'Crônica copiada.',
+    naoCopiou: 'Não deu para copiar.',
+    compartilhar: 'Compartilhar a crônica',
+    caderno: 'Caderno de finais · {vistos} de {total}',
+    porDescobrir: '☆☆☆ ainda por descobrir',
+    outraSessao: 'Outra sessão',
+    mesmaSemente: 'Mesma semente, outro passado',
+  },
+
+  ficha: {
+    fechar: 'Fechar',
+    gastos: ' · {pontos}',
+    paraGastar: ' · {n} para gastar no acampamento',
+    inicial: 'Inicial',
+    atual: 'Atual',
+    pontosDeVida: 'Pontos de Vida',
+    pontosDeMagia: 'Pontos de Magia',
+    sanidade: 'Sanidade',
+    numeros: 'Ataque curto {curto} · Ataque longo {longo} · Defesa {defesa} · Limite de equipamento {limite}',
+    curar: 'Curar com magia (1 PM, 1 dado de Vida)',
+    antecedentes: 'Antecedentes: ',
+    armas: 'Armas e equipamentos',
+    usar: 'usar',
+    emUso: ' em uso',
+    ajuda: ' ajuda em testes',
+    nadaNaSacola: 'Nada na sacola.',
+    companhia: 'Companhia',
+    viajaSo: 'Você viaja só.',
+    lacos: 'Laços pelo caminho: {lacos} · {relogio}: {atual} de {max}',
+  },
+};

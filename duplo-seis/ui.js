@@ -1,7 +1,8 @@
 /** Duplo Seis: a mesa na tela. Lê o estado de jogo.js e desenha. */
 import * as J from './jogo.js';
 import * as R from './regras.js';
-import { AVENTURAS } from './aventuras/index.js';
+import { aventurasPara } from './aventuras/index.js';
+import { IDIOMAS, idiomaAtual, definirIdioma, t, plural, nomeDaChave, nomeDoCaminho } from './idioma.js';
 import { sementeNova } from './rng.js';
 import { som, alternarSom, somLigado } from './som.js';
 import { VERSAO } from './versao.js';
@@ -11,6 +12,11 @@ const $ = (s) => document.querySelector(s);
 const params = new URLSearchParams(location.search);
 const RAPIDO = params.has('rapido') || matchMedia('(prefers-reduced-motion: reduce)').matches;
 const espera = (ms) => new Promise((ok) => setTimeout(ok, RAPIDO ? 0 : ms));
+
+/** As aventuras no idioma da mesa (as que ainda não têm tradução vêm em português). */
+const AVENTURAS = aventurasPara(idiomaAtual());
+/** Quem chegou com ?idioma= no endereço continua com ele nos endereços que a mesa monta. */
+const COM_IDIOMA = params.has('idioma') ? `&idioma=${idiomaAtual()}` : '';
 
 let AVENTURA = AVENTURAS.find((a) => a.id === params.get('aventura')) ?? AVENTURAS[0];
 let e = null;
@@ -31,12 +37,32 @@ function h(seletor, attrs = {}, ...filhos) {
   return el;
 }
 
-const CAMINHO = { corpo: 'Corpo', mente: 'Mente', espirito: 'Espírito' };
-const ANTECEDENTE = { aliado: 'Aliado', inimigo: 'Inimigo', boaFama: 'Boa Fama', maFama: 'Má Fama', recursos: 'Recursos', semRecursos: 'Sem Recursos' };
-const MEDIDA = { vida: 'Vida', magia: 'Magia', sanidade: 'Sanidade', brasa: 'Brasa', lacos: 'Laço' };
-const nomeDaMedida = (tipo) => (tipo === 'brasa' ? AVENTURA.relogio.nome : MEDIDA[tipo]);
+const nomeDoAntecedente = (k) => t(`nomes.antecedentes.${k}`);
+const nomeDaMedida = (tipo) => (tipo === 'brasa' ? AVENTURA.relogio.nome : t(`nomes.medidas.${tipo}`));
 const bolinhas = (n, max = 5) => '●'.repeat(n) + '○'.repeat(Math.max(0, max - n));
-const plural = (n, um, muitos) => `${n} ${n === 1 ? um : muitos}`;
+const estrelas = (n) => '★'.repeat(n) + '☆'.repeat(3 - n);
+
+/* ---------- Idioma ---------- */
+
+/** Preenche o que o index.html traz escrito: data-t (texto), data-t-aria (aria-label), data-t-content (meta). */
+function traduzirPagina() {
+  document.documentElement.lang = idiomaAtual() === 'pt' ? 'pt-BR' : idiomaAtual();
+  document.title = t('pagina.titulo');
+  for (const el of document.querySelectorAll('[data-t]')) el.textContent = t(el.dataset.t);
+  for (const el of document.querySelectorAll('[data-t-aria]')) el.setAttribute('aria-label', t(el.dataset.tAria));
+  for (const el of document.querySelectorAll('[data-t-content]')) el.setAttribute('content', t(el.dataset.tContent));
+}
+
+/** A troca de idioma, só na tela de início: guarda a escolha e recarrega a página. */
+function montarIdiomas() {
+  $('#idiomas').replaceChildren(...IDIOMAS.map((i) => h('button', { type: 'button', lang: i.id, title: i.nome, 'aria-label': i.nome, 'aria-pressed': String(i.id === idiomaAtual()), onclick: () => {
+    if (i.id === idiomaAtual()) return;
+    definirIdioma(i.id);
+    // O ?idioma= do endereço ganharia da escolha: sai antes de recarregar.
+    const u = new URL(location.href);
+    if (u.searchParams.has('idioma')) { u.searchParams.delete('idioma'); location.href = u.href; } else location.reload();
+  } }, i.id.toUpperCase())));
+}
 
 /* ---------- Guardado no aparelho ---------- */
 
@@ -57,22 +83,27 @@ const hoje = () => {
   const d = new Date();
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
 };
-const dataCurta = (iso) => iso.split('-').reverse().slice(0, 2).join('/');
+/** dd/mm em português; "Nov 21" em inglês. */
+const dataCurta = (iso) => {
+  if (idiomaAtual() === 'pt') return iso.split('-').reverse().slice(0, 2).join('/');
+  const [ano, mes, dia] = iso.split('-').map(Number);
+  return new Intl.DateTimeFormat(idiomaAtual(), { month: 'short', day: 'numeric' }).format(new Date(ano, mes - 1, dia));
+};
 const aventuraDoDia = () => AVENTURAS[Math.floor(new Date(`${hoje()}T12:00:00`).getTime() / 86400000) % AVENTURAS.length];
 const totalDeFinais = (av) => av.finais.length + Object.keys(av.quedas).length;
 
 function montarInicio() {
-  $('#versao').textContent = `Duplo Seis ${VERSAO.numero}`;
+  $('#versao').textContent = t('pagina.versao', { numero: VERSAO.numero });
   const g = guardado();
 
   // Sessão em andamento.
   const salva = g.sessao ? J.retomar(g.sessao, AVENTURAS) : null;
   $('#retomar').replaceChildren(...(salva ? [
-    h('p.rotulo', {}, 'Sessão em andamento'),
-    h('p', {}, h('b', {}, salva.nome), ` em ${salva.aventura.nome}`),
+    h('p.rotulo', {}, t('inicio.emAndamento')),
+    h('p', {}, h('b', {}, salva.nome), t('inicio.emAventura', { aventura: salva.aventura.nome })),
     h('div.linha.dupla', {},
-      h('button.principal', { type: 'button', onclick: () => { AVENTURA = salva.aventura; e = salva; abrirMesa(); } }, 'Continuar'),
-      h('button.secundario', { type: 'button', onclick: () => { const x = guardado(); delete x.sessao; guardar(x); montarInicio(); } }, 'Abandonar'),
+      h('button.principal', { type: 'button', onclick: () => { AVENTURA = salva.aventura; e = salva; abrirMesa(); } }, t('inicio.continuar')),
+      h('button.secundario', { type: 'button', onclick: () => { const x = guardado(); delete x.sessao; guardar(x); montarInicio(); } }, t('inicio.abandonar')),
     ),
   ] : []));
   $('#retomar').hidden = !salva;
@@ -82,11 +113,11 @@ function montarInicio() {
   const feito = g.dias?.[dia];
   const doDia = aventuraDoDia();
   $('#dia').replaceChildren(
-    h('p.rotulo', {}, `Aventura do dia · ${dataCurta(dia)}`),
-    h('p', {}, h('b', {}, doDia.nome), ': a mesma semente para todo mundo, uma chance por dia de comparar crônicas.'),
+    h('p.rotulo', {}, t('inicio.doDia', { data: dataCurta(dia) })),
+    h('p', {}, h('b', {}, doDia.nome), t('inicio.doDiaExplica')),
     feito
-      ? h('p.feito', {}, `Hoje: ${'★'.repeat(feito.estrelas)}${'☆'.repeat(3 - feito.estrelas)} ${feito.titulo}`)
-      : h('button.secundario', { type: 'button', 'aria-pressed': String(modoDia), onclick: () => { modoDia = !modoDia; if (modoDia) AVENTURA = doDia; som.toque(); montarInicio(); } }, modoDia ? '✓ Você vai jogar a de hoje. Escolha quem você é.' : 'Jogar a de hoje'),
+      ? h('p.feito', {}, t('inicio.hoje', { estrelas: estrelas(feito.estrelas), titulo: feito.titulo }))
+      : h('button.secundario', { type: 'button', 'aria-pressed': String(modoDia), onclick: () => { modoDia = !modoDia; if (modoDia) AVENTURA = doDia; som.toque(); montarInicio(); } }, modoDia ? t('inicio.vaiJogarHoje') : t('inicio.jogarHoje')),
   );
 
   // Aventuras.
@@ -94,7 +125,7 @@ function montarInicio() {
     h('small', {}, av.genero),
     h('strong', {}, av.nome),
     h('span', {}, av.resumo),
-    h('em', {}, `Finais descobertos: ${(g.vistos?.[av.id] ?? []).length} de ${totalDeFinais(av)}`),
+    h('em', {}, t('inicio.finaisDescobertos', { vistos: (g.vistos?.[av.id] ?? []).length, total: totalDeFinais(av) })),
   )));
 
   // Passados da aventura, mais a ficha livre.
@@ -103,13 +134,13 @@ function montarInicio() {
       const melhor = g.finais?.[`${AVENTURA.id}:${p.id}`];
       return h('button.passado', { type: 'button', role: 'radio', 'aria-checked': 'false', 'data-id': p.id, 'data-caminho': p.caminho, onclick: () => escolherPassado(p.id) },
         h('strong', {}, p.titulo),
-        h('small', {}, CAMINHO[p.caminho]),
-        melhor != null ? h('span.estrelas', { title: 'Melhor final' }, '★'.repeat(melhor) + '☆'.repeat(3 - melhor)) : null,
+        h('small', {}, nomeDoCaminho(p.caminho)),
+        melhor != null ? h('span.estrelas', { title: t('inicio.melhorFinal') }, estrelas(melhor)) : null,
       );
     }),
     h('button.passado.livre', { type: 'button', role: 'radio', 'aria-checked': 'false', 'data-id': 'livre', 'data-caminho': 'livre', onclick: () => escolherPassado('livre') },
-      h('strong', {}, 'Ficha livre'),
-      h('small', {}, 'Seu próprio passado'),
+      h('strong', {}, t('inicio.fichaLivre')),
+      h('small', {}, t('inicio.seuPassado')),
     ),
   );
   const pedido = params.get('passado') ?? g.ultimo?.[AVENTURA.id];
@@ -132,20 +163,20 @@ function escolherPassado(id, rolar = true) {
       h('p.quem', {}, p.quem),
       h('p.motivo', {}, p.motivo),
       resumoDaFicha(ficha),
-      h('p.numeros', {}, `Vida ${v.vida} · Magia ${v.magia} · Sanidade ${v.sanidade}`),
-      h('p.leva', {}, 'Leva: ', p.itens.map((i) => nomeDoItem(i)).join(', '), Object.keys(p.antecedentes).length ? ` · Antecedentes: ${Object.keys(p.antecedentes).map((a) => ANTECEDENTE[a]).join(', ')}` : ''),
-      h('label.campo', {}, 'Nome', h('input', { id: 'nome', type: 'text', maxlength: '18', value: p.nome, autocomplete: 'off' })),
+      h('p.numeros', {}, t('inicio.numeros', { vida: v.vida, magia: v.magia, sanidade: v.sanidade })),
+      h('p.leva', {}, t('inicio.leva'), p.itens.map((i) => nomeDoItem(i)).join(', '), Object.keys(p.antecedentes).length ? t('inicio.antecedentes', { lista: Object.keys(p.antecedentes).map(nomeDoAntecedente).join(', ') }) : ''),
+      h('label.campo', {}, t('inicio.nome'), h('input', { id: 'nome', type: 'text', maxlength: '18', value: p.nome, autocomplete: 'off' })),
       camposDaSemente(),
-      h('button.principal', { type: 'button', onclick: comecar }, 'Sentar à mesa'),
+      h('button.principal', { type: 'button', onclick: comecar }, t('inicio.sentar')),
     );
   }
   if (rolar) caixa.scrollIntoView({ behavior: RAPIDO ? 'auto' : 'smooth', block: 'nearest' });
 }
 
 function camposDaSemente() {
-  if (modoDia) return h('p.nota.escura', {}, `Semente do dia: dia-${hoje()}`);
-  return h('details.semente', {}, h('summary', {}, 'Semente da sessão'),
-    h('label.campo', {}, 'A mesma semente conta a mesma história', h('input', { id: 'semente', type: 'text', maxlength: '24', value: params.get('semente') ?? '', placeholder: 'em branco: sorteia uma' })));
+  if (modoDia) return h('p.nota.escura', {}, t('inicio.sementeDoDia', { semente: `dia-${hoje()}` }));
+  return h('details.semente', {}, h('summary', {}, t('inicio.sementeDaSessao')),
+    h('label.campo', {}, t('inicio.sementeExplica'), h('input', { id: 'semente', type: 'text', maxlength: '24', value: params.get('semente') ?? '', placeholder: t('inicio.sementeEmBranco') })));
 }
 
 function nomeDoItem(id) {
@@ -156,21 +187,21 @@ function nomeDoItem(id) {
 /** A ficha em bolinhas, como no papel. */
 function resumoDaFicha(ficha, { completa = false } = {}) {
   const colunas = Object.entries(R.CAMINHOS).map(([c, def]) => h('div.coluna', { 'data-caminho': c },
-    h('h4', {}, def.nome),
+    h('h4', {}, nomeDoCaminho(c)),
     def.atributos.map((a) => {
       const n = ficha.atributos[a];
       const aprs = Object.entries(R.APRIMORAMENTOS).filter(([k, d]) => d.pai === a && (ficha.aprimoramentos[k] ?? 0) > 0);
-      if (!completa && n === 0) return h('p.atributo.vazio', {}, h('span', {}, R.ATRIBUTOS[a].nome), h('span.b', {}, bolinhas(0)));
+      if (!completa && n === 0) return h('p.atributo.vazio', {}, h('span', {}, nomeDaChave(a)), h('span.b', {}, bolinhas(0)));
       return [
-        h('p.atributo', {}, h('span', {}, R.ATRIBUTOS[a].nome), h('span.b', {}, bolinhas(n))),
-        aprs.map(([k, d]) => h('p.aprimoramento', {}, h('span', {}, d.nome), h('span.b', {}, bolinhas(ficha.aprimoramentos[k], n)))),
+        h('p.atributo', {}, h('span', {}, nomeDaChave(a)), h('span.b', {}, bolinhas(n))),
+        aprs.map(([k]) => h('p.aprimoramento', {}, h('span', {}, nomeDaChave(k)), h('span.b', {}, bolinhas(ficha.aprimoramentos[k], n)))),
       ];
     }),
   ));
   const pericias = Object.entries(ficha.pericias).filter(([, n]) => n > 0);
   return h('div.resumo-ficha', {},
     h('div.colunas', {}, colunas),
-    pericias.length ? h('p.pericias', {}, 'Perícias: ', pericias.map(([k, n]) => `${R.nomeDaChave(k)} ${n}`).join(', ')) : null,
+    pericias.length ? h('p.pericias', {}, t('inicio.pericias'), pericias.map(([k, n]) => `${nomeDaChave(k)} ${n}`).join(', ')) : null,
   );
 }
 
@@ -213,16 +244,16 @@ function montarFichaLivre(caixa) {
     const livres = PONTOS_LIVRES - gastos;
     const linha = (onde, chave, tipo) => {
       const n = onde[chave] ?? 0;
-      const t = R.teto(ficha, chave);
+      const teto = R.teto(ficha, chave);
       return h(`p.ajuste.${tipo}`, {},
-        h('span.nome-ajuste', {}, R.nomeDaChave(chave)),
-        h('button.mais', { type: 'button', disabled: n <= 0, 'aria-label': `Baixar ${R.nomeDaChave(chave)}`, onclick: () => mexer(onde, chave, -1) }, '−'),
-        h('span.b', {}, bolinhas(n, tipo === 'atributo' ? 5 : Math.max(t, 1))),
-        h('button.mais', { type: 'button', disabled: n >= t || livres <= 0, 'aria-label': `Subir ${R.nomeDaChave(chave)}`, onclick: () => mexer(onde, chave, 1) }, '+'),
+        h('span.nome-ajuste', {}, nomeDaChave(chave)),
+        h('button.mais', { type: 'button', disabled: n <= 0, 'aria-label': t('livre.baixar', { nome: nomeDaChave(chave) }), onclick: () => mexer(onde, chave, -1) }, '−'),
+        h('span.b', {}, bolinhas(n, tipo === 'atributo' ? 5 : Math.max(teto, 1))),
+        h('button.mais', { type: 'button', disabled: n >= teto || livres <= 0, 'aria-label': t('livre.subir', { nome: nomeDaChave(chave) }), onclick: () => mexer(onde, chave, 1) }, '+'),
       );
     };
     const colunas = Object.entries(R.CAMINHOS).map(([c, def]) => h('div.bloco', { 'data-caminho': c },
-      h('h4', {}, def.nome),
+      h('h4', {}, nomeDoCaminho(c)),
       def.atributos.map((a) => [
         linha(p.atributos, a, 'atributo'),
         (p.atributos[a] ?? 0) > 0 ? Object.entries(R.APRIMORAMENTOS).filter(([, d]) => d.pai === a).map(([k]) => linha(p.aprimoramentos, k, 'aprimoramento')) : null,
@@ -232,33 +263,33 @@ function montarFichaLivre(caixa) {
     const jaVem = [AVENTURA.abertura.efeitosAoEntrar?.item].flat();
     const kit = Object.entries(AVENTURA.itens).filter(([id, i]) => (i.mod ?? 0) <= 1 && !jaVem.includes(id));
     const pronto = p.quem.trim().length >= 20 && livres === 0;
-    const falta = p.quem.trim().length < 20 ? 'Conteúdo é o Rei: escreva o passado antes dos pontos.' : livres > 0 ? `Faltam ${plural(livres, 'ponto', 'pontos')} para distribuir.` : '';
+    const oQueFalta = () => (p.quem.trim().length < 20 ? t('livre.conteudoRei') : livres > 0 ? t('livre.faltam', { pontos: plural(livres, 'ponto') }) : '');
 
-    const quem = h('textarea', { id: 'livre-quem', rows: '3', maxlength: '280', placeholder: 'Quem você foi, o que viveu, por que aceitou esta viagem.' });
+    const quem = h('textarea', { id: 'livre-quem', rows: '3', maxlength: '280', placeholder: t('livre.exemploQuem') });
     quem.value = p.quem;
     quem.addEventListener('input', () => { p.quem = quem.value; atualizarBotao(); });
-    const titulo = h('input', { type: 'text', maxlength: '24', value: p.titulo, placeholder: 'ex.: A Ferreira', autocomplete: 'off' });
+    const titulo = h('input', { type: 'text', maxlength: '24', value: p.titulo, placeholder: t('livre.exemploTitulo'), autocomplete: 'off' });
     titulo.addEventListener('input', () => { p.titulo = titulo.value; });
-    const nome = h('input', { id: 'nome', type: 'text', maxlength: '18', value: p.nome, placeholder: 'ex.: Lia', autocomplete: 'off' });
+    const nome = h('input', { id: 'nome', type: 'text', maxlength: '18', value: p.nome, placeholder: t('livre.exemploNome'), autocomplete: 'off' });
     nome.addEventListener('input', () => { p.nome = nome.value; });
-    const botao = h('button.principal', { type: 'button', disabled: !pronto, onclick: () => { escolhido = fecharRascunho(); comecar(); } }, 'Sentar à mesa');
-    const aviso = h('p.nota.escura', {}, falta);
+    const botao = h('button.principal', { type: 'button', disabled: !pronto, onclick: () => { escolhido = fecharRascunho(); comecar(); } }, t('inicio.sentar'));
+    const aviso = h('p.nota.escura', {}, oQueFalta());
     const atualizarBotao = () => {
       const ok = p.quem.trim().length >= 20 && livres === 0;
       botao.disabled = !ok;
-      aviso.textContent = p.quem.trim().length < 20 ? 'Conteúdo é o Rei: escreva o passado antes dos pontos.' : livres > 0 ? `Faltam ${plural(livres, 'ponto', 'pontos')} para distribuir.` : '';
+      aviso.textContent = oQueFalta();
     };
 
     caixa.replaceChildren(
-      h('p.quem', {}, 'O manual começa assim: sem um passado interessante, as regras não podem ser aplicadas. Primeiro a história, depois os pontos.'),
-      h('label.campo', {}, 'Quem é você?', quem),
-      h('div.linha.dupla', {}, h('label.campo', {}, 'Como chamam você', titulo), h('label.campo', {}, 'Nome', nome)),
-      h('p.pontos-livres', {}, `Pontos de Evolução: ${gastos} de ${PONTOS_LIVRES}`, h('small', {}, ' · Especialista Iniciante')),
+      h('p.quem', {}, t('livre.manual')),
+      h('label.campo', {}, t('livre.quemEVoce'), quem),
+      h('div.linha.dupla', {}, h('label.campo', {}, t('livre.comoChamam'), titulo), h('label.campo', {}, t('inicio.nome'), nome)),
+      h('p.pontos-livres', {}, t('livre.pontos', { gastos, total: PONTOS_LIVRES }), h('small', {}, t('livre.nivelInicial'))),
       h('div.blocos', {}, colunas),
-      pericias.length ? h('div.bloco', { 'data-caminho': 'livre' }, h('h4', {}, 'Perícias'), pericias.map((k) => linha(p.pericias, k, 'pericia'))) : h('p.nota.escura', {}, 'As Perícias aparecem conforme os Atributos que elas exigem.'),
-      h('p.numeros', {}, `Vida ${v.vida} · Magia ${v.magia} · Sanidade ${v.sanidade} · Ataque ${v.ataqueCurta} · Defesa ${v.defesa} · Caminho do ${CAMINHO[v.dominante]}`),
+      pericias.length ? h('div.bloco', { 'data-caminho': 'livre' }, h('h4', {}, t('livre.pericias')), pericias.map((k) => linha(p.pericias, k, 'pericia'))) : h('p.nota.escura', {}, t('livre.periciasAparecem')),
+      h('p.numeros', {}, t('livre.numeros', { vida: v.vida, magia: v.magia, sanidade: v.sanidade, ataque: v.ataqueCurta, defesa: v.defesa, caminho: nomeDoCaminho(v.dominante) })),
       h('div.bloco', { 'data-caminho': 'livre' },
-        h('h4', {}, `Leva na sacola (${p.itens.length} de ${ITENS_LIVRES})`),
+        h('h4', {}, t('livre.sacola', { n: p.itens.length, total: ITENS_LIVRES })),
         h('div.kit', {}, kit.map(([id]) => h('button.alavanca.clara', { type: 'button', 'aria-pressed': String(p.itens.includes(id)), disabled: !p.itens.includes(id) && p.itens.length >= ITENS_LIVRES, onclick: () => {
           const i = p.itens.indexOf(id);
           if (i >= 0) p.itens.splice(i, 1); else p.itens.push(id);
@@ -276,7 +307,7 @@ function montarFichaLivre(caixa) {
 function fecharRascunho() {
   const p = rascunho;
   const ficha = R.novaFicha(p);
-  const pronto = { ...p, id: 'livre', titulo: p.titulo.trim() || 'Alguém do caminho', nome: p.nome.trim() || 'Sem-Nome', caminho: R.caminhoDominante(ficha) };
+  const pronto = { ...p, id: 'livre', titulo: p.titulo.trim() || t('livre.semTitulo'), nome: p.nome.trim() || t('livre.semNome'), caminho: R.caminhoDominante(ficha) };
   const g = guardado();
   g.livre ??= {};
   g.livre[AVENTURA.id] = pronto;
@@ -299,7 +330,7 @@ function comecar() {
 }
 
 function abrirMesa() {
-  history.replaceState(null, '', `?aventura=${AVENTURA.id}&semente=${encodeURIComponent(e.semente)}&passado=${e.passado}`);
+  history.replaceState(null, '', `?aventura=${AVENTURA.id}&semente=${encodeURIComponent(e.semente)}&passado=${e.passado}${COM_IDIOMA}`);
   $('#inicio').hidden = true;
   $('#mesa').hidden = false;
   window.scrollTo(0, 0);
@@ -311,9 +342,9 @@ function abrirMesa() {
 function desenharTopo() {
   $('#topo-nome').textContent = e.nome;
   const ato = e.cena?.ato ?? e.ato;
-  $('#topo-ato').textContent = e.fase === 'acampamento' ? (AVENTURA.textos.pausa ?? 'Acampamento') : ato === 0 ? AVENTURA.inicio : `Ato ${Math.min(ato, 4)} · ${AVENTURA.atos[Math.min(ato, 4)]}`;
+  $('#topo-ato').textContent = e.fase === 'acampamento' ? (AVENTURA.textos.pausa ?? t('mesa.acampamento')) : ato === 0 ? AVENTURA.inicio : t('mesa.ato', { n: Math.min(ato, 4), nome: AVENTURA.atos[Math.min(ato, 4)] });
   document.documentElement.style.setProperty('--brasa', String(e.brasa / J.MESA.brasa));
-  const barra = (tipo, atual, max) => h(`div.medida.${tipo}`, { title: `${MEDIDA[tipo]}: ${atual} de ${max}` },
+  const barra = (tipo, atual, max) => h(`div.medida.${tipo}`, { title: t('mesa.medida', { nome: t(`nomes.medidas.${tipo}`), atual, max }) },
     h('span.nome', {}, nomeDaMedida(tipo)),
     h('span.trilho', {}, h('span.cheio', { style: `width:${max ? Math.round((atual / max) * 100) : 0}%` })),
     h('span.palavra', {}, J.emPalavras(tipo, atual, max, AVENTURA)),
@@ -393,12 +424,12 @@ function cartaDoMestre(cena) {
 
 function descreverOpcao(o) {
   if (o.tipo === 'teste') {
-    if (o.magica) return o.disponivel ? `${o.nomeChave} · 1 dado por Ponto de Magia · ${o.nomeDificuldade} ${o.dificuldade}` : `${o.nomeChave} · sem Pontos de Magia`;
-    const dados = o.nivel > 0 ? plural(o.nivel, 'dado', 'dados') : '1 dado −2';
-    return `${o.nomeChave} · ${dados} · ${o.nomeDificuldade} ${o.dificuldade}`;
+    if (o.magica) return o.disponivel ? t('cena.magica', { chave: o.nomeChave, dificuldade: o.nomeDificuldade, valor: o.dificuldade }) : t('cena.semPM', { chave: o.nomeChave });
+    const dados = o.nivel > 0 ? plural(o.nivel, 'dado') : t('cena.umDadoMenos2');
+    return t('cena.teste', { chave: o.nomeChave, dados, dificuldade: o.nomeDificuldade, valor: o.dificuldade });
   }
-  if (o.tipo === 'combate') return `Combate · ${o.inimigo}`;
-  return o.custo ? `Sem dados · custa ${Object.entries(o.custo).map(([k, v]) => `${-v} de ${nomeDaMedida(k)}`).join(', ')}` : 'Sem dados';
+  if (o.tipo === 'combate') return t('cena.combate', { inimigo: o.inimigo });
+  return o.custo ? t('cena.semDadosCusta', { custo: Object.entries(o.custo).map(([k, v]) => t('cena.custo', { valor: -v, medida: nomeDaMedida(k) })).join(', ') }) : t('cena.semDados');
 }
 
 function desenharCena(palco) {
@@ -406,12 +437,12 @@ function desenharCena(palco) {
   const lista = h('div.escolhas');
   for (const o of ops) {
     const botao = h('button.escolha', { type: 'button', 'data-caminho': o.caminho ?? 'livre', disabled: !o.disponivel, 'aria-expanded': 'false', onclick: () => abrirPreparo(o, botao, lista) },
-      h('span.rot', {}, o.rotulo, o.especial ? h('span.especial', { title: 'Só para quem tem esse passado ou esse objeto' }, '★') : null),
+      h('span.rot', {}, o.rotulo, o.especial ? h('span.especial', { title: t('cena.especial') }, '★') : null),
       h('span.det', {}, descreverOpcao(o)),
     );
     lista.append(h('div.opcao', {}, botao));
   }
-  palco.replaceChildren(cartaDoMestre(e.cena), h('p.pergunta', {}, 'O que você faz?'), lista);
+  palco.replaceChildren(cartaDoMestre(e.cena), h('p.pergunta', {}, t('cena.pergunta')), lista);
 }
 
 function abrirPreparo(o, botao, lista) {
@@ -425,51 +456,51 @@ function abrirPreparo(o, botao, lista) {
   const aviso = h('p.palpite');
 
   const atualizar = () => {
-    if (o.tipo === 'combate') { principal.textContent = 'Partir para a luta'; return; }
-    if (o.tipo === 'livre') { principal.textContent = 'Fazer isso'; return; }
+    if (o.tipo === 'combate') { principal.textContent = t('cena.lutar'); return; }
+    if (o.tipo === 'livre') { principal.textContent = t('cena.fazer'); return; }
     let n;
     if (o.magica) n = extras.pm;
     else n = o.nivel + (o.objetos.find((x) => x.id === extras.objeto)?.mod ?? 0) + o.aliados.filter((x) => extras.unir.includes(x.id)).reduce((s, x) => s + x.nivel, 0);
-    principal.textContent = n > 0 ? `Rolar ${plural(n, 'dado', 'dados')} contra ${o.dificuldade}` : `Rolar 1 dado −2 contra ${o.dificuldade}`;
-    aviso.textContent = `O Mestre avisa: ${J.palpite(n, o.dificuldade)}.`;
+    principal.textContent = n > 0 ? t('cena.rolar', { dados: plural(n, 'dado'), dificuldade: o.dificuldade }) : t('cena.rolarIncapaz', { dificuldade: o.dificuldade });
+    aviso.textContent = t('cena.mestreAvisa', { palpite: J.palpite(n, o.dificuldade) });
   };
 
   if (o.tipo === 'teste' && !o.magica) {
-    if (o.nivel === 0) caixa.append(h('p.nota', {}, `Você não tem nível em ${o.nomeChave}: rola um dado e tira 2, e não pode insistir.`));
-    else if (o.caminho === 'corpo') caixa.append(h('p.nota', {}, 'Teste do Corpo: se falhar, dá para insistir pagando em Vida o que faltar.'));
+    if (o.nivel === 0) caixa.append(h('p.nota', {}, t('cena.semNivel', { chave: o.nomeChave })));
+    else if (o.caminho === 'corpo') caixa.append(h('p.nota', {}, t('cena.notaCorpo')));
     for (const obj of o.objetos) {
-      const t = h('button.alavanca', { type: 'button', 'aria-pressed': 'false', onclick: () => {
+      const alavanca = h('button.alavanca', { type: 'button', 'aria-pressed': 'false', onclick: () => {
         extras.objeto = extras.objeto === obj.id ? null : obj.id;
-        for (const b of caixa.querySelectorAll('.alavanca.objeto')) b.setAttribute('aria-pressed', String(b === t && extras.objeto === obj.id));
+        for (const b of caixa.querySelectorAll('.alavanca.objeto')) b.setAttribute('aria-pressed', String(b === alavanca && extras.objeto === obj.id));
         som.toque(); atualizar();
-      } }, `Usar ${obj.nome}`, h('b', {}, `+${plural(obj.mod, 'dado', 'dados')}`));
-      t.classList.add('objeto');
-      caixa.append(t);
+      } }, t('cena.usar', { nome: obj.nome }), h('b', {}, t('cena.maisDados', { dados: plural(obj.mod, 'dado') })));
+      alavanca.classList.add('objeto');
+      caixa.append(alavanca);
     }
     for (const al of o.aliados) {
-      const t = h('button.alavanca', { type: 'button', 'aria-pressed': 'false', onclick: () => {
+      const alavanca = h('button.alavanca', { type: 'button', 'aria-pressed': 'false', onclick: () => {
         const i = extras.unir.indexOf(al.id);
         if (i >= 0) extras.unir.splice(i, 1); else extras.unir.push(al.id);
-        t.setAttribute('aria-pressed', String(i < 0));
+        alavanca.setAttribute('aria-pressed', String(i < 0));
         som.toque(); atualizar();
-      } }, `Unir forças com ${al.nome}`, h('b', {}, `+${plural(al.nivel, 'dado', 'dados')}`));
-      caixa.append(t);
+      } }, t('cena.unir', { nome: al.nome }), h('b', {}, t('cena.maisDados', { dados: plural(al.nivel, 'dado') })));
+      caixa.append(alavanca);
     }
   }
   if (o.magica) {
-    caixa.append(h('p.nota', {}, `Magia: cada Ponto de Magia gasto rola um dado. Seu limite nesta perícia é ${o.maxPM}.`));
+    caixa.append(h('p.nota', {}, t('cena.notaMagia', { max: o.maxPM })));
     const linha = h('div.pm');
     for (let n = 1; n <= o.maxPM; n++) {
       const b = h('button.alavanca', { type: 'button', 'aria-pressed': String(n === extras.pm), onclick: () => {
         extras.pm = n;
         for (const x of linha.children) x.setAttribute('aria-pressed', String(x === b));
         som.toque(); atualizar();
-      } }, `${n} PM`);
+      } }, t('cena.pm', { n }));
       linha.append(b);
     }
     caixa.append(linha);
   }
-  if (o.tipo === 'combate') caixa.append(h('p.nota', {}, 'Combate é por rodadas: seu valor mais um dado contra o do inimigo. Custa caro para quem não é do Corpo.'));
+  if (o.tipo === 'combate') caixa.append(h('p.nota', {}, t('cena.notaCombate')));
   principal.addEventListener('click', () => confirmar(o, extras));
   atualizar();
   caixa.append(aviso, principal);
@@ -492,7 +523,7 @@ async function mostrarRolagem(o) {
   const conta = h('p.conta');
   const selo = h('p.selo-resultado');
   const mesa = h('section.rolagem', { 'data-caminho': o.caminho },
-    h('p.sobre', {}, `${o.rotulo} · ${r.nomeChave} contra ${r.dificuldade}`),
+    h('p.sobre', {}, t('rolagem.sobre', { rotulo: o.rotulo, chave: r.nomeChave, dificuldade: r.dificuldade })),
     bandeja, conta, selo);
   palco.replaceChildren(h('article.carta.mestre.curta', {}, h('p.sobre', {}, e.cena.titulo)), mesa);
   mesa.scrollIntoView({ block: 'center' });
@@ -503,31 +534,31 @@ async function mostrarRolagem(o) {
   await espera(350);
 
   if (r.sorte.confirma != null) {
-    const linha = h('div.confirma', {}, h('p', {}, `O dado da sorte caiu ${r.dados[0]}. O Mestre manda rolar de novo.`));
+    const linha = h('div.confirma', {}, h('p', {}, t('rolagem.sorteCaiu', { valor: r.dados[0] })));
     const b2 = h('div.bandeja.pequena');
     linha.append(b2);
     mesa.append(linha);
     await espera(500);
     await rolarDados(b2, [r.sorte.confirma], { classe: () => 'sorte' });
-    if (r.sorte.tipo === 'sucesso') { linha.append(h('p.duplo.bom', {}, 'Duplo seis! Sucesso crítico.')); som.critico(); }
-    else if (r.sorte.tipo === 'falha') { linha.append(h('p.duplo.mau', {}, 'Duplo um. Falha crítica.')); som.desastre(); }
-    else linha.append(h('p.nada', {}, 'Não se repetiu. Segue o jogo.'));
+    if (r.sorte.tipo === 'sucesso') { linha.append(h('p.duplo.bom', {}, t('rolagem.duploSeis'))); som.critico(); }
+    else if (r.sorte.tipo === 'falha') { linha.append(h('p.duplo.mau', {}, t('rolagem.duploUm'))); som.desastre(); }
+    else linha.append(h('p.nada', {}, t('rolagem.naoRepetiu')));
     await espera(r.sorte.tipo ? 900 : 450);
   }
 
   if (e.fase === 'insistir') {
-    selo.textContent = `Faltou ${r.falta}`;
+    selo.textContent = t('rolagem.faltou', { falta: r.falta });
     selo.className = 'selo-resultado falha';
     som.falha();
     mesa.append(h('div.insistir', {},
-      h('p', {}, `Dá para insistir: um esforço acima das suas forças. Custa ${r.custoInsistir} de Vida (você tem ${e.vida}).`),
-      h('button.principal.corpo', { type: 'button', onclick: () => { J.insistir(e, true); som.golpe(); desenhar(); } }, `Insistir (−${r.custoInsistir} Vida)`),
-      h('button.secundario', { type: 'button', onclick: () => { J.insistir(e, false); desenhar(); } }, 'Aceitar a falha'),
+      h('p', {}, t('rolagem.daParaInsistir', { custo: r.custoInsistir, vida: e.vida })),
+      h('button.principal.corpo', { type: 'button', onclick: () => { J.insistir(e, true); som.golpe(); desenhar(); } }, t('rolagem.insistir', { custo: r.custoInsistir })),
+      h('button.secundario', { type: 'button', onclick: () => { J.insistir(e, false); desenhar(); } }, t('rolagem.aceitar')),
     ));
     return;
   }
   const ok = e.desfecho.ok;
-  selo.textContent = r.viradaDaSorte ? 'A sorte virou: sucesso' : ok ? 'Sucesso' : `Falha: faltou ${r.falta}`;
+  selo.textContent = r.viradaDaSorte ? t('rolagem.sorteVirou') : ok ? t('rolagem.sucesso') : t('rolagem.falhaFaltou', { falta: r.falta });
   selo.className = `selo-resultado ${ok ? 'sucesso' : 'falha'}`;
   if (!r.sorte.tipo) (ok ? som.sucesso : som.falha)();
   await espera(700);
@@ -538,12 +569,12 @@ const SINAL = (v) => (v > 0 ? `+${v}` : `−${Math.abs(v)}`);
 function fichas(mudou) {
   if (!mudou?.length) return null;
   return h('p.fichas', {}, mudou.map((m) => {
-    if (m.tipo === 'item') return h('span.ficha-m.ganho', {}, `Ganhou: ${m.nome}`);
-    if (m.tipo === 'semItem') return h('span.ficha-m.perda', {}, `Perdeu: ${m.nome}`);
-    if (m.tipo === 'companheiro') return h('span.ficha-m.ganho', {}, `${m.nome} segue com você`);
-    if (m.tipo === 'semCompanheiro') return h('span.ficha-m.perda', {}, `${m.nome} foi embora`);
-    if (m.tipo === 'cansado') return h('span.ficha-m.perda', {}, `${m.nome} precisa de fôlego`);
-    if (m.tipo === 'marco') return h('span.ficha-m.marco', {}, 'Marco da história');
+    if (m.tipo === 'item') return h('span.ficha-m.ganho', {}, t('mudou.ganhou', { nome: m.nome }));
+    if (m.tipo === 'semItem') return h('span.ficha-m.perda', {}, t('mudou.perdeu', { nome: m.nome }));
+    if (m.tipo === 'companheiro') return h('span.ficha-m.ganho', {}, t('mudou.segue', { nome: m.nome }));
+    if (m.tipo === 'semCompanheiro') return h('span.ficha-m.perda', {}, t('mudou.foiEmbora', { nome: m.nome }));
+    if (m.tipo === 'cansado') return h('span.ficha-m.perda', {}, t('mudou.cansado', { nome: m.nome }));
+    if (m.tipo === 'marco') return h('span.ficha-m.marco', {}, t('mudou.marco'));
     return h(`span.ficha-m.${m.valor > 0 ? 'ganho' : 'perda'}.${m.tipo}`, {}, `${nomeDaMedida(m.tipo)} ${SINAL(m.valor)}`);
   }));
 }
@@ -551,20 +582,20 @@ function fichas(mudou) {
 function linhaDeGolpe(g) {
   const eu = g.quem === 'voce';
   let texto;
-  if (g.critico === 'ataque-falha') texto = eu ? 'Duplo um: seu golpe se perde no ar.' : 'Duplo um: o ataque dele se perde.';
-  else if (g.critico === 'defesa-sucesso') texto = eu ? 'Duplo seis na defesa: ele escapa por um fio.' : 'Duplo seis na defesa: você sai ileso.';
-  else if (!g.acertou) texto = eu ? 'Defendido.' : 'Você defende.';
+  if (g.critico === 'ataque-falha') texto = eu ? t('combate.duploUmMeu') : t('combate.duploUmDele');
+  else if (g.critico === 'defesa-sucesso') texto = eu ? t('combate.defesaSeisDele') : t('combate.defesaSeisMinha');
+  else if (!g.acertou) texto = eu ? t('combate.defendido') : t('combate.voceDefende');
   else {
-    const alvo = g.alvo === 'sanidade' ? 'Sanidade' : 'Vida';
-    texto = eu ? `Acertou: ${g.dano} de dano.` : `Acertou você: −${g.dano} de ${alvo}.`;
-    if (g.critico === 'ataque-sucesso') texto = `Duplo seis! ${texto}`;
-    if (g.critico === 'defesa-falha') texto = `A guarda abriu. ${texto}`;
+    const alvo = t(`nomes.medidas.${g.alvo === 'sanidade' ? 'sanidade' : 'vida'}`);
+    texto = eu ? t('combate.acertou', { dano: g.dano }) : t('combate.acertouVoce', { dano: g.dano, alvo });
+    if (g.critico === 'ataque-sucesso') texto = t('combate.comDuploSeis', { texto });
+    if (g.critico === 'defesa-falha') texto = t('combate.guardaAbriu', { texto });
   }
   const d1 = novoDado(); face(d1, g.dadoAtaque);
   const d2 = novoDado(); face(d2, g.dadoDefesa);
   return h(`div.golpe.${eu ? 'meu' : 'dele'}`, {},
-    h('p.quem', {}, eu ? g.rotulo : `${g.rotulo} ataca`),
-    h('p.conta-golpe', {}, d1, h('span', {}, `${g.valorAtaque}`), h('em', {}, 'contra'), d2, h('span', {}, `${g.valorDefesa}`)),
+    h('p.quem', {}, eu ? g.rotulo : t('combate.ataca', { nome: g.rotulo })),
+    h('p.conta-golpe', {}, d1, h('span', {}, `${g.valorAtaque}`), h('em', {}, t('combate.contra')), d2, h('span', {}, `${g.valorDefesa}`)),
     h('p.efeito', {}, texto),
   );
 }
@@ -575,18 +606,18 @@ function desenharCombate(palco) {
   const botoes = h('div.acoes');
   for (const a of acoes) {
     if (a.maxPM) {
-      for (let n = 1; n <= a.maxPM; n++) botoes.append(h('button.escolha', { type: 'button', 'data-caminho': 'mente', onclick: () => rodada(a.id, n) }, h('span.rot', {}, `${a.rotulo} (${n} PM)`), h('span.det', {}, `1 dado + ${n}`)));
+      for (let n = 1; n <= a.maxPM; n++) botoes.append(h('button.escolha', { type: 'button', 'data-caminho': 'mente', onclick: () => rodada(a.id, n) }, h('span.rot', {}, t('combate.comPM', { rotulo: a.rotulo, n })), h('span.det', {}, t('combate.dadoMais', { n }))));
     } else if (a.id === 'recuar') {
-      botoes.append(h('button.escolha', { type: 'button', 'data-caminho': 'livre', onclick: () => rodada('recuar') }, h('span.rot', {}, 'Recuar'), h('span.det', {}, 'Ele ainda ataca uma vez')));
+      botoes.append(h('button.escolha', { type: 'button', 'data-caminho': 'livre', onclick: () => rodada('recuar') }, h('span.rot', {}, a.rotulo), h('span.det', {}, t('combate.recuarDetalhe'))));
     } else {
-      botoes.append(h('button.escolha', { type: 'button', 'data-caminho': 'corpo', onclick: () => rodada(a.id) }, h('span.rot', {}, a.rotulo), h('span.det', {}, `1 dado + ${a.ataque}${a.arma ? ` · arma +${a.arma} no dano` : ''}`)));
+      botoes.append(h('button.escolha', { type: 'button', 'data-caminho': 'corpo', onclick: () => rodada(a.id) }, h('span.rot', {}, a.rotulo), h('span.det', {}, t('combate.dadoMais', { n: a.ataque }) + (a.arma ? t('combate.armaNoDano', { n: a.arma }) : ''))));
     }
   }
   palco.replaceChildren(
     h('article.carta.mestre.curta', {}, h('p.sobre', {}, e.cena.titulo)),
     h('section.combate', {},
       h('h3', {}, c.inimigo.nome),
-      h('p.estado', {}, `Está ${J.estadoDoInimigo(e)}. ${c.rodada === 0 ? (c.primeiro === 'voce' ? 'Você é mais rápido: ataca primeiro.' : 'Ele é mais rápido: ataca primeiro.') : `Rodada ${c.rodada + 1}.`}`),
+      h('p.estado', {}, t('combate.estado', { estado: J.estadoDoInimigo(e), resto: c.rodada === 0 ? (c.primeiro === 'voce' ? t('combate.voceMaisRapido') : t('combate.eleMaisRapido')) : t('combate.rodada', { n: c.rodada + 1 }) })),
       h('div.log', {}, c.log.map(linhaDeGolpe)),
       botoes,
     ),
@@ -607,14 +638,14 @@ function desenharDesfecho(palco) {
     const r = e.rolagem;
     const bandeja = h('div.bandeja.pequena', {}, r.dados.map((v, i) => { const x = novoDado(i === 0 ? 'sorte' : ''); face(x, v); x.classList.add('pousou'); return x; }));
     filhos.push(h('section.rolagem.resumo', { 'data-caminho': r.caminho }, bandeja,
-      h('p.conta', {}, `${r.nomeChave}: ${r.total} contra ${r.dificuldade}${r.insistiu ? ' · insistiu' : ''}`)));
+      h('p.conta', {}, t('desfecho.resumo', { chave: r.nomeChave, total: r.total, dificuldade: r.dificuldade }) + (r.insistiu ? t('desfecho.insistiu') : ''))));
   }
   const carimbo = d.tipo === 'livre' ? null : h(`p.selo-resultado.${d.ok ? 'sucesso' : 'falha'}`, {},
-    d.critico === 'sucesso' ? 'Sucesso crítico' : d.critico === 'falha' ? (d.ok ? 'Sucesso, mas…' : 'Falha crítica') : d.tipo === 'combate' ? ({ vitoria: 'Vitória', derrota: 'Derrota', fuga: 'Recuo' }[d.combate.fim]) : d.ok ? 'Sucesso' : 'Falha');
+    d.critico === 'sucesso' ? t('desfecho.sucessoCritico') : d.critico === 'falha' ? (d.ok ? t('desfecho.sucessoMas') : t('desfecho.falhaCritica')) : d.tipo === 'combate' ? t(`desfecho.${d.combate.fim}`) : d.ok ? t('desfecho.sucesso') : t('desfecho.falha'));
   filhos.push(h('article.carta.desfecho', { 'data-ok': String(d.ok) }, carimbo, h('p.narra', {}, d.texto), fichas(d.mudou)));
   for (const a of d.avisos) filhos.push(h('article.carta.aviso', {}, h('p.narra', {}, a.texto), fichas(a.mudou)));
-  if (d.fatal) filhos.push(h('article.carta.aviso', {}, h('p.narra', {}, d.fatal === 'morte' ? 'Desta vez o corpo não levanta.' : 'Desta vez a cabeça não volta.')));
-  filhos.push(h('button.principal', { type: 'button', onclick: () => { som.toque(); J.continuar(e); desenhar(); } }, d.fatal ? 'Ver o fim' : 'Continuar'));
+  if (d.fatal) filhos.push(h('article.carta.aviso', {}, h('p.narra', {}, d.fatal === 'morte' ? t('desfecho.morte') : t('desfecho.perdido'))));
+  filhos.push(h('button.principal', { type: 'button', onclick: () => { som.toque(); J.continuar(e); desenhar(); } }, d.fatal ? t('desfecho.verFim') : t('desfecho.continuar')));
   palco.replaceChildren(...filhos);
   if (d.mudou.some((m) => m.tipo === 'brasa')) som.brasa();
 }
@@ -624,12 +655,12 @@ function desenharSurto(palco) {
   som.desastre();
   palco.replaceChildren(
     h('article.carta.aviso.surto', {},
-      h('p.sobre', {}, 'Fora de si'),
+      h('p.sobre', {}, t('surto.titulo')),
       h('p.narra', {}, s.texto),
       fichas(s.mudou),
-      h('p.nota', {}, s.restam === 1 ? 'Da próxima vez, você não volta.' : 'A cabeça volta aos poucos. Não vai aguentar isso muitas vezes.'),
+      h('p.nota', {}, s.restam === 1 ? t('surto.ultimaVez') : t('surto.volta')),
     ),
-    h('button.principal', { type: 'button', onclick: () => { J.continuar(e); desenhar(); } }, 'Levantar e seguir'),
+    h('button.principal', { type: 'button', onclick: () => { J.continuar(e); desenhar(); } }, t('surto.levantar')),
   );
 }
 
@@ -637,35 +668,35 @@ function desenharAcampamento(palco) {
   const a = e.acampamento;
   const lojas = J.compras(e);
   const grupos = Object.keys(R.CAMINHOS).map((c) => h('div.coluna', { 'data-caminho': c },
-    h('h4', {}, CAMINHO[c]),
+    h('h4', {}, nomeDoCaminho(c)),
     lojas.filter((l) => l.caminho === c && (l.tipo === 'atributo' || l.teto > 0)).map((l) => h(`p.compra.${l.tipo}`, {},
       h('span', {}, l.nome),
       h('span.b', {}, bolinhas(l.nivel, l.tipo === 'atributo' ? 5 : Math.max(l.teto, l.nivel))),
-      h('button.mais', { type: 'button', disabled: !l.pode, 'aria-label': `Subir ${l.nome}`, onclick: () => { J.comprar(e, l.chave); som.sucesso(); desenhar(); } }, '+'),
+      h('button.mais', { type: 'button', disabled: !l.pode, 'aria-label': t('livre.subir', { nome: l.nome }), onclick: () => { J.comprar(e, l.chave); som.sucesso(); desenhar(); } }, '+'),
     )),
   ));
   const rep = a.repousou;
   const repouso = rep
-    ? h('div.repouso', {}, h('p', {}, { feridas: 'Você trata as feridas.', cabeca: 'Você deixa a cabeça assentar.', brasa: AVENTURA.textos.velou }[rep.tipo]), fichas(rep.mudou))
+    ? h('div.repouso', {}, h('p', {}, rep.tipo === 'brasa' ? AVENTURA.textos.velou : t(`acampamento.${rep.tipo}`)), fichas(rep.mudou))
     : h('div.repouso', {},
-      h('p.rotulo', {}, 'A noite dá para uma coisa só'),
-      h('button.escolha', { type: 'button', 'data-caminho': 'corpo', disabled: e.vida >= e.max.vida, onclick: () => { J.repousar(e, 'feridas'); desenhar(); } }, h('span.rot', {}, 'Tratar as feridas'), h('span.det', {}, 'Recupera 1 dado de Vida')),
-      h('button.escolha', { type: 'button', 'data-caminho': 'espirito', disabled: e.sanidade >= e.max.sanidade, onclick: () => { J.repousar(e, 'cabeca'); desenhar(); } }, h('span.rot', {}, 'Aquietar a cabeça'), h('span.det', {}, 'Recupera 1 dado de Sanidade')),
+      h('p.rotulo', {}, t('acampamento.umaCoisa')),
+      h('button.escolha', { type: 'button', 'data-caminho': 'corpo', disabled: e.vida >= e.max.vida, onclick: () => { J.repousar(e, 'feridas'); desenhar(); } }, h('span.rot', {}, t('acampamento.tratar')), h('span.det', {}, t('acampamento.tratarDetalhe'))),
+      h('button.escolha', { type: 'button', 'data-caminho': 'espirito', disabled: e.sanidade >= e.max.sanidade, onclick: () => { J.repousar(e, 'cabeca'); desenhar(); } }, h('span.rot', {}, t('acampamento.aquietar')), h('span.det', {}, t('acampamento.aquietarDetalhe'))),
       h('button.escolha', { type: 'button', 'data-caminho': 'livre', disabled: e.brasa >= J.MESA.brasa, onclick: () => { J.repousar(e, 'brasa'); som.brasa(); desenhar(); } }, h('span.rot', {}, AVENTURA.textos.velar), h('span.det', {}, `${AVENTURA.relogio.nome} +${J.MESA.repouso.brasa}`)),
     );
   palco.replaceChildren(
     h('article.carta.mestre', {},
-      h('p.sobre', {}, `Fim do Ato ${a.ato}`),
+      h('p.sobre', {}, t('acampamento.fimDoAto', { n: a.ato })),
       h('p.narra', {}, a.texto),
       fichas(a.mudou),
     ),
     h('section.evolucao', {},
-      h('h3', {}, `Pontos de Evolução: ${e.pontos}`),
-      h('p.nota', {}, a.marcos ? `O caminho ensinou: ${plural(a.ganhos, 'ponto', 'pontos')} neste ato, ${plural(a.marcos, 'deles por marco', 'deles por marcos')} da história. Ninguém aprende nada por derrubar inimigo.` : `O caminho ensinou: ${plural(a.ganhos, 'ponto', 'pontos')} neste ato. Marcos da história valem mais.`),
+      h('h3', {}, t('acampamento.pontos', { n: e.pontos })),
+      h('p.nota', {}, a.marcos ? t('acampamento.ensinouComMarcos', { pontos: plural(a.ganhos, 'ponto'), marcos: plural(a.marcos, 'porMarco') }) : t('acampamento.ensinou', { pontos: plural(a.ganhos, 'ponto') })),
       h('div.colunas', {}, grupos),
     ),
     repouso,
-    h('button.principal', { type: 'button', onclick: () => { som.toque(); J.continuar(e); desenhar(); } }, e.ato >= J.MESA.atos ? AVENTURA.textos.subir : (AVENTURA.textos.seguir ?? 'Seguir viagem')),
+    h('button.principal', { type: 'button', onclick: () => { som.toque(); J.continuar(e); desenhar(); } }, e.ato >= J.MESA.atos ? AVENTURA.textos.subir : (AVENTURA.textos.seguir ?? t('acampamento.seguir'))),
   );
 }
 
@@ -691,31 +722,31 @@ function desenharFim(palco) {
   const todos = [...AVENTURA.finais, ...Object.values(AVENTURA.quedas)];
   palco.replaceChildren(
     h('article.carta.final', { 'data-estrelas': f.estrelas },
-      h('p.sobre', {}, e.dia ? `Aventura do dia · ${dataCurta(e.dia)}` : 'Fim da sessão'),
+      h('p.sobre', {}, e.dia ? t('inicio.doDia', { data: dataCurta(e.dia) }) : t('fim.daSessao')),
       h('h2', {}, f.titulo),
-      h('p.estrelas', { 'aria-label': `${f.estrelas} de 3 estrelas` }, '★'.repeat(f.estrelas) + '☆'.repeat(3 - f.estrelas)),
+      h('p.estrelas', { 'aria-label': t('fim.estrelas', { n: f.estrelas }) }, estrelas(f.estrelas)),
       h('p.narra', {}, f.texto),
     ),
     h('section.cronica', {},
-      h('h3', {}, `A crônica de ${e.nome}`),
+      h('h3', {}, t('fim.cronicaDe', { nome: e.nome })),
       h('ol', {}, e.cronica.map((l) => h('li', {}, l))),
       h('div.linha', {},
         h('button.secundario', { type: 'button', onclick: async () => {
           try {
             if (navigator.share) await navigator.share({ text: texto });
-            else { await navigator.clipboard.writeText(texto); aviso.textContent = 'Crônica copiada.'; }
-          } catch { aviso.textContent = 'Não deu para copiar.'; }
-        } }, 'Compartilhar a crônica'),
+            else { await navigator.clipboard.writeText(texto); aviso.textContent = t('fim.copiada'); }
+          } catch { aviso.textContent = t('fim.naoCopiou'); }
+        } }, t('fim.compartilhar')),
         aviso,
       ),
     ),
     h('section.cronica', {},
-      h('h3', {}, `Caderno de finais · ${vistos.length} de ${todos.length}`),
-      h('ul.caderno', {}, todos.map((x) => h(`li${vistos.includes(x.id) ? '' : '.oculto'}`, {}, vistos.includes(x.id) ? `${'★'.repeat(x.estrelas)}${'☆'.repeat(3 - x.estrelas)} ${x.titulo}` : '☆☆☆ ainda por descobrir'))),
-      h('p.nota', {}, `semente ${e.semente}`),
+      h('h3', {}, t('fim.caderno', { vistos: vistos.length, total: todos.length })),
+      h('ul.caderno', {}, todos.map((x) => h(`li${vistos.includes(x.id) ? '' : '.oculto'}`, {}, vistos.includes(x.id) ? `${estrelas(x.estrelas)} ${x.titulo}` : t('fim.porDescobrir')))),
+      h('p.nota', {}, t('cronica.semente', { semente: e.semente })),
     ),
-    h('button.principal', { type: 'button', onclick: () => { location.search = `?aventura=${AVENTURA.id}`; } }, 'Outra sessão'),
-    e.dia ? null : h('button.secundario', { type: 'button', onclick: () => { location.search = `?aventura=${AVENTURA.id}&semente=${encodeURIComponent(e.semente)}`; } }, 'Mesma semente, outro passado'),
+    h('button.principal', { type: 'button', onclick: () => { location.search = `?aventura=${AVENTURA.id}${COM_IDIOMA}`; } }, t('fim.outraSessao')),
+    e.dia ? null : h('button.secundario', { type: 'button', onclick: () => { location.search = `?aventura=${AVENTURA.id}&semente=${encodeURIComponent(e.semente)}${COM_IDIOMA}`; } }, t('fim.mesmaSemente')),
   );
 }
 
@@ -729,31 +760,31 @@ function abrirFicha() {
   const podeAgir = ['cena', 'acampamento'].includes(e.fase);
   const itens = e.itens.map((id) => {
     const i = AVENTURA.itens[id];
-    const usar = i.tipo === 'consumivel' && podeAgir ? h('button.mais', { type: 'button', onclick: () => { J.usar(e, id); som.sucesso(); desenharTopo(); abrirFicha(); } }, 'usar') : null;
-    return h('li', {}, nomeDoItem(id), emUso.has(id) ? h('small', {}, ' em uso') : null, i.tipo === 'objeto' ? h('small', {}, ' ajuda em testes') : null, usar);
+    const usar = i.tipo === 'consumivel' && podeAgir ? h('button.mais', { type: 'button', onclick: () => { J.usar(e, id); som.sucesso(); desenharTopo(); abrirFicha(); } }, t('ficha.usar')) : null;
+    return h('li', {}, nomeDoItem(id), emUso.has(id) ? h('small', {}, t('ficha.emUso')) : null, i.tipo === 'objeto' ? h('small', {}, t('ficha.ajuda')) : null, usar);
   });
   const podeCurar = podeAgir && R.maximoDePM(e.ficha, 'magiaSuporte', e.magia) > 0 && e.vida < e.max.vida;
   d.replaceChildren(
     h('form', { method: 'dialog' },
-      h('header', {}, h('h2', {}, e.nome), h('button.icone', { type: 'submit', 'aria-label': 'Fechar' }, '×')),
-      h('p.nota', {}, e.tituloDoPassado, ` · ${plural(R.pontosGastos(e.ficha), 'Ponto', 'Pontos')} de Evolução gastos`, e.pontos ? ` · ${e.pontos} para gastar no acampamento` : ''),
+      h('header', {}, h('h2', {}, e.nome), h('button.icone', { type: 'submit', 'aria-label': t('ficha.fechar') }, '×')),
+      h('p.nota', {}, e.tituloDoPassado, t('ficha.gastos', { pontos: plural(R.pontosGastos(e.ficha), 'pontoGasto') }), e.pontos ? t('ficha.paraGastar', { n: e.pontos }) : ''),
       resumoDaFicha(e.ficha, { completa: true }),
       h('table.valores', {},
-        h('tr', {}, h('th', {}, ''), h('th', {}, 'Inicial'), h('th', {}, 'Atual')),
-        h('tr', {}, h('td', {}, 'Pontos de Vida'), h('td', {}, e.max.vida), h('td', {}, e.vida)),
-        h('tr', {}, h('td', {}, 'Pontos de Magia'), h('td', {}, e.max.magia), h('td', {}, e.magia)),
-        h('tr', {}, h('td', {}, 'Sanidade'), h('td', {}, e.max.sanidade), h('td', {}, e.sanidade)),
+        h('tr', {}, h('th', {}, ''), h('th', {}, t('ficha.inicial')), h('th', {}, t('ficha.atual'))),
+        h('tr', {}, h('td', {}, t('ficha.pontosDeVida')), h('td', {}, e.max.vida), h('td', {}, e.vida)),
+        h('tr', {}, h('td', {}, t('ficha.pontosDeMagia')), h('td', {}, e.max.magia), h('td', {}, e.magia)),
+        h('tr', {}, h('td', {}, t('ficha.sanidade')), h('td', {}, e.max.sanidade), h('td', {}, e.sanidade)),
       ),
-      h('p.numeros', {}, `Ataque curto ${v.ataqueCurta} · Ataque longo ${v.ataqueLonga} · Defesa ${v.defesa} · Limite de equipamento ${eq.limite}`),
-      podeCurar ? h('button.secundario', { type: 'button', onclick: () => { J.curar(e); som.sucesso(); desenharTopo(); abrirFicha(); } }, 'Curar com magia (1 PM, 1 dado de Vida)') : null,
-      Object.keys(e.ficha.antecedentes).length ? h('p', {}, h('b', {}, 'Antecedentes: '), Object.entries(e.ficha.antecedentes).map(([k, a]) => `${ANTECEDENTE[k]} ${a.nivel}`).join(', ')) : null,
-      h('h4', {}, 'Armas e equipamentos'),
-      itens.length ? h('ul.itens', {}, itens) : h('p.nota', {}, 'Nada na sacola.'),
-      h('h4', {}, 'Companhia'),
+      h('p.numeros', {}, t('ficha.numeros', { curto: v.ataqueCurta, longo: v.ataqueLonga, defesa: v.defesa, limite: eq.limite })),
+      podeCurar ? h('button.secundario', { type: 'button', onclick: () => { J.curar(e); som.sucesso(); desenharTopo(); abrirFicha(); } }, t('ficha.curar')) : null,
+      Object.keys(e.ficha.antecedentes).length ? h('p', {}, h('b', {}, t('ficha.antecedentes')), Object.entries(e.ficha.antecedentes).map(([k, a]) => `${nomeDoAntecedente(k)} ${a.nivel}`).join(', ')) : null,
+      h('h4', {}, t('ficha.armas')),
+      itens.length ? h('ul.itens', {}, itens) : h('p.nota', {}, t('ficha.nadaNaSacola')),
+      h('h4', {}, t('ficha.companhia')),
       e.companheiros.length
-        ? h('ul.itens', {}, e.companheiros.map((id) => { const c = AVENTURA.companheiros[id]; return h('li', {}, h('b', {}, c.nome), c.quem ? `, ${c.quem}` : '', h('small', {}, ' · ' + Object.entries(c.niveis).map(([k, n]) => `${R.nomeDaChave(k)} ${n}`).join(', '))); }))
-        : h('p.nota', {}, 'Você viaja só.'),
-      h('p.nota', {}, `Laços pelo caminho: ${e.lacos} · ${AVENTURA.relogio.nome}: ${e.brasa} de ${J.MESA.brasa}`),
+        ? h('ul.itens', {}, e.companheiros.map((id) => { const c = AVENTURA.companheiros[id]; return h('li', {}, h('b', {}, c.nome), c.quem ? `, ${c.quem}` : '', h('small', {}, ' · ' + Object.entries(c.niveis).map(([k, n]) => `${nomeDaChave(k)} ${n}`).join(', '))); }))
+        : h('p.nota', {}, t('ficha.viajaSo')),
+      h('p.nota', {}, t('ficha.lacos', { lacos: e.lacos, relogio: AVENTURA.relogio.nome, atual: e.brasa, max: J.MESA.brasa })),
     ),
   );
   if (!d.open) d.showModal();
@@ -766,6 +797,8 @@ $('#som').setAttribute('aria-pressed', String(somLigado()));
 $('#som').addEventListener('click', () => { const l = alternarSom(); $('#som').setAttribute('aria-pressed', String(l)); if (l) som.toque(); });
 $('#ficha').addEventListener('click', (ev) => { if (ev.target === $('#ficha')) $('#ficha').close(); });
 
+traduzirPagina();
+montarIdiomas();
 montarInicio();
 if (params.get('jogar') === '1') comecar();
 

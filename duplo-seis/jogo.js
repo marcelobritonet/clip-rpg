@@ -10,6 +10,7 @@
  */
 import * as R from './regras.js';
 import { fluxo, comoFuncao, embaralhar, inteiro, sortear } from './rng.js';
+import { t, idiomaAtual, nomeDaChave, nomeDaDificuldade } from './idioma.js';
 
 /** Decisões do Mestre: nada aqui é regra do Clip. */
 export const MESA = {
@@ -33,19 +34,6 @@ export const MESA = {
 };
 
 const REACOES = ['furia', 'impulso', 'convulsao', 'torpor'];
-
-const T = {
-  desmaio: 'Tudo escurece. Quando você abre os olhos, a brasa está menor e o mundo dói.',
-  desmaioAcompanhado: 'Tudo escurece. Você acorda com {quem} segurando a lanterna e a sua cabeça.',
-  furia: 'Algo se rompe. Quando a vista volta, suas mãos estão fechadas e doendo, e há alguém se afastando de você com medo.',
-  furiaSozinho: 'Algo se rompe. Quando a vista volta, seus punhos estão esfolados na casca de uma árvore que não lhe fez nada.',
-  impulso: 'Você corre. Não sabe de quê. Larga o que pesa, ri alto, corre mais. Quando para, falta alguma coisa na sacola.',
-  convulsao: 'O chão sobe. O corpo treme sozinho, os dentes batem, a língua sangra. Passa. Demora, mas passa.',
-  torpor: 'Você se senta. Só um pouco. A lanterna queima ao seu lado enquanto você olha para nada, por muito tempo.',
-  noite: 'Você acha um canto abrigado e acende um fogo pequeno ao lado da lanterna. A brasa come a noite devagar.',
-  cronicaDesmaio: '{nome} caiu sem sentidos e acordou com a brasa menor.',
-  cronicaSurto: '{nome} ficou fora de si por um tempo, e não gosta de lembrar.',
-};
 
 /* ---------- Início ---------- */
 
@@ -94,8 +82,8 @@ export function nova({ semente, passado = 'desertora', nome, aventura }) {
 }
 
 const rng = (e) => comoFuncao(e.r);
-/** Texto de sistema: o da aventura, se ela tiver; senão o padrão. */
-const txt = (e, k) => e.aventura.textos?.[k] ?? T[k];
+/** Texto de sistema: o da aventura, se ela tiver; senão o padrão, no idioma da mesa (textos/*.js, bloco `sistema`). */
+const txt = (e, k) => e.aventura.textos?.[k] ?? t(`sistema.${k}`);
 const lista = (x) => (x == null ? [] : Array.isArray(x) ? x : [x]);
 const comNome = (e, texto) => String(texto).replaceAll('{nome}', e.nome);
 
@@ -218,10 +206,10 @@ export function opcoes(e) {
       const dificuldade = a.teste.dificuldade + (magica ? 0 : MESA.aperto[e.cena.ato] ?? 0);
       Object.assign(o, {
         chave,
-        nomeChave: R.nomeDaChave(chave),
+        nomeChave: nomeDaChave(chave),
         caminho: R.caminhoDaChave(chave),
         dificuldade,
-        nomeDificuldade: R.nomeDaDificuldade(dificuldade),
+        nomeDificuldade: nomeDaDificuldade(dificuldade),
         nivel: R.nivel(e.ficha, chave),
         magica,
       });
@@ -401,13 +389,13 @@ export function acoesDeCombate(e) {
   const eq = equipado(e);
   const v = R.valores(e.ficha);
   const ajuda = e.companheiros.length ? MESA.combate.ajudaDeCompanheiro : 0;
-  const acoes = [{ id: 'golpear', rotulo: eq.arma ? `Golpear com ${eq.arma.nome}` : 'Golpear de mãos nuas', ataque: v.ataqueCurta + ajuda, arma: eq.arma?.mod ?? 0 }];
-  if (eq.longa) acoes.push({ id: 'atirar', rotulo: `Atirar com ${eq.longa.nome}`, ataque: v.ataqueLonga + ajuda, arma: eq.longa.mod });
+  const acoes = [{ id: 'golpear', rotulo: eq.arma ? t('acoes.golpearCom', { arma: eq.arma.nome }) : t('acoes.maosNuas'), ataque: v.ataqueCurta + ajuda, arma: eq.arma?.mod ?? 0 }];
+  if (eq.longa) acoes.push({ id: 'atirar', rotulo: t('acoes.atirarCom', { arma: eq.longa.nome }), ataque: v.ataqueLonga + ajuda, arma: eq.longa.mod });
   const pmFisico = R.maximoDePM(e.ficha, 'magiaAtaqueFisico', e.magia);
-  if (pmFisico > 0) acoes.push({ id: 'magia', rotulo: 'Ataque mágico', maxPM: pmFisico });
+  if (pmFisico > 0) acoes.push({ id: 'magia', rotulo: t('acoes.ataqueMagico'), maxPM: pmFisico });
   const pmMental = R.maximoDePM(e.ficha, 'magiaAtaqueMental', e.magia);
-  if (pmMental > 0) acoes.push({ id: 'mental', rotulo: 'Ataque à mente', maxPM: pmMental });
-  acoes.push({ id: 'recuar', rotulo: 'Recuar' });
+  if (pmMental > 0) acoes.push({ id: 'mental', rotulo: t('acoes.ataqueMente'), maxPM: pmMental });
+  acoes.push({ id: 'recuar', rotulo: t('acoes.recuar') });
   return acoes;
 }
 
@@ -510,11 +498,11 @@ export function estadoDoInimigo(e) {
   const c = e.combate;
   if (!c) return '';
   const f = c.vida / c.inimigo.vida;
-  if (f >= 1) return 'inteiro';
-  if (f > 0.6) return 'arranhado';
-  if (f > 0.3) return 'ferido';
-  if (f > 0) return 'quase caindo';
-  return 'caído';
+  if (f >= 1) return t('inimigo.inteiro');
+  if (f > 0.6) return t('inimigo.arranhado');
+  if (f > 0.3) return t('inimigo.ferido');
+  if (f > 0) return t('inimigo.quaseCaindo');
+  return t('inimigo.caido');
 }
 
 /* ---------- Depois do desfecho ---------- */
@@ -600,7 +588,7 @@ function acampar(e) {
 /** O que dá para comprar com um Ponto de Evolução, dentro dos tetos do manual. */
 export function compras(e) {
   const f = e.ficha;
-  const linha = (chave) => ({ chave, nome: R.nomeDaChave(chave), tipo: R.tipoDaChave(chave), caminho: R.caminhoDaChave(chave), nivel: R.nivel(f, chave), teto: R.teto(f, chave) });
+  const linha = (chave) => ({ chave, nome: nomeDaChave(chave), tipo: R.tipoDaChave(chave), caminho: R.caminhoDaChave(chave), nivel: R.nivel(f, chave), teto: R.teto(f, chave) });
   const todas = [
     ...Object.keys(R.ATRIBUTOS),
     ...Object.keys(R.APRIMORAMENTOS),
@@ -684,12 +672,7 @@ function terminar(e, final) {
 /** Vida, Sanidade e brasa em palavras: o Mestre não narra em números. */
 export function emPalavras(tipo, atual, max, aventura = null) {
   const f = max > 0 ? atual / max : 0;
-  let escala = {
-    vida: ['caído', 'por um fio', 'muito ferido', 'ferido', 'arranhado', 'inteiro'],
-    sanidade: ['fora de si', 'em pedaços', 'abalado', 'inquieto', 'firme', 'sereno'],
-    magia: ['esgotado', 'quase seco', 'gasto', 'pela metade', 'disposto', 'pleno'],
-    brasa: ['cinza', 'um ponto vermelho', 'fraca', 'viva', 'forte', 'gorda e clara'],
-  }[tipo];
+  let escala = t(`escala.${tipo}`);
   if (tipo === 'brasa' && aventura?.relogio?.palavras) escala = aventura.relogio.palavras;
   if (atual <= 0) return escala[0];
   if (f >= 1) return escala[5];
@@ -699,15 +682,17 @@ export function emPalavras(tipo, atual, max, aventura = null) {
 /** A crônica da sessão, pronta para copiar. */
 export function cronica(e) {
   const marcas = e.trilha.map((t) => (t.caminho === 'corpo' ? '🟥' : t.caminho === 'mente' ? '🟦' : t.caminho === 'espirito' ? '🟪' : '⬜') ).join('');
+  // "Lia, a Ferreira": baixar o artigo do título é coisa do português.
+  const titulo = idiomaAtual() === 'pt' ? e.tituloDoPassado.replace(/^(O|A) /, (m) => m.toLowerCase()) : e.tituloDoPassado;
   const linhas = [
-    `Duplo Seis · ${e.aventura.nome}`,
-    `${e.nome}, ${e.tituloDoPassado.replace(/^(O|A) /, (m) => m.toLowerCase())}`,
+    t('cronica.cabecalho', { aventura: e.aventura.nome }),
+    t('cronica.personagem', { nome: e.nome, titulo }),
     '',
     ...e.cronica,
     '',
     e.fim ? `${'★'.repeat(e.fim.estrelas)}${'☆'.repeat(3 - e.fim.estrelas)} ${e.fim.titulo}` : '',
     marcas,
-    `semente ${e.semente}`,
+    t('cronica.semente', { semente: e.semente }),
   ];
   return linhas.join('\n');
 }
@@ -731,12 +716,12 @@ export function chanceDeSucesso(dados, dificuldade) {
 /** O Mestre não dá porcentagem: dá um aviso. */
 export function palpite(dados, dificuldade) {
   const c = chanceDeSucesso(dados, dificuldade);
-  if (c <= 0) return 'impossível assim';
-  if (c < 0.2) return 'só com muita sorte';
-  if (c < 0.45) return 'arriscado';
-  if (c < 0.7) return 'pode ir para qualquer lado';
-  if (c < 0.93) return 'provável';
-  return 'quase certo';
+  if (c <= 0) return t('palpite.impossivel');
+  if (c < 0.2) return t('palpite.muitaSorte');
+  if (c < 0.45) return t('palpite.arriscado');
+  if (c < 0.7) return t('palpite.qualquerLado');
+  if (c < 0.93) return t('palpite.provavel');
+  return t('palpite.quaseCerto');
 }
 
 /* ---------- Guardar e retomar ---------- */
