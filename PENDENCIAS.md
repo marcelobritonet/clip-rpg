@@ -118,3 +118,27 @@ Jogar: https://marcelobritonet.github.io/clip-rpg/duplo-seis/ · Notas e decisõ
 | 8.6 | Mais cenas por ato | ☐ Hoje são 9 por ato; com 12 as sessões se repetem menos | `duplo-seis/aventuras/FORMATO.md` descreve o formato | |
 | 8.7 | Terceira aventura e mais idiomas | ☐ Ideia: investigação ou horror, para a Sanidade pesar; espanhol | Copiar a estrutura de `aventuras/ar/` | |
 | 8.8 | Conferências que faltaram | ☐ Jogar sem rede depois de instalar, botão de compartilhar a crônica, e teste em celular de verdade (só foi visto em janela de 375 px) | Instalar pelo navegador do celular e desligar a rede | |
+
+### 8.9 Que modelo dá conta de cada pendência do Duplo Seis
+
+Auditoria de 21/11/2026. "Modelo mínimo" é o mais barato em que dá para confiar sem retrabalho; é julgamento, não medição.
+
+| # | Pendência | O que exige | Modelo mínimo | Observação |
+|---|---|---|---|---|
+| 8.1 | Revisão de continuidade | Ler 54 cenas em dois idiomas e editar prosa sem perder a voz | Opus 5.5 | Dá para dividir: Sonnet lista os problemas, Opus corrige |
+| 8.2 | Equilíbrio da Brasa | Simular, mexer em números, simular de novo | Sonnet 5.5 | Laço fechado com medição objetiva. Enunciado pronto em 8.10 |
+| 8.3 | Jogar e opinar | Gosto humano | Nenhum | Só o Marcelo |
+| 8.4 | Lacunas que viram regra | Decisão de autor | Nenhum para decidir; Sonnet 5.5 para escrever no README | |
+| 8.5 | Link no menu e no README | Uma linha em sete arquivos | Haiku 5.5 | Depende de decisão do Marcelo |
+| 8.6 | Mais cenas por ato | Escrita criativa em formato rígido, com validador | Sonnet 5.5 (corretas), Opus 5.5 (boas) | O validador garante a forma, não a graça |
+| 8.7 | Terceira aventura | Conceber cenário, tom, final e 27 cenas | Opus 5.5 na base e na bíblia; Sonnet 5.5 nos atos | |
+| 8.7 | Espanhol | Tradução literária com paridade conferida por teste | Sonnet 5.5; Haiku 5.5 no dicionário da interface | |
+| 8.8 | Conferir em celular de verdade | Instalar, desligar a rede, tocar na tela | Nenhum sozinho | Precisa do aparelho |
+
+Fable 5.2 não é necessário para nenhuma delas; só valeria para desenhar um jogo novo ou repensar a estrutura deste.
+Na primeira rodada, traduções e atos da segunda aventura rodaram no modelo mais caro e caberiam em Sonnet com bíblia e glossário prontos.
+Para gastar pouco: sessão nova (sem o histórico longo), sem subagentes, um item por vez.
+
+### 8.10 Enunciado pronto para a 8.2 (sessão nova, Sonnet 5.5)
+
+> No clip-rpg, branch `claude/duplo-seis`: resolver a pendência 8.2 do `PENDENCIAS.md`. Rodar `node duplo-seis/simular.mjs 400 atento brasa` e aproximar os seis passados no final de 3 estrelas (hoje 21% a 82%; alvo, todos entre 30% e 60%), mexendo só em `lacos` das cenas ou nas condições de `finais` em `duplo-seis/aventuras/brasa/`, e espelhando no `en/`. Sem subagentes. Conferir com `npm test` e `node duplo-seis/aventuras/paridade.js brasa en`. Registrar os números novos no `duplo-seis/NOTAS.md`, marcar a 8.2 no `PENDENCIAS.md`, commitar e parar; não publicar release.
