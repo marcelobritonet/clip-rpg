@@ -120,7 +120,7 @@ button.primario { background: var(--accent); border-color: var(--accent); color:
 .topo .marca { font-family: var(--serif); font-weight: 700; font-size: 1.25rem; text-decoration: none; color: var(--ink); }
 .topo nav { display: flex; gap: 14px; flex-wrap: wrap; }
 .topo nav a { text-decoration: none; color: var(--ink-2); }
-.topo nav a[aria-current='page'] { color: var(--ink); font-weight: 600; }
+.topo nav a:is([aria-current='page'], [aria-current='true']) { color: var(--ink); font-weight: 600; }
 .topo .espaco { flex: 1; }
 
 /* Rodapé com versões */
