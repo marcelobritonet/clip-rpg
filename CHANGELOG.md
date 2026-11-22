@@ -4,6 +4,14 @@ O Clip tem duas linhas de versão: as **regras** (o texto do Sistema Clip, no [R
 
 ## Ficha, manual e motor
 
+### 1.3.0 (22/11/2026)
+
+Uma página só para os jogos: **Jogos** (`/jogos/`).
+
+- Duplo Seis, Arena, Travessia e Desvario reunidos numa página, cada um com um cartão.
+- O menu do topo passa de seis para quatro links: Manual, Ficha digital, Jogos e Novidades. Dentro de um jogo, "Jogos" fica marcado.
+- O README aponta para a página e lista os quatro jogos, agora com o Duplo Seis.
+
 ### 1.2.0 (18/11/2026)
 
 Um terceiro protótipo de jogo: **Desvario** (`/crawler/`), um dungeon crawler em que a Sanidade distorce a percepção.

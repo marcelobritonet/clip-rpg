@@ -2,7 +2,7 @@
  * Duplo Seis fora do ar: tudo o que a página carregou uma vez fica guardado.
  * Com rede, vale sempre a versão nova; sem rede, a guardada.
  */
-const CACHE = 'duplo-seis-v3';
+const CACHE = 'duplo-seis-v4';
 
 self.addEventListener('install', (ev) => {
   ev.waitUntil(caches.open(CACHE).then((c) => c.addAll(['./', 'duplo-seis.css', 'ui.js'])).then(() => self.skipWaiting()));

@@ -6,7 +6,7 @@
  * - `regras`: o texto do Sistema Clip (README.md).
  */
 export const VERSAO = {
-  ferramentas: '1.2.0',
+  ferramentas: '1.3.0',
   regras: '0.9.3',
-  data: '2026-11-18',
+  data: '2026-11-22',
 };
