@@ -450,6 +450,17 @@ export const cenas = [
           cronica: 'In the blackout, Caetano led {nome} down the Tube by clicking his tongue.',
         },
       },
+      {
+        id: 'lanterna',
+        rotulo: 'Switch on the head lamp',
+        requer: { item: 'lanterna' },
+        livre: true,
+        resultado: {
+          texto: 'The beam is small, a hand of light in the black, but enough to read the signs. At the second junction it finds an errand boy curled in a niche, crying quietly. He follows clinging to your belt all the way to the green light, and only there says his name: Dico.',
+          cronica: '{nome} switched on the lamp in the Tube blackout and brought a lost boy to the light.',
+          efeitos: { lacos: 1 },
+        },
+      },
     ],
   },
 

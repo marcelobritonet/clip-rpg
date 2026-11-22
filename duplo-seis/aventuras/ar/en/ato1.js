@@ -501,8 +501,9 @@ export const cenas = [
         requer: { nivel: { equilibrio: 1 } },
         teste: { chave: 'equilibrio', dificuldade: 3 },
         sucesso: {
-          texto: 'The beam is a hand wide and runs above everything. For someone who walks the hull, that is a high street. You pass over Brigadier, who cannot believe it, and press the button with the tip of your foot.',
+          texto: 'The beam is a hand wide and runs above everything. For someone who walks the hull, that is a high street. You pass over Brigadier, who cannot believe it, and press the button with the tip of your foot. From the door, Bia whistles in admiration: "Even I don\'t walk up there."',
           cronica: '{nome} crossed the High Coop along the beam and silenced the alarm with one foot.',
+          efeitos: { lacos: 1 },
         },
         falha: {
           texto: 'A coop beam has something on it that a station hull does not. You slip halfway and come down sitting in a heap of straw, one step from the button and two from the cockerel. You press and run.',

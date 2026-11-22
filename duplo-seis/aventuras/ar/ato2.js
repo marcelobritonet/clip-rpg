@@ -870,6 +870,17 @@ export const cenas = [
           efeitos: { sanidade: -2 },
         },
       },
+      {
+        id: 'inimigo',
+        rotulo: 'Dizer a quem você deve',
+        requer: { antecedente: 'inimigo' },
+        livre: true,
+        resultado: {
+          texto: 'Dona Ester pergunta para quem você leva caixa sem manifesto. Você diz o nome, e dói dizer. Ela solta o manche. "Ele também me cobra, desde que a Andorinha parou", diz, e abre a escotilha. "Quem deve a ele é da minha turma." Na rampa, aperta a sua mão com força.',
+          cronica: '{nome} confessou a Dona Ester a quem devia, e ela abriu a Andorinha para um colega de dívida.',
+          efeitos: { lacos: 1, sanidade: -1 },
+        },
+      },
     ],
   },
   {

@@ -151,6 +151,23 @@ da Rosa, que o Aprendiz já traz de casa.
 
 O Piloto do Ar continua bem abaixo dos outros (16%); não era parte da 8.2, que tratava só da Brasa.
 
+## O Piloto do Ar (22/11/2026, 8.12)
+
+O Piloto de Rebocador chegava ao final de 3 estrelas do Ar em 16% das sessões (robô atento), contra 33% a 54% dos outros. O motivo: as abordagens especiais a que ele tem acesso somavam 2 laços no total, contra 4 a 9 dos outros passados, e nenhum dos itens dele (botas, lanterna, estilete) abria coisa nenhuma. Como o final "duzentos" pede 5 laços, ele parava no "Ar limpo".
+
+| Cena | Mudança |
+|---|---|
+| ar1-galinheiro, viga dos poleiros (`equilibrio`) | Bia vê a travessia da porta; +1 laço |
+| ar2-andorinha, nova especial `inimigo` (livre) | Ele confessa a Dona Ester a quem deve; ela também deve à mesma pessoa e abre a cabine. +1 laço, −1 Sanidade. É a primeira cena que usa o `inimigo` do Ar |
+| ar3-apagao, nova especial `lanterna` (livre) | O facho acha um menino perdido no escuro, Dico; +1 laço. Quem pegou a lanterna nos tanques de alga também usa |
+
+| Robô | Piloto antes | Piloto depois |
+|---|---|---|
+| atento | 16% | 36% |
+| teimoso | — | 34% |
+
+Os outros cinco passados ficaram com os mesmos números. O inglês recebeu as mudanças da viga e do apagão (cenas que já existiam lá); a Andorinha ainda não foi traduzida (8.11).
+
 ## Próximos passos
 
 Estão no `PENDENCIAS.md`, seção 8.

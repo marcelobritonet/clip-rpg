@@ -450,6 +450,17 @@ export const cenas = [
           cronica: 'No apagão, Caetano guiou {nome} pelo Tubo estalando a língua.',
         },
       },
+      {
+        id: 'lanterna',
+        rotulo: 'Acender a lanterna de testa',
+        requer: { item: 'lanterna' },
+        livre: true,
+        resultado: {
+          texto: 'O facho é pouco, um palmo de luz no breu, mas dá para ler as placas. Na segunda bifurcação ele acha um menino de recados encolhido num nicho, chorando baixo. O menino segue agarrado ao seu cinto até a luz verde, e só lá diz o nome: Dico.',
+          cronica: '{nome} acendeu a lanterna no apagão do Tubo e trouxe um menino perdido até a luz.',
+          efeitos: { lacos: 1 },
+        },
+      },
     ],
   },
 

@@ -501,8 +501,9 @@ export const cenas = [
         requer: { nivel: { equilibrio: 1 } },
         teste: { chave: 'equilibrio', dificuldade: 3 },
         sucesso: {
-          texto: 'A viga tem um palmo de largura e corre por cima de tudo. Para quem anda no casco, é avenida. Você passa sobre Brigadeiro, que não acredita, e aperta o botão com a ponta do pé.',
+          texto: 'A viga tem um palmo de largura e corre por cima de tudo. Para quem anda no casco, é avenida. Você passa sobre Brigadeiro, que não acredita, e aperta o botão com a ponta do pé. Da porta, Bia assobia de admiração: "Nem eu ando aí."',
           cronica: '{nome} cruzou o Galinheiro Alto pela viga e calou o alarme com o pé.',
+          efeitos: { lacos: 1 },
         },
         falha: {
           texto: 'Viga de galinheiro tem o que casco de estação não tem. Você escorrega no meio e desce sentado num monte de palha, a um passo do botão e a dois do galo. Aperta e corre.',
