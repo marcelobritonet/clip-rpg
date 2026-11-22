@@ -738,4 +738,235 @@ export const cenas = [
       },
     ],
   },
+  {
+    id: 'ato2-barqueira',
+    ato: 2,
+    titulo: 'A barqueira do Rio Escuro',
+    texto:
+      'Dentro da mata o rio corre preto e calado, entre raízes que bebem nele. Num tronco escavado espera uma barqueira de chapéu de palha e olhos de quem não dorme. "Moeda não serve aqui", diz, sem erguer a vara. "A travessia custa uma história verdadeira. Das mentirosas, o rio cuida." Na outra margem, a trilha sobe.',
+    abordagens: [
+      {
+        id: 'corpo',
+        rotulo: 'Atravessar a vau',
+        teste: { chave: 'fisico', dificuldade: 8 },
+        sucesso: {
+          texto: 'A água preta é gelada e mais funda do que parece. Você vai de raiz em raiz, com a lanterna no alto, e sai do outro lado tremendo. A barqueira acompanha tudo do tronco e tira o chapéu quando você chega.',
+          cronica: '{nome} atravessou o Rio Escuro a vau, sem pagar a barqueira.',
+        },
+        falha: {
+          texto: 'No meio, a corrente puxa as pernas para um lugar que não é a outra margem. A barqueira encosta o tronco, puxa você pela gola e atravessa você de graça, sem dizer nada. Isso pesa.',
+          cronica: '{nome} foi pescado do Rio Escuro pela barqueira que não quis pagar.',
+          efeitos: { vida: -1, brasa: -1 },
+        },
+      },
+      {
+        id: 'mente',
+        rotulo: 'Contar uma história do vale',
+        teste: { chave: 'sabedoria', dificuldade: 7 },
+        ajuda: ['livro'],
+        sucesso: {
+          texto: 'Você conta a do fundador de Vau-do-Sino, que trocou o sino da capela por uma vaca e depois a vaca pelo sino de volta. Está nos livros. A barqueira ri pelo nariz e empurra o tronco.',
+          cronica: '{nome} pagou a travessia do Rio Escuro com a história do sino trocado por uma vaca.',
+        },
+        falha: {
+          texto: 'No meio da história você enfeita um pouco. O tronco para no meio do rio e só anda de novo quando você conta como foi de verdade, que tem menos graça e mais vergonha.',
+          cronica: '{nome} enfeitou uma história no Rio Escuro, e o rio não deixou.',
+          efeitos: { sanidade: -1, brasa: -1 },
+        },
+      },
+      {
+        id: 'espirito',
+        rotulo: 'Contar a verdade sobre você',
+        teste: { chave: 'vontade', dificuldade: 7 },
+        sucesso: {
+          texto: 'Você conta por que leva a brasa. A razão de verdade, a que ainda não tinha dito em voz alta. A barqueira escuta remando. Na outra margem, antes de você descer, toca a lanterna com dois dedos, como quem benze.',
+          cronica: '{nome} contou à barqueira do Rio Escuro a razão verdadeira da viagem.',
+          efeitos: { brasa: 1 },
+        },
+        falha: {
+          texto: 'Você começa, e a voz trava no pedaço mais difícil. O tronco para e fica parado até você terminar. Você termina, com a garganta doendo. A barqueira não comenta, e é pior do que se comentasse.',
+          cronica: '{nome} contou a verdade no Rio Escuro aos pedaços.',
+          efeitos: { sanidade: -2 },
+        },
+      },
+      {
+        id: 'almanaque',
+        rotulo: 'Ler a história do Farol',
+        requer: { item: 'almanaque' },
+        livre: true,
+        resultado: {
+          texto: 'O almanaque traz a história do ano em que o Farol foi aceso. A barqueira para de remar para ouvir até o fim e, na outra margem, pede que você leia de novo. Você lê. Leva tempo, e vale.',
+          cronica: '{nome} leu para a barqueira do Rio Escuro, duas vezes, a história do Farol aceso.',
+          efeitos: { marco: true, brasa: -1 },
+        },
+      },
+      {
+        id: 'fama',
+        rotulo: 'Cantar uma das suas',
+        requer: { antecedente: 'boaFama' },
+        livre: true,
+        resultado: {
+          texto: 'Ela conhece a canção, e conhece você por ela. Pede a do meio, a triste. Você canta, ela rema no compasso. Na margem, diz que é a primeira vez que alguém paga duas vezes.',
+          cronica: '{nome} pagou a travessia do Rio Escuro com uma canção que a barqueira já sabia de cor.',
+          efeitos: { brasa: 1, sanidade: -1 },
+        },
+      },
+    ],
+  },
+  {
+    id: 'ato2-copista',
+    ato: 2,
+    titulo: 'A última página',
+    texto:
+      'Numa torre caída no meio da mata mora Frei Aurélio, um copista tão velho quanto as paredes. Passou a vida copiando o único livro que sobrou de uma biblioteca queimada, e falta só a última página. A chuva da tarde abriu uma goteira bem em cima da mesa, e a vela treme no vento. "Só preciso de luz até o fim", ele diz.',
+    abordagens: [
+      {
+        id: 'corpo',
+        rotulo: 'Subir e tapar a goteira',
+        teste: { chave: 'agilidade', dificuldade: 7 },
+        sucesso: {
+          texto: 'Você sobe pela hera da torre até o buraco do telhado e o tapa com o seu casaco e duas pedras. Lá embaixo, a pena volta a correr. Quando você desce, molhado, o frei está na última linha, e lhe dá de presente a lente com que lia.',
+          cronica: '{nome} tapou com o próprio casaco o telhado de Frei Aurélio e ganhou a lente do copista.',
+          efeitos: { lacos: 1, item: 'lente' },
+        },
+        falha: {
+          texto: 'A hera solta da pedra no meio da subida. Você cai de costas na lama do pátio, e da janela o frei pergunta, aflito, se a lanterna está bem. Está. Você, menos.',
+          cronica: '{nome} caiu da torre do copista e protegeu a lanterna com as costas.',
+          efeitos: { vida: -2 },
+        },
+      },
+      {
+        id: 'mente',
+        rotulo: 'Desviar a goteira',
+        teste: { chave: 'inteligencia', dificuldade: 7 },
+        sucesso: {
+          texto: 'Uma telha quebrada, uma corda de varal e uma tigela: a água passa a escorrer pela corda até a tigela, longe do livro, gota por gota. O frei termina a página olhando a corda como quem vê milagre de engenho, e lhe dá a lente com que lia.',
+          cronica: '{nome} desviou a goteira do copista com uma corda de varal e ganhou a lente dele.',
+          efeitos: { lacos: 1, item: 'lente' },
+        },
+        falha: {
+          texto: 'A corda leva a água direto para o tinteiro. O frei salva o livro e perde a tinta. Vocês passam a tarde moendo carvão para fazer mais, e a página sai, mas tarde.',
+          cronica: '{nome} desviou uma goteira para dentro do tinteiro do copista.',
+          efeitos: { brasa: -1 },
+        },
+      },
+      {
+        id: 'espirito',
+        rotulo: 'Segurar a luz para ele',
+        teste: { chave: 'vontade', dificuldade: 7 },
+        sucesso: {
+          texto: 'Você abre a lanterna ao lado do livro e fica ali, de braço estendido, protegendo a chama do vento com o corpo. O braço dói, depois some. O frei escreve a última palavra, sopra a tinta e lhe dá a lente com que lia.',
+          cronica: '{nome} segurou a lanterna aberta até Frei Aurélio terminar o último livro do vale.',
+          efeitos: { lacos: 1, item: 'lente' },
+        },
+        falha: {
+          texto: 'O braço treme antes de a página acabar, e a luz treme junto. O frei erra uma letra, raspa, erra outra. Termina, mas a última página do único livro tem um borrão, e ele não diz nada sobre isso.',
+          cronica: '{nome} deixou a luz tremer na última página do copista.',
+          efeitos: { sanidade: -1, brasa: -1 },
+        },
+      },
+      {
+        id: 'historia',
+        rotulo: 'Ditar a página de cor',
+        requer: { nivel: { historia: 1 } },
+        teste: { chave: 'historia', dificuldade: 3 },
+        sucesso: {
+          texto: 'É a Crônica do Vale, e a última página conta o Farol aceso pela primeira vez. Você dita de cor enquanto ele escreve depressa, antes que a chuva vença. No fim, o frei lhe dá a lente e uma bênção comprida.',
+          cronica: '{nome} ditou de cor a última página da Crônica do Vale a um copista na Mata Velha.',
+          efeitos: { item: 'lente', marco: true },
+        },
+        falha: {
+          texto: 'Você lembra o começo e o fim, não o meio. O frei espera, educado, e acaba escrevendo o meio do jeito dele.',
+          cronica: '{nome} esqueceu o meio da Crônica do Vale, e o copista inventou.',
+          efeitos: { brasa: -1 },
+        },
+      },
+    ],
+  },
+  {
+    id: 'ato2-caieira',
+    ato: 2,
+    titulo: 'A caieira',
+    texto:
+      'Numa clareira esfumaçada, um monte de terra do tamanho de uma casa fumega pelas frestas: é a caieira, onde a lenha vira carvão devagar. A carvoeira, Leonor, corre em volta dele com uma pá. Uma rachadura se abriu lá no alto, e o fogo de dentro quer ar. Se pegar, a caieira vira fogueira, e vão-se três semanas de trabalho.',
+    abordagens: [
+      {
+        id: 'corpo',
+        rotulo: 'Tapar a rachadura lá em cima',
+        teste: { chave: 'fisico', dificuldade: 7 },
+        sucesso: {
+          texto: 'Você sobe a caieira quente, de botas fumegando, e soca terra molhada na rachadura até o fumo ficar azul e manso. Leonor respira e enche a sua lanterna de carvão bom, do que pega com um sopro.',
+          cronica: '{nome} tapou a rachadura da caieira de Leonor, a carvoeira.',
+          efeitos: { brasa: 1 },
+        },
+        falha: {
+          texto: 'A terra quente cede, e a sua perna afunda até o joelho no bafo de dentro. Você sai depressa, com a bota em brasa e a pele também. A rachadura, quem tapa é Leonor.',
+          cronica: '{nome} afundou a perna numa caieira acesa.',
+          efeitos: { vida: -2 },
+        },
+      },
+      {
+        id: 'mente',
+        rotulo: 'Abafar pelo pé',
+        teste: { chave: 'inteligencia', dificuldade: 7 },
+        sucesso: {
+          texto: 'Fogo que quer ar puxa por baixo. Você fecha com terra os respiros do pé, um a um, e a rachadura de cima para de puxar e vira só fumaça. Leonor olha com respeito de colega e enche a sua lanterna de carvão bom.',
+          cronica: '{nome} abafou a caieira pelo pé, como se faz entre carvoeiros.',
+          efeitos: { brasa: 1 },
+        },
+        falha: {
+          texto: 'Você fecha os respiros de um lado só. O fogo procura o outro e acha. Você e Leonor passam a tarde correndo em volta do monte de pá na mão, e salvam metade.',
+          cronica: '{nome} salvou meia caieira, correndo de pá na mão.',
+          efeitos: { brasa: -1 },
+        },
+      },
+      {
+        id: 'espirito',
+        rotulo: 'Dar o ritmo às duas pás',
+        teste: { chave: 'lideranca', dificuldade: 7 },
+        sucesso: {
+          texto: 'Você segura Leonor pelo braço, divide o monte em dois lados e dá o ritmo: terra, bate, terra, bate. Logo ela conta junto. O fumo muda de cor, e ela paga com um punhado de carvão bom na sua lanterna.',
+          cronica: '{nome} salvou a caieira de Leonor no ritmo de duas pás.',
+          efeitos: { brasa: 1 },
+        },
+        falha: {
+          texto: 'Leonor não aceita ordem de forasteiro em caieira dela, e as duas pás se atrapalham. A rachadura cresce antes de diminuir, e o dia vai junto.',
+          cronica: '{nome} quis mandar numa caieira alheia, e a caieira não deixou.',
+          efeitos: { brasa: -1 },
+        },
+      },
+      {
+        id: 'sobrevivencia',
+        rotulo: 'Ler a cor da fumaça',
+        requer: { nivel: { sobrevivencia: 1 } },
+        teste: { chave: 'sobrevivencia', dificuldade: 4 },
+        sucesso: {
+          texto: 'Fumaça branca é água, azul é bom, amarela é fome de ar. A amarela sai de dois lugares, e um deles ainda não rachou. Você tapa os dois. Leonor enche a sua lanterna de carvão bom, do que pega com um sopro.',
+          cronica: '{nome} leu a fumaça da caieira e tapou a rachadura antes que ela abrisse.',
+          efeitos: { brasa: 1 },
+        },
+        falha: {
+          texto: 'A fumaça está toda da mesma cor, cinza de entardecer. Você ajuda como dá, de pá, e o resto é sorte e Leonor.',
+          cronica: '{nome} não soube ler a fumaça da caieira.',
+          efeitos: { brasa: -1 },
+        },
+      },
+      {
+        id: 'elemental',
+        rotulo: 'Pedir ao fogo que durma',
+        requer: { nivel: { magiaElemental: 1 } },
+        teste: { chave: 'magiaElemental', dificuldade: 5 },
+        sucesso: {
+          texto: 'Você põe a mão na terra quente e fala com o fogo lá dentro, baixo, como se fala com bicho no ninho. Ele se encolhe, resmunga e dorme. Leonor faz o sinal da cruz e depois, por via das dúvidas, paga com carvão bom.',
+          cronica: '{nome} pôs para dormir o fogo de uma caieira.',
+          efeitos: { brasa: 1 },
+        },
+        falha: {
+          texto: 'O fogo acorda em vez de dormir e cospe uma língua amarela pela rachadura. Você recua com as sobrancelhas chamuscadas e a cabeça zunindo.',
+          cronica: '{nome} acordou o fogo de uma caieira em vez de acalmá-lo.',
+          efeitos: { sanidade: -1, brasa: -1 },
+        },
+      },
+    ],
+  },
 ];

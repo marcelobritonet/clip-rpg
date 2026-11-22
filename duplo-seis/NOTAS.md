@@ -98,7 +98,7 @@ O robô ao acaso continua quase sempre em "Cinza".
 
 ### Continuidade dos textos (22/11/2026, só pt)
 
-As cenas de cada ato saem sorteadas (4 de 9), então nenhuma pode supor outra. Corrigido só em português; o
+As cenas de cada ato saem sorteadas (4 de 9 na época; agora 4 de 12), então nenhuma pode supor outra. Corrigido só em português; o
 inglês ainda tem a versão antiga destes trechos (pendência 8.11 do `PENDENCIAS.md`).
 
 | Aventura | Cena | Problema | Correção |
@@ -118,6 +118,38 @@ inglês ainda tem a versão antiga destes trechos (pendência 8.11 do `PENDENCIA
 | Ar | A Doca Aberta | "Primeira vez sem vidro" contradizia quem anda por fora do casco | Frase trocada |
 | Ar | O Trecho Frio | 42 fundadores, contra os mais de 160 nomes lidos na capela | Mais de duzentos |
 | Ar | A voz emprestada | Citava "a janela da capela", que pode não ter aparecido | "o lado de fora sem vidro" |
+
+### Doze cenas por ato (22/11/2026, só pt)
+
+Três cenas novas por ato em cada aventura, 18 ao todo, só em português. O inglês segue com as 9 antigas
+por ato até a pendência 8.11; `paridade.js` aceita cena que só existe no original e lista as que faltam.
+
+| Aventura | Ato | Cenas novas |
+|---|---|---|
+| Brasa | 1, O Vale | A pipa no campanário · A forja fria (a brasa acende a forja e não diminui) · A carta molhada |
+| Brasa | 2, A Mata Velha | A barqueira do Rio Escuro (a travessia custa uma história verdadeira) · A última página · A caieira |
+| Brasa | 3, O Cimo | Os que subiram antes (lanternas de quem tentou; o Faroleiro também subiu um dia) · O sino do passo · A que desceu |
+| Ar | 1, O Anel Verde | A colmeia da estufa · O voluntário · A festa suspensa |
+| Ar | 2, As Docas | A última nave · A queda de braço · A gata no ejetor |
+| Ar | 3, O Eixo | O jardim do Eixo · Fogo sem peso · Os primeiros dias (o diário da Zeladora) |
+
+Prêmios que faltavam: a Lente de Vidro da Brasa e o Manual dos Fundadores do Ar só eram usados em `ajuda`,
+nunca dados; agora a última página e a última nave os dão.
+
+Equilíbrio depois das cenas novas (robô atento, 1500 sessões, final de 3 estrelas). Na Brasa, a primeira versão
+passou de 70% para três passados; tirei os laços da forja e da caieira (viraram itens e brasa) e da lamparina
+da Rosa, que o Aprendiz já traz de casa.
+
+| Brasa | Antes | Agora | | Ar | Antes | Agora |
+|---|---|---|---|---|---|---|
+| A Desertora | 38% | 32% | | A Estivadora | 32% | 38% |
+| O Caçador | 48% | 42% | | O Piloto de Rebocador | 15% | 16% |
+| A Boticária | 45% | 46% | | A Médica do Anel | 21% | 33% |
+| O Aprendiz | 56% | 52% | | O Técnico de Sistemas | 35% | 41% |
+| O Menestrel | 54% | 51% | | O Negociador do Mercado | 49% | 54% |
+| A Peregrina | 55% | 58% | | A Sensitiva | 57% | 53% |
+
+O Piloto do Ar continua bem abaixo dos outros (16%); não era parte da 8.2, que tratava só da Brasa.
 
 ## Próximos passos
 

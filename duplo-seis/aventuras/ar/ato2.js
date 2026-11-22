@@ -802,4 +802,244 @@ export const cenas = [
       },
     ],
   },
+  {
+    id: 'ar2-andorinha',
+    ato: 2,
+    titulo: 'A última nave',
+    texto:
+      'No fundo da Doca 4 dorme a Andorinha, a última nave da estação, sem combustível há onze anos. A doca em volta perdeu a pressão; o único caminho com ar até a rampa do Eixo passa por dentro da cabine. Lá dentro, de mãos no manche, está Dona Ester, que pilotou a última viagem. "Sem autorização da torre, ninguém embarca", diz.',
+    abordagens: [
+      {
+        id: 'corpo',
+        rotulo: 'Ir por fora, pelo costado',
+        teste: { chave: 'fisico', dificuldade: 8 },
+        ajuda: ['traje', 'ima'],
+        sucesso: {
+          texto: 'Você prende o fôlego e o cartucho e vai pela borda da doca sem ar, colado ao costado da Andorinha. Pela janela da cabine, Dona Ester acompanha tudo e, quando você chega à eclusa do outro lado, bate continência.',
+          cronica: '{nome} contornou a Andorinha por fora, na doca sem ar.',
+        },
+        falha: {
+          texto: 'Na metade do costado o fôlego acaba. Você bate na janela da cabine, sem ar, e Dona Ester abre a escotilha de serviço e puxa você para dentro, resmungando sobre gente que não pede autorização.',
+          cronica: '{nome} foi resgatado do costado da Andorinha pela piloto que não queria deixar passar.',
+          efeitos: { vida: -2, sanidade: -1 },
+        },
+      },
+      {
+        id: 'mente',
+        rotulo: 'Pedir autorização à torre',
+        teste: { chave: 'inteligencia', dificuldade: 7 },
+        sucesso: {
+          texto: 'Você acha no painel a frequência da torre, que ninguém ocupa há onze anos, e pede pelo rádio, no jargão das cartas de voo, permissão para cruzar a cabine. Dona Ester ouve, pensa, e responde ela mesma, na voz da torre: "Autorizado." Na saída, lhe passa o manual de bordo.',
+          cronica: '{nome} pediu autorização a uma torre vazia, e Dona Ester respondeu por ela.',
+          efeitos: { item: 'manual' },
+        },
+        falha: {
+          texto: 'Você erra o indicativo da torre. Dona Ester ri, sem graça, e diz que nem a torre de verdade era tão ruim. Abre a escotilha muito depois, quando cansa de você.',
+          cronica: '{nome} errou o indicativo da torre diante da última piloto da estação.',
+          efeitos: { brasa: -1 },
+        },
+      },
+      {
+        id: 'espirito',
+        rotulo: 'Ouvir a última viagem',
+        teste: { chave: 'empatia', dificuldade: 7 },
+        sucesso: {
+          texto: 'Você senta no banco do copiloto e pede que ela conte. Ela conta: a Terra crescendo na janela, o porto, a volta com o porão cheio. Quando termina, as mãos soltam o manche. "Vai", diz, e lhe dá o manual de bordo. "E volta para me contar se o ar voltou."',
+          cronica: '{nome} ouviu Dona Ester contar a última viagem da Andorinha.',
+          efeitos: { item: 'manual', marco: true },
+        },
+        falha: {
+          texto: 'Ela conta, e você ouve com o medidor de ar piscando no pulso. Ela vê. "Todo mundo tem pressa agora", diz, e volta ao manche. Você espera muito até ela abrir.',
+          cronica: '{nome} ouviu Dona Ester com um olho no medidor de ar.',
+          efeitos: { sanidade: -1, brasa: -1 },
+        },
+      },
+      {
+        id: 'maquinas',
+        rotulo: 'Dar a partida no motor',
+        requer: { nivel: { maquinas: 1 } },
+        teste: { chave: 'maquinas', dificuldade: 4 },
+        sucesso: {
+          texto: 'Não há combustível, mas há partida. Você liga, e a Andorinha estremece inteira, com um ronco que a doca não ouvia há onze anos. Dona Ester fecha os olhos e sorri. Depois desliga, abre a escotilha e lhe entrega o manual de bordo.',
+          cronica: '{nome} fez a Andorinha roncar uma última vez para a piloto dela.',
+          efeitos: { item: 'manual', marco: true },
+        },
+        falha: {
+          texto: 'A partida tosse e queima um fusível. A cabine fica no escuro, e no escuro Dona Ester chora baixinho. Você espera ela abrir.',
+          cronica: '{nome} queimou um fusível da Andorinha, e a cabine ficou no escuro.',
+          efeitos: { sanidade: -2 },
+        },
+      },
+    ],
+  },
+  {
+    id: 'ar2-rafa',
+    ato: 2,
+    titulo: 'A queda de braço',
+    texto:
+      'A rampa de serviço é da turma da Rafa Cinco-Dedos, e a turma está de braços cruzados na frente dela. Ninguém sobe sem pagar. Rafa não quer ficha nem favor: quer uma queda de braço, ali na mesa de caixote, diante das Docas inteiras. Ela nunca perdeu. A turma bate nas caixas, em ritmo, esperando você sentar.',
+    abordagens: [
+      {
+        id: 'corpo',
+        rotulo: 'Aceitar a queda de braço',
+        teste: { chave: 'forca', dificuldade: 8 },
+        sucesso: {
+          texto: 'A mão dela é uma morsa, mas é a sua que desce o braço dela até o caixote, devagar, com as Docas em silêncio. Rafa ri alto da primeira derrota da vida e manda dois da turma levarem o cartucho rampa acima.',
+          cronica: '{nome} ganhou a primeira queda de braço que Rafa Cinco-Dedos perdeu na vida.',
+          efeitos: { lacos: 1 },
+        },
+        falha: {
+          texto: 'O seu braço bate no caixote antes de você entender que começou. A turma vibra. Rafa, generosa na vitória, deixa você subir, mas pela escada de serviço, que é comprida.',
+          cronica: '{nome} perdeu para Rafa Cinco-Dedos e subiu pela escada comprida.',
+          efeitos: { vida: -1, brasa: -1 },
+        },
+      },
+      {
+        id: 'mente',
+        rotulo: 'Perceber o que ela quer',
+        teste: { chave: 'sabedoria', dificuldade: 7 },
+        sucesso: {
+          texto: 'Ninguém fecha uma rampa por esporte. Os olhos de Rafa vão do cartucho para a rampa e voltam: ela quer ajudar, e não sabe pedir. Você convida. Ela finge pensar, aceita, e carrega o cartucho na frente, abrindo caminho.',
+          cronica: '{nome} percebeu que Rafa Cinco-Dedos queria ajudar e a convidou.',
+          efeitos: { lacos: 1 },
+        },
+        falha: {
+          texto: 'Você acha que ela quer fichas, e oferece. A turma ri da oferta. Rafa, ofendida, deixa você passar só depois de um sermão comprido sobre a honra das Docas.',
+          cronica: '{nome} ofereceu fichas a Rafa Cinco-Dedos e ouviu um sermão.',
+          efeitos: { brasa: -1, sanidade: -1 },
+        },
+      },
+      {
+        id: 'espirito',
+        rotulo: 'Propor um duelo de canto',
+        teste: { chave: 'presenca', dificuldade: 7 },
+        ajuda: ['musica'],
+        sucesso: {
+          texto: 'Você propõe outra coisa: quem cantar mais alto a música das Docas sobe. Rafa aceita. O duelo dura três refrões, você perde por um verso, e a turma, encantada, carrega você e o cartucho nos ombros rampa acima.',
+          cronica: '{nome} perdeu um duelo de canto para Rafa Cinco-Dedos e subiu nos ombros da turma.',
+          efeitos: { lacos: 1 },
+        },
+        falha: {
+          texto: 'Você esquece a letra no segundo verso. A turma canta por você, rindo, e Rafa deixa passar com pena, que é pior do que perder.',
+          cronica: '{nome} esqueceu a música das Docas diante da turma inteira.',
+          efeitos: { sanidade: -1 },
+        },
+      },
+      {
+        id: 'fama',
+        rotulo: 'Deixar que ela reconheça você',
+        requer: { antecedente: 'boaFama' },
+        livre: true,
+        resultado: {
+          texto: 'Rafa olha duas vezes e se levanta. "Você ganhou do meu pai", diz. Não há queda de braço; há um abraço que estala as suas costas, e a rampa livre.',
+          cronica: '{nome} foi reconhecido por Rafa Cinco-Dedos e ganhou um abraço de estalar as costas.',
+          efeitos: { lacos: 1, vida: -1 },
+        },
+      },
+      {
+        id: 'furtividade',
+        rotulo: 'Passar por baixo da rampa',
+        requer: { nivel: { furtividade: 1 } },
+        teste: { chave: 'furtividade', dificuldade: 4 },
+        sucesso: {
+          texto: 'Enquanto a turma bate nas caixas, você passa por baixo da rampa, pela treliça, e aparece lá em cima acenando. Rafa ri tanto que perdoa, e manda a turma subir o cartucho para você.',
+          cronica: '{nome} passou por baixo da rampa da turma da Rafa e foi perdoado de tanto riso.',
+          efeitos: { lacos: 1 },
+        },
+        falha: {
+          texto: 'A treliça range no meio do caminho. Quarenta cabeças se abaixam para olhar. Você sai de lá debaixo sob vaias e senta à mesa de caixote, que agora é obrigação.',
+          cronica: '{nome} foi pego embaixo da rampa da turma da Rafa.',
+          efeitos: { sanidade: -1, brasa: -1 },
+        },
+      },
+    ],
+  },
+  {
+    id: 'ar2-ejetor',
+    ato: 2,
+    titulo: 'A gata no ejetor',
+    texto:
+      'O ejetor de lixo das Docas solta a carga no vácuo a cada dez minutos, com um estrondo que se sente nos dentes. Dentro da câmara, entre sacos e sucata, mia Graxinha, a gata da turma, com três filhotes. O relógio da parede marca seis minutos. Tonho Graxa, o chefe dos estivadores, procura a chave do painel com as mãos tremendo.',
+    abordagens: [
+      {
+        id: 'corpo',
+        rotulo: 'Entrar e tirar os quatro',
+        teste: { chave: 'destreza', dificuldade: 7 },
+        sucesso: {
+          texto: 'Você entra de cabeça pela boca da câmara e cata os filhotes pela nuca, um, dois, três, e a gata pelo meio. Sai de costas com o painel apitando, e a porta fecha atrás do seu calcanhar. Tonho Graxa abraça a gata, e depois você.',
+          cronica: '{nome} tirou a gata da turma e três filhotes de dentro do ejetor de lixo.',
+          efeitos: { lacos: 1 },
+        },
+        falha: {
+          texto: 'Os filhotes saem; a gata, não: ela se enfia mais fundo nos sacos. Você sai com o apito no ouvido, e Graxinha só escapa porque Tonho acha a chave no último segundo. Você treme um bom tempo.',
+          cronica: '{nome} deixou a gata no ejetor, e a chave de Tonho Graxa chegou por um triz.',
+          efeitos: { sanidade: -2 },
+        },
+      },
+      {
+        id: 'mente',
+        rotulo: 'Enganar o sensor da porta',
+        teste: { chave: 'inteligencia', dificuldade: 7 },
+        ajuda: ['ferramenta'],
+        sucesso: {
+          texto: 'Todo ejetor tem um sensor de porta: se acha que a porta está aberta, não dispara. Você calça o sensor com uma ficha de troca dobrada. O relógio para nos dois minutos. A turma tira os gatos com calma, e alguém lhe traz café.',
+          cronica: '{nome} travou o ejetor de lixo com uma ficha dobrada, e a gata da turma saiu viva.',
+          efeitos: { lacos: 1 },
+        },
+        falha: {
+          texto: 'Você calça o sensor errado, e o relógio corre mais depressa. Tonho Graxa acha a chave a tempo, por pouco, e o olhar que ele lhe dá vale um sermão.',
+          cronica: '{nome} apressou o ejetor de lixo em vez de travá-lo.',
+          efeitos: { brasa: -1, sanidade: -1 },
+        },
+      },
+      {
+        id: 'espirito',
+        rotulo: 'Chamar a gata com calma',
+        teste: { chave: 'vontade', dificuldade: 7 },
+        ajuda: ['isca'],
+        sucesso: {
+          texto: 'Você se agacha na boca da câmara, sem pressa no corpo apesar do relógio, e chama. Graxinha olha, pesa você e traz os filhotes um a um pela nuca, até o seu colo. Sobra um minuto. A turma aplaude baixinho, para não assustar.',
+          cronica: '{nome} chamou a gata da turma para fora do ejetor sem levantar a voz.',
+          efeitos: { lacos: 1 },
+        },
+        falha: {
+          texto: 'A pressa vaza na sua voz, e a gata recua para o fundo. Quem tira os quatro é Tonho Graxa, de cabeça para dentro, com a chave achada no último instante.',
+          cronica: '{nome} chamou a gata com pressa demais, e ela não veio.',
+          efeitos: { brasa: -1 },
+        },
+      },
+      {
+        id: 'maquinas',
+        rotulo: 'Cortar a linha do ejetor',
+        requer: { nivel: { maquinas: 1 } },
+        teste: { chave: 'maquinas', dificuldade: 4 },
+        sucesso: {
+          texto: 'Você abre a caixa de força ao lado da porta e corta a linha certa sem olhar duas vezes. O relógio congela. Tonho Graxa tira os gatos e, de gratidão, lhe entrega a rebitadeira da turma: "Quem sabe mexer, merece."',
+          cronica: '{nome} desligou o ejetor de lixo a tempo e ganhou a rebitadeira da turma.',
+          efeitos: { lacos: 1, item: 'rebitadeira' },
+        },
+        falha: {
+          texto: 'A linha que você corta é a da luz do corredor. No escuro, o relógio continua a brilhar. Tonho acha a chave no tato, a tempo, e ninguém fala com você por um bom tempo.',
+          cronica: '{nome} apagou a luz das Docas tentando parar um ejetor.',
+          efeitos: { sanidade: -1 },
+        },
+      },
+      {
+        id: 'lidarAnimais',
+        rotulo: 'Falar de gata para gata',
+        requer: { nivel: { lidarAnimais: 1 } },
+        teste: { chave: 'lidarAnimais', dificuldade: 3 },
+        sucesso: {
+          texto: 'Um chiado curto, dois estalos de língua, o som que mãe gata faz. Graxinha responde e sai da câmara com um filhote na boca, volta, sai de novo. Na última viagem traz os três, e a turma lhe enche a mochila de ração.',
+          cronica: '{nome} falou com a gata da turma na língua dela e tirou os filhotes do ejetor.',
+          efeitos: { lacos: 1, item: 'racao' },
+        },
+        falha: {
+          texto: 'Graxinha entende e não confia. Leva os filhotes para o fundo da câmara, e é Tonho Graxa quem os tira, com a chave e um palavrão.',
+          cronica: '{nome} falou com uma gata que não quis conversa.',
+          efeitos: { brasa: -1 },
+        },
+      },
+    ],
+  },
 ];

@@ -774,4 +774,209 @@ export const cenas = [
       },
     ],
   },
+  {
+    id: 'ar1-abelhas',
+    ato: 1,
+    titulo: 'A colmeia da estufa',
+    texto:
+      'Na estufa de polinização o ventilador parou, e as abelhas saíram da caixa atrás de ar. Agora são um novelo zumbindo no teto, em volta da lâmpada-sol, e sem elas a horta não dá fruto na safra que vem. Seu Lázaro, o apicultor, está de véu e luvas e não alcança. "Elas seguem a rainha", diz. "E a rainha segue o calor."',
+    abordagens: [
+      {
+        id: 'corpo',
+        rotulo: 'Subir e pegar a rainha',
+        teste: { chave: 'destreza', dificuldade: 6 },
+        sucesso: {
+          texto: 'Você sobe pela treliça dos tomates até a altura da lâmpada, com abelha no cabelo e na gola. A rainha é maior e mais lenta. Você a fecha na mão em concha e desce, e o novelo inteiro desce atrás de você, como um casaco.',
+          cronica: '{nome} desceu a rainha da estufa na palma da mão, com o enxame atrás.',
+          efeitos: { lacos: 1 },
+        },
+        falha: {
+          texto: 'A treliça balança, as abelhas não gostam, e você desce mais depressa do que subiu, com sete ferroadas e nenhuma rainha. Seu Lázaro resolve depois, com fumaça e paciência.',
+          cronica: '{nome} subiu atrás de uma rainha e voltou com sete ferroadas.',
+          efeitos: { vida: -1 },
+        },
+      },
+      {
+        id: 'mente',
+        rotulo: 'Mudar o calor de lugar',
+        teste: { chave: 'inteligencia', dificuldade: 6 },
+        sucesso: {
+          texto: 'Se a rainha segue o calor, quem manda é o calor. Você apaga a lâmpada-sol do teto e acende a de mudas, lá embaixo, ao lado da caixa. O novelo hesita, desce e entra. Seu Lázaro tira o véu para ver melhor.',
+          cronica: '{nome} levou as abelhas da estufa de volta para casa trocando a luz de lugar.',
+          efeitos: { lacos: 1 },
+        },
+        falha: {
+          texto: 'Você apaga a lâmpada do teto, e as abelhas, no escuro, se espalham pela estufa inteira. Acender de novo e esperar o novelo se refazer leva o resto do turno.',
+          cronica: '{nome} apagou a luz da estufa e espalhou o enxame.',
+          efeitos: { brasa: -1 },
+        },
+      },
+      {
+        id: 'espirito',
+        rotulo: 'Ficar parado no meio delas',
+        teste: { chave: 'vontade', dificuldade: 6 },
+        sucesso: {
+          texto: 'Você entra no zumbido e para. Abelha no rosto, nas mãos, no pescoço. Nenhuma ferroa quem não se mexe. Seu Lázaro aproveita a calma e ergue a caixa até o novelo, que entra sozinho, devagar.',
+          cronica: '{nome} ficou imóvel no meio de um enxame até as abelhas voltarem para a caixa.',
+          efeitos: { lacos: 1 },
+        },
+        falha: {
+          texto: 'Uma abelha anda pela sua pálpebra e você pisca. Pisca de novo. Depois já está batendo nos braços e correndo para a porta, e o enxame acha que é guerra.',
+          cronica: '{nome} piscou no meio de um enxame, e o enxame não perdoou.',
+          efeitos: { vida: -1, sanidade: -1 },
+        },
+      },
+      {
+        id: 'lidarAnimais',
+        rotulo: 'Zumbir no tom delas',
+        requer: { nivel: { lidarAnimais: 1 } },
+        teste: { chave: 'lidarAnimais', dificuldade: 3 },
+        sucesso: {
+          texto: 'Zumbido baixo, mão aberta, respiração lenta. O novelo se desfaz numa fila que entra na caixa como quem volta do trabalho. Seu Lázaro lhe dá um saquinho de chá do pé de hortelã da estufa.',
+          cronica: '{nome} conversou com as abelhas da estufa, e elas voltaram para casa em fila.',
+          efeitos: { lacos: 1, item: 'cha' },
+        },
+        falha: {
+          texto: 'As abelhas entendem o recado e não concordam. Você sai da estufa com três ferroadas e um respeito novo por elas.',
+          cronica: '{nome} discutiu com um enxame e perdeu por três ferroadas.',
+          efeitos: { vida: -1 },
+        },
+      },
+    ],
+  },
+  {
+    id: 'ar1-tobias',
+    ato: 1,
+    titulo: 'O voluntário',
+    texto:
+      'Na saída do Anel Verde, um menino de oito anos espera você com uma fronha nas costas, cheia de pão e de meias. É Tobias, e ele vai junto até o Núcleo, já decidiu. Lá no fundo do corredor, a mãe dele grita o nome, ainda longe. Tobias segura a alça do cartucho com as duas mãos e não solta.',
+    abordagens: [
+      {
+        id: 'corpo',
+        rotulo: 'Levá-lo de volta no ombro',
+        teste: { chave: 'forca', dificuldade: 6 },
+        sucesso: {
+          texto: 'Você põe Tobias no ombro como saco de adubo, e ele esperneia o corredor inteiro. A mãe o recebe com um abraço e um puxão de orelha, nessa ordem. Por cima do ombro dela, ele faz você jurar que conta como foi.',
+          cronica: '{nome} devolveu Tobias à mãe carregado no ombro, esperneando.',
+          efeitos: { lacos: 1 },
+        },
+        falha: {
+          texto: 'Tobias escorrega do ombro e corre, e menino de oito anos em corredor de anel é sabão. Você leva meio turno para achá-lo de novo, atrás das caixas de adubo.',
+          cronica: '{nome} perdeu meio turno correndo atrás de um menino de oito anos.',
+          efeitos: { brasa: -1 },
+        },
+      },
+      {
+        id: 'mente',
+        rotulo: 'Dar a ele uma missão aqui',
+        teste: { chave: 'sabedoria', dificuldade: 5 },
+        sucesso: {
+          texto: 'Você explica, sério, que alguém precisa vigiar o medidor de ar do anel e avisar o conselho se ele cair. Serviço de confiança. Tobias pensa, entrega a fronha e vai para o posto de peito estufado.',
+          cronica: '{nome} deu a Tobias o posto de vigia do medidor de ar do Anel Verde.',
+          efeitos: { lacos: 1 },
+        },
+        falha: {
+          texto: 'Ele percebe na hora que é truque. "Isso é coisa que se diz para criança", diz, ofendido, e chora. A mãe chega, leva Tobias e olha para você como se a culpa fosse sua.',
+          cronica: '{nome} tentou enganar Tobias com uma missão de mentira.',
+          efeitos: { sanidade: -1 },
+        },
+      },
+      {
+        id: 'espirito',
+        rotulo: 'Prometer que volta para contar',
+        teste: { chave: 'presenca', dificuldade: 6 },
+        sucesso: {
+          texto: 'Você se agacha na altura dele e promete, com a mão no cartucho, que volta para contar tudo. Tobias examina a promessa por todos os lados, aceita e solta a alça. A mãe chega a tempo de ver o filho acenar.',
+          cronica: '{nome} prometeu a Tobias que voltaria para contar, e ele soltou o cartucho.',
+          efeitos: { lacos: 1 },
+        },
+        falha: {
+          texto: 'Você promete, mas ele já ouviu promessa de adulto antes. Não solta. Quem resolve é a mãe, chegando de cara vermelha, e o turno vai embora em explicações.',
+          cronica: '{nome} prometeu, e Tobias não acreditou.',
+          efeitos: { brasa: -1 },
+        },
+      },
+      {
+        id: 'semRecursos',
+        rotulo: 'Contar que você também foi assim',
+        requer: { antecedente: 'semRecursos' },
+        livre: true,
+        resultado: {
+          texto: 'Você conta do menino de bolso vazio que fugiu para as Docas aos nove anos e voltou no mesmo turno, de fome. Tobias ri, contra a vontade, e solta a alça. A história tem um pedaço que você não conta, e ele dói.',
+          cronica: '{nome} contou a Tobias a própria fuga de menino, e Tobias ficou.',
+          efeitos: { lacos: 1, sanidade: -1 },
+        },
+      },
+    ],
+  },
+  {
+    id: 'ar1-casamento',
+    ato: 1,
+    titulo: 'A festa suspensa',
+    texto:
+      'No refeitório do Anel Verde há bandeirolas de pano e uma mesa posta para o casamento de Joana e Teodoro, da turma da horta. O conselho mandou suspender: festa gasta ar. A noiva está de vestido e de braços cruzados, o pai do noivo discute com o conselheiro de turno, e as crianças já comeram metade dos doces.',
+    abordagens: [
+      {
+        id: 'corpo',
+        rotulo: 'Levar a festa para a Horta',
+        teste: { chave: 'forca', dificuldade: 7 },
+        sucesso: {
+          texto: 'Mesa, bancos, panela, bolo: você carrega tudo para o meio dos tomateiros, onde as plantas devolvem o ar que a festa gasta. O conselheiro não acha artigo no regulamento contra isso. Os noivos casam debaixo da treliça.',
+          cronica: '{nome} carregou um casamento inteiro para o meio da Horta Grande.',
+          efeitos: { lacos: 1 },
+        },
+        falha: {
+          texto: 'No caminho da horta, o bolo escorrega da tábua. Casam assim mesmo, mais tarde e sem bolo, e você leva a culpa com o glacê na manga.',
+          cronica: '{nome} derrubou o bolo de um casamento no corredor da horta.',
+          efeitos: { brasa: -1 },
+        },
+      },
+      {
+        id: 'mente',
+        rotulo: 'Fazer a conta da festa',
+        teste: { chave: 'inteligencia', dificuldade: 6 },
+        sucesso: {
+          texto: 'Quarenta pessoas sentadas gastam menos ar que quarenta pessoas nervosas discutindo de pé. Você faz a conta num guardanapo. O conselheiro confere duas vezes, assina embaixo e manda servir. Sem dança.',
+          cronica: '{nome} salvou um casamento com uma conta de ar feita num guardanapo.',
+          efeitos: { lacos: 1 },
+        },
+        falha: {
+          texto: 'A sua conta está certa, mas o conselheiro acha no guardanapo um erro que não existe e ganha a discussão por cansaço. A festa sai depois, menor, e você não é convidado.',
+          cronica: '{nome} fez a conta certa e perdeu a discussão com o conselheiro.',
+          efeitos: { sanidade: -1 },
+        },
+      },
+      {
+        id: 'espirito',
+        rotulo: 'Fazer o brinde',
+        teste: { chave: 'presenca', dificuldade: 6 },
+        sucesso: {
+          texto: 'Você sobe num banco e brinda à noiva, ao noivo e ao ar, que é de todos e por isso também é deles hoje. O refeitório aplaude. O conselheiro, encurralado, brinda junto. É o casamento mais curto e mais feliz que o anel já viu.',
+          cronica: '{nome} fez o brinde que salvou o casamento de Joana e Teodoro.',
+          efeitos: { lacos: 1 },
+        },
+        falha: {
+          texto: 'O brinde sai comprido e a voz tremida. O conselheiro aproveita a pausa para ler o regulamento. Os noivos casam no corredor, em voz baixa, de mãos dadas, e ninguém lembra do seu brinde.',
+          cronica: '{nome} fez um brinde que ninguém lembrou.',
+          efeitos: { sanidade: -1, brasa: -1 },
+        },
+        critico: {
+          texto: 'O refeitório inteiro ergue os copos, e o conselheiro ergue o dele primeiro. Joana desce da mesa para abraçar você antes do noivo. Daqui a muitas safras, nos casamentos do anel, ainda vão repetir o seu brinde.',
+          cronica: '{nome} fez um brinde de casamento que o Anel Verde passou a repetir.',
+          efeitos: { lacos: 1, marco: true },
+        },
+      },
+      {
+        id: 'gaita',
+        rotulo: 'Tocar a valsa dos noivos',
+        requer: { item: 'gaita' },
+        livre: true,
+        resultado: {
+          texto: 'Você toca baixinho, só para os dois. Ninguém dança, que dança gasta ar, mas os noivos se balançam sentados, e o refeitório inteiro balança junto. A festa passa da hora, e o conselheiro finge que não vê.',
+          cronica: '{nome} tocou na gaita a valsa de um casamento em que ninguém podia dançar.',
+          efeitos: { lacos: 1, brasa: -1 },
+        },
+      },
+    ],
+  },
 ];

@@ -721,4 +721,227 @@ export const cenas = [
       },
     ],
   },
+  {
+    id: 'ato1-pipa',
+    ato: 1,
+    titulo: 'A pipa no campanário',
+    texto:
+      'Na praça de um povoado de beira de estrada, um menino de nariz escorrendo olha para cima e já não chora, porque já chorou tudo. A pipa dele, de papel de embrulho e rabo de fita, enroscou no galo de ferro do campanário. O sacristão avisa que a escada do sino é só para o sino. O vento da tarde começa a subir.',
+    abordagens: [
+      {
+        id: 'corpo',
+        rotulo: 'Subir pelo lado de fora',
+        teste: { chave: 'destreza', dificuldade: 7 },
+        ajuda: ['corda'],
+        sucesso: {
+          texto: 'Uma pedra saliente, a calha, o beiral. Lá em cima o vento empurra, e você empurra de volta. Desce com a pipa entre os dentes, e o menino a recebe como quem recebe alguém que voltou de longe.',
+          cronica: '{nome} escalou o campanário de um povoado para salvar uma pipa.',
+          efeitos: { lacos: 1 },
+        },
+        falha: {
+          texto: 'A calha solta da parede com você junto. Você cai num monte de feno que, por sorte, estava ali, e por azar estava com o forcado dentro. A pipa continua lá em cima, tremulando.',
+          cronica: '{nome} caiu do campanário dentro de um monte de feno.',
+          efeitos: { vida: -2 },
+        },
+        critico: {
+          texto: 'Do galo de ferro dá para ver o vale inteiro e, no fim dele, a montanha. Bem no alto, uma ponta escura: o Farol, apagado. Você desce com a pipa na mão e o caminho inteiro na cabeça.',
+          cronica: '{nome} viu o Farol apagado do alto de um campanário e desceu com uma pipa.',
+          efeitos: { lacos: 1, marco: true },
+        },
+      },
+      {
+        id: 'mente',
+        rotulo: 'Esperar o vento certo',
+        teste: { chave: 'percepcao', dificuldade: 6 },
+        sucesso: {
+          texto: 'Pipa enroscada sai pelo mesmo caminho por onde entrou. Você segura a linha que pende do campanário, espera a rajada de lado e dá um puxão curto. A pipa se solta, dá uma volta no ar e desce nos braços do menino.',
+          cronica: '{nome} desenroscou uma pipa do campanário esperando a rajada certa.',
+          efeitos: { lacos: 1 },
+        },
+        falha: {
+          texto: 'O puxão vem na rajada errada. A linha arrebenta, e a pipa vai embora sozinha, alta, por cima dos telhados. O menino acompanha até ela virar um ponto. Depois olha para você.',
+          cronica: '{nome} soltou ao vento, sem querer, a pipa de um menino.',
+          efeitos: { sanidade: -1 },
+        },
+      },
+      {
+        id: 'espirito',
+        rotulo: 'Fazer outra pipa com ele',
+        teste: { chave: 'empatia', dificuldade: 6 },
+        sucesso: {
+          texto: 'Você pede papel, linha e duas varetas e senta no chão da praça com ele. A pipa nova sai torta e voa melhor que a velha. Quando você parte, ele corre ao lado da estrada com ela no alto, até o fim do povoado.',
+          cronica: '{nome} fez uma pipa nova com um menino, sentado no chão da praça.',
+          efeitos: { lacos: 1 },
+        },
+        falha: {
+          texto: 'A pipa nova não sobe. Vocês dois correm a praça inteira puxando um papel que se arrasta no chão. O menino acaba rindo de você, o que consola, e a manhã vai embora nisso.',
+          cronica: '{nome} passou a manhã tentando fazer voar uma pipa que não queria.',
+          efeitos: { brasa: -1 },
+        },
+      },
+      {
+        id: 'aliado',
+        rotulo: 'Pedir a chave ao sacristão',
+        requer: { antecedente: 'aliado' },
+        livre: true,
+        resultado: {
+          texto: 'O sacristão é primo de alguém que lhe deve um favor, e no vale todo mundo é primo de alguém. Ele abre a escada do sino, mas só depois de contar a história do sino inteira, desde o fundidor.',
+          cronica: '{nome} subiu ao campanário pela escada do sino, graças a um primo de um amigo.',
+          efeitos: { lacos: 1, brasa: -1 },
+        },
+      },
+    ],
+  },
+  {
+    id: 'ato1-forja',
+    ato: 1,
+    titulo: 'A forja fria',
+    texto:
+      'A ferraria da estrada está de portas abertas e de fogo morto. Na porta, um tropeiro espera com quatro mulas e duas ferraduras soltas. O ferreiro, Bento, tosse sentado num banco, enrolado num cobertor, ao lado de uma forja cinzenta. "Ela não pega", diz. "Desde ontem ela não quer pegar, e eu também não."',
+    abordagens: [
+      {
+        id: 'corpo',
+        rotulo: 'Tocar o fole até pegar',
+        teste: { chave: 'resistencia', dificuldade: 6 },
+        sucesso: {
+          texto: 'Você puxa o fole até o braço virar madeira. O carvão estala, fumega e pega. Bento levanta só para dizer que o fogo está bom e malha as ferraduras em meia hora. Na saída, lhe dá um escudo de tábua que ninguém quis comprar.',
+          cronica: '{nome} tocou o fole da ferraria até a forja de Bento pegar.',
+          efeitos: { item: 'escudo' },
+        },
+        falha: {
+          texto: 'O fole sopra, o carvão fumega e apaga, sopra e apaga. Quando o braço desiste, a forja continua fria, e o tropeiro vai embora atrás de outra ferraria, duas léguas adiante.',
+          cronica: '{nome} soprou a forja de Bento até cansar, e ela não pegou.',
+          efeitos: { vida: -1 },
+        },
+      },
+      {
+        id: 'mente',
+        rotulo: 'Achar por que não puxa',
+        teste: { chave: 'percepcao', dificuldade: 6 },
+        sucesso: {
+          texto: 'Forja que não pega é chaminé que não puxa. Você sobe no telhado e acha um ninho de andorinha do tamanho de um chapéu, já vazio. Tira. O fogo pega na primeira faísca, e Bento ri pela primeira vez desde ontem.',
+          cronica: '{nome} desentupiu a chaminé da ferraria de um ninho vazio.',
+          efeitos: { item: 'escudo' },
+        },
+        falha: {
+          texto: 'Você examina o carvão, o fole, a pedra. Tudo certo. Só muito depois, coberto de fuligem, alguém olha para cima e pergunta da chaminé.',
+          cronica: '{nome} procurou o defeito da forja em todo lugar, menos na chaminé.',
+          efeitos: { brasa: -1 },
+        },
+      },
+      {
+        id: 'espirito',
+        rotulo: 'Emprestar fogo da lanterna',
+        teste: { chave: 'fe', dificuldade: 6 },
+        sucesso: {
+          texto: 'Você abre a portinhola e encosta um graveto na brasa. A chama passa para a forja, cresce e ruge. Na lanterna, a brasa continua do mesmo tamanho, como se fogo dado não fizesse falta. Bento olha aquilo um tempo comprido e não pergunta nada.',
+          cronica: '{nome} acendeu a forja de Bento com a brasa do Farol, e a brasa não diminuiu.',
+          efeitos: { marco: true },
+        },
+        falha: {
+          texto: 'O graveto pega e apaga no caminho. Você tenta de novo, mais perto, e o vento da porta quase leva a brasa para dentro do carvão. Você fecha a lanterna com o coração na boca. A forja segue fria.',
+          cronica: '{nome} quase perdeu a brasa dentro de uma forja fria.',
+          efeitos: { brasa: -1, sanidade: -1 },
+        },
+      },
+      {
+        id: 'medicina',
+        rotulo: 'Cuidar da tosse do ferreiro',
+        requer: { nivel: { medicina: 1 } },
+        teste: { chave: 'medicina', dificuldade: 3 },
+        sucesso: {
+          texto: 'Peito chiado, febre baixa, nada que mate. Um chá de casca e um emplastro quente. Em uma hora Bento acende a forja sozinho e lhe entrega um gibão de couro que fez para um filho que não voltou.',
+          cronica: '{nome} curou a tosse do ferreiro Bento e saiu da ferraria com um gibão de couro.',
+          efeitos: { item: ['escudo', 'gibao'] },
+        },
+        falha: {
+          texto: 'O remédio é o certo, e a dose é pouca. Bento melhora devagar, e você fica até ele conseguir segurar o martelo, o que leva a manhã inteira.',
+          cronica: '{nome} tratou o ferreiro com paciência e pouco remédio.',
+          efeitos: { brasa: -1 },
+        },
+      },
+    ],
+  },
+  {
+    id: 'ato1-carta',
+    ato: 1,
+    titulo: 'A carta molhada',
+    texto:
+      'Na venda da estrada, entre sacos de feijão e um gato dormindo, dona Ana segura uma carta com as duas mãos. É do filho, soldado na fronteira, a primeira em dois anos. A mala do correio caiu no rio, e a tinta escorreu. Ela não sabe ler. "Só me diga se ele está vivo", pede.',
+    abordagens: [
+      {
+        id: 'corpo',
+        rotulo: 'Correr atrás do carteiro',
+        teste: { chave: 'fisico', dificuldade: 6 },
+        sucesso: {
+          texto: 'O cavalo do carteiro é velho e você é teimoso. Na segunda curva você o alcança, sem fôlego. Ele lê a carta de pé, com o dedo, devagar. Você volta com cada palavra decorada e repete tudo para dona Ana duas vezes, porque ela pede.',
+          cronica: '{nome} correu atrás do carteiro para que alguém lesse a carta de dona Ana.',
+          efeitos: { lacos: 1 },
+        },
+        falha: {
+          texto: 'O carteiro já vai longe, e o cavalo dele, velho ou não, tem quatro pernas. Você volta de mãos vazias, e dona Ana guarda a carta no avental, para quando passar alguém que saiba ler.',
+          cronica: '{nome} correu atrás do carteiro e não o alcançou.',
+          efeitos: { brasa: -1 },
+        },
+      },
+      {
+        id: 'mente',
+        rotulo: 'Decifrar a tinta borrada',
+        teste: { chave: 'inteligencia', dificuldade: 7 },
+        ajuda: ['lente'],
+        sucesso: {
+          texto: 'Contra a luz da porta, o papel guarda o sulco da pena onde a tinta foi embora. Você lê com os olhos e com a ponta dos dedos: "Mãe, estou bem. Volto na primavera. Guarde o banco de perto do fogo." Dona Ana senta no banco de perto do fogo.',
+          cronica: '{nome} leu contra a luz a carta molhada do filho de dona Ana.',
+          efeitos: { lacos: 1 },
+        },
+        falha: {
+          texto: 'Você acha "mãe", acha "frio", acha um borrão que pode ser "volto" ou "morto". Diz só o que tem certeza. Dona Ana agradece e fica olhando o borrão, e você vai embora com ele também.',
+          cronica: '{nome} só conseguiu ler meia carta para dona Ana.',
+          efeitos: { sanidade: -1 },
+        },
+      },
+      {
+        id: 'espirito',
+        rotulo: 'Ler devagar, ao lado dela',
+        teste: { chave: 'vontade', dificuldade: 6 },
+        sucesso: {
+          texto: 'Você não tem pressa, e a carta também não. Uma palavra por vez, com ela segurando o seu braço: as que a tinta deixou e as que dá para adivinhar sem mentir. Ele está vivo. Está com frio. Volta na primavera. Ela pede para ouvir de novo.',
+          cronica: '{nome} leu devagar a carta molhada, ao lado de dona Ana, até o fim.',
+          efeitos: { lacos: 1 },
+        },
+        falha: {
+          texto: 'A pressa da viagem entra na sua voz, e ela percebe. "Pode ir", diz, e fecha a carta antes do fim. Você vai, e a carta fica aberta na sua cabeça o resto do dia.',
+          cronica: '{nome} leu a carta de dona Ana com pressa, e ela não quis ouvir o resto.',
+          efeitos: { sanidade: -1 },
+        },
+      },
+      {
+        id: 'regimento',
+        rotulo: 'Reconhecer o regimento',
+        requer: { antecedente: 'maFama' },
+        livre: true,
+        resultado: {
+          texto: 'O selo você conhece bem: é o do seu antigo regimento. O nome do rapaz também. Você diz a dona Ana que ele está vivo e que é dos bons, e é verdade. Não diz de onde sabe.',
+          cronica: '{nome} reconheceu na carta o regimento que tinha largado, e calou de onde.',
+          efeitos: { lacos: 1, sanidade: -1 },
+        },
+      },
+      {
+        id: 'historia',
+        rotulo: 'Ler a dobra da carta',
+        requer: { nivel: { historia: 1 } },
+        teste: { chave: 'historia', dificuldade: 3 },
+        sucesso: {
+          texto: 'Carta de soldado dobrada em três, com a ponta virada, é carta de licença: quem manda assim já tem dia para voltar. Você explica. Dona Ana chora rindo e tira da prateleira um pote de unguento para a sua viagem.',
+          cronica: '{nome} leu na dobra da carta que o filho de dona Ana estava voltando.',
+          efeitos: { lacos: 1, item: 'unguento' },
+        },
+        falha: {
+          texto: 'Os costumes da fronteira não estão nos livros que você leu. Você lê o pouco que a tinta deixou e não inventa o resto.',
+          cronica: '{nome} não soube ler a dobra da carta de dona Ana.',
+          efeitos: { brasa: -1 },
+        },
+      },
+    ],
+  },
 ];

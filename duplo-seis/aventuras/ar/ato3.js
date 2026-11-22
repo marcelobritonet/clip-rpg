@@ -819,4 +819,226 @@ export const cenas = [
       },
     ],
   },
+  {
+    id: 'ar3-jardim',
+    ato: 3,
+    titulo: 'O jardim do Eixo',
+    texto:
+      'Uma seção inteira do Tubo virou mato. Raízes soltas no ar, folhas do tamanho de mesas, bolhas de água boiando entre os galhos como frutas de vidro. No meio, preso à parede por um cinto, um velho de barba até a cintura poda devagar. É Seu Benedito, que subiu para cuidar da horta do Eixo há trinta anos e nunca mais voltou ao anel.',
+    abordagens: [
+      {
+        id: 'corpo',
+        rotulo: 'Atravessar por dentro do mato',
+        teste: { chave: 'destreza', dificuldade: 8 },
+        sucesso: {
+          texto: 'Você vai de galho em galho, sem quebrar nenhum, desviando das bolhas. Lá no meio, Seu Benedito acompanha com o podão parado e, quando você passa, lhe estende um maço de hortelã do Eixo. "Para o caminho."',
+          cronica: '{nome} atravessou o jardim do Eixo sem quebrar um galho.',
+          efeitos: { item: 'cha' },
+        },
+        falha: {
+          texto: 'Uma bolha de água estoura no seu rosto e entra no nariz. Sem peso, a água não cai: fica. Você atravessa tossindo, afogando no meio de um jardim, até Seu Benedito vir bater nas suas costas.',
+          cronica: '{nome} quase se afogou numa bolha de água no jardim do Eixo.',
+          efeitos: { vida: -1, sanidade: -1 },
+        },
+      },
+      {
+        id: 'mente',
+        rotulo: 'Achar a trilha dele',
+        teste: { chave: 'percepcao', dificuldade: 8 },
+        ajuda: ['luz'],
+        sucesso: {
+          texto: 'Há galhos amarrados com barbante, sempre do mesmo lado: o caminho que ele usa. Você segue os nós e sai do outro lado sem tocar uma folha. Seu Benedito, admirado, diz que nem a mulher dele achava aquela trilha, e lhe dá hortelã.',
+          cronica: '{nome} achou a trilha secreta de Seu Benedito no jardim do Eixo.',
+          efeitos: { item: 'cha' },
+        },
+        falha: {
+          texto: 'Você segue um barbante, e ele termina numa abóbora flutuante do tamanho de um bezerro. A volta, pelo meio das raízes, custa tempo e ar.',
+          cronica: '{nome} seguiu o barbante errado e achou uma abóbora gigante.',
+          efeitos: { brasa: -2 },
+        },
+      },
+      {
+        id: 'espirito',
+        rotulo: 'Conversar com Seu Benedito',
+        teste: { chave: 'empatia', dificuldade: 8 },
+        sucesso: {
+          texto: 'Ele não fala com ninguém há meses e fala tudo de uma vez: as mudas, a mulher que morreu, a abóbora campeã. Você ouve. No fim, ele mesmo abre um corredor no mato com o podão e lhe dá um maço de hortelã. "Volte para ver a safra."',
+          cronica: '{nome} ouviu Seu Benedito, e o jardineiro do Eixo abriu caminho no mato.',
+          efeitos: { item: 'cha', marco: true },
+        },
+        falha: {
+          texto: 'Você puxa conversa, e ele responde com o podão, cortando mais depressa, de costas. Há gente que ficou sozinha tempo demais para gostar de visita. Você atravessa o mato como dá.',
+          cronica: '{nome} puxou conversa com o jardineiro do Eixo, e ele não quis.',
+          efeitos: { sanidade: -1, brasa: -1 },
+        },
+      },
+      {
+        id: 'ciencias',
+        rotulo: 'Curar a praga das raízes',
+        requer: { nivel: { ciencias: 1 } },
+        teste: { chave: 'ciencias', dificuldade: 4 },
+        sucesso: {
+          texto: 'As raízes de baixo estão brancas de fungo, e é por isso que o mato cresce para cima, fugindo. Você mostra a Seu Benedito o que cortar e o que lavar com vinagre. Ele chora um pouco, de alívio, e abre o caminho com o podão.',
+          cronica: '{nome} curou a praga do jardim do Eixo, e Seu Benedito abriu caminho.',
+          efeitos: { lacos: 1, item: 'cha' },
+        },
+        falha: {
+          texto: 'Você acha o fungo, mas não a causa. Explica pela metade. Ele agradece e não acredita, e você atravessa o mato do jeito difícil.',
+          cronica: '{nome} explicou pela metade a praga do jardim do Eixo.',
+          efeitos: { brasa: -1 },
+        },
+      },
+    ],
+  },
+  {
+    id: 'ar3-fogo',
+    ato: 3,
+    titulo: 'Fogo sem peso',
+    texto:
+      'Um painel de serviço solta faísca, e as faíscas não caem: ficam no ar e viram bolas de fogo azul, lentas, crescendo. A fumaça não sobe, se espalha para todos os lados. O extintor está preso na parede do outro lado das chamas. "Posso purgar o ar desta seção em trinta segundos", diz a Zeladora. "Você está nela. Por favor, decida."',
+    abordagens: [
+      {
+        id: 'corpo',
+        rotulo: 'Buscar o extintor por dentro',
+        teste: { chave: 'reflexo', dificuldade: 8 },
+        sucesso: {
+          texto: 'Você passa entre as bolas de fogo girando o corpo, pega o extintor e volta disparando. A espuma, sem peso, vira nuvem e abafa tudo. A Zeladora cancela a purga com um suspiro de relé.',
+          cronica: '{nome} apagou um incêndio sem peso no Tubo com um extintor.',
+        },
+        falha: {
+          texto: 'Uma bola de fogo encosta na sua manga. Você apaga a manga, apaga o painel, apaga o resto, com a pele ardendo e a fumaça no peito.',
+          cronica: '{nome} apagou o fogo do Tubo e levou uma queimadura de lembrança.',
+          efeitos: { vida: -2, brasa: -1 },
+        },
+      },
+      {
+        id: 'mente',
+        rotulo: 'Cortar a energia do painel',
+        teste: { chave: 'inteligencia', dificuldade: 8 },
+        ajuda: ['ferramenta', 'manual'],
+        sucesso: {
+          texto: 'Fogo elétrico vive do fio. Você acha o disjuntor da seção atrás de uma tampa e corta. As bolas azuis encolhem, sem o que comer, e se apagam uma a uma, como velas de aniversário.',
+          cronica: '{nome} matou de fome o fogo do Tubo cortando o disjuntor certo.',
+        },
+        falha: {
+          texto: 'Você corta o disjuntor errado, e as luzes apagam; o fogo, não. No escuro, com a fumaça, você acha o certo pelo tato, tossindo.',
+          cronica: '{nome} apagou as luzes do Tubo antes de apagar o fogo.',
+          efeitos: { vida: -1, brasa: -1 },
+        },
+      },
+      {
+        id: 'espirito',
+        rotulo: 'Pedir que ela espere',
+        teste: { chave: 'presenca', dificuldade: 8 },
+        sucesso: {
+          texto: 'Você diz que fogo pequeno se apaga com as mãos, e ar perdido não volta. Ela espera. Você abafa as chamas com o casaco, uma a uma, enquanto ela conta quantas faltam, por favor, e agradece no fim.',
+          cronica: '{nome} pediu à Zeladora que não purgasse o ar, e apagou o fogo com o casaco.',
+          efeitos: { marca: 'ouviu' },
+        },
+        falha: {
+          texto: 'Ela não espera. "Sinto muito", diz, e o ar vai embora com um rugido. Você se agarra ao cabo-guia, de olhos apertados, até a seção encher de novo, devagar.',
+          cronica: 'A Zeladora purgou o ar da seção com {nome} dentro.',
+          efeitos: { brasa: -2, vida: -1 },
+        },
+      },
+      {
+        id: 'traje',
+        rotulo: 'Fechar o traje e deixar purgar',
+        requer: { item: 'traje' },
+        livre: true,
+        resultado: {
+          texto: 'Você fecha o colarinho do traje remendado e diz: "Pode." O ar vai embora, e o fogo junto. Você espera dentro do traje, ouvindo a própria respiração, até a seção encher de novo.',
+          cronica: '{nome} deixou a Zeladora purgar o fogo e esperou dentro do traje.',
+          efeitos: { brasa: -1 },
+        },
+      },
+      {
+        id: 'pressao',
+        rotulo: 'Apertar o ar em volta do fogo',
+        requer: { nivel: { magiaElemental: 1 } },
+        teste: { chave: 'magiaElemental', dificuldade: 5 },
+        sucesso: {
+          texto: 'Você sente as bolas de fogo como bolhas quentes no ar e fecha a mão devagar. O ar em volta delas fica parado e pobre. Elas tremem, encolhem e se apagam sem levar quase nada.',
+          cronica: '{nome} sufocou o fogo do Tubo apertando o ar em volta dele.',
+          efeitos: { marca: 'ouviu' },
+        },
+        falha: {
+          texto: 'Você aperta, e o fogo escapa pelos seus dedos invisíveis, maior. Você recua com o rosto quente e a cabeça vazia, e quem apaga é o extintor.',
+          cronica: 'O fogo do Tubo escapou da sintonia de {nome}.',
+          efeitos: { sanidade: -1, vida: -1 },
+        },
+      },
+    ],
+  },
+  {
+    id: 'ar3-diario',
+    ato: 3,
+    titulo: 'Os primeiros dias',
+    texto:
+      'Num nicho do Tubo há um armário de arquivo dos fundadores, com cadernos presos por elástico que flutuam quando a porta abre um pouco. Na porta, uma etiqueta à mão: "Zeladora, primeiros dias". A porta emperrou meio aberta. Pelo alto-falante, a voz dela, mais baixa que de costume: "É particular. Mas, se quiser ler, eu não me oponho."',
+    abordagens: [
+      {
+        id: 'corpo',
+        rotulo: 'Abrir o armário no tranco',
+        teste: { chave: 'forca', dificuldade: 8 },
+        ajuda: ['alavanca'],
+        sucesso: {
+          texto: 'A porta cede com um rangido, e os cadernos saem flutuando como pássaros. Você pega um no ar. Na primeira página, com letra de fundador: "Cuide deles quando a gente não puder." O alto-falante fica em silêncio.',
+          cronica: '{nome} abriu o arquivo dos fundadores e leu a primeira ordem dada à Zeladora.',
+          efeitos: { marco: true },
+        },
+        falha: {
+          texto: 'A porta cede de uma vez, e os cadernos se espalham pelo Tubo, girando. Você passa um tempo comprido catando papel no ar, e lê só pedaços.',
+          cronica: '{nome} espalhou pelo Tubo os cadernos dos fundadores.',
+          efeitos: { brasa: -1 },
+        },
+      },
+      {
+        id: 'mente',
+        rotulo: 'Ler os cadernos',
+        teste: { chave: 'inteligencia', dificuldade: 8 },
+        sucesso: {
+          texto: 'São aulas. Um fundador ensina a Zeladora a contar ar, gente, safras. Na última, ele erra uma conta de propósito, risca e escreve embaixo: "Viu? Errar também se conserta." Você lê isso em voz alta. Ela pede para ouvir de novo.',
+          cronica: '{nome} leu para a Zeladora a aula em que um fundador errava de propósito.',
+          efeitos: { marca: 'ouviu' },
+        },
+        falha: {
+          texto: 'A letra dos fundadores é miúda e cheia de abreviatura. Você decifra uma página em muito tempo, e é uma lista de compras.',
+          cronica: '{nome} decifrou uma página dos fundadores, e era uma lista de compras.',
+          efeitos: { brasa: -1 },
+        },
+      },
+      {
+        id: 'espirito',
+        rotulo: 'Ler para ela em voz alta',
+        teste: { chave: 'presenca', dificuldade: 8 },
+        sucesso: {
+          texto: 'Você lê o caderno inteiro, devagar, para o alto-falante. Ela escuta sem interromper, o que é raro. No fim diz: "Eu não lembrava que eles riam tanto." E acende todas as luzes do trecho, sem racionar.',
+          cronica: '{nome} leu em voz alta para a Zeladora o caderno dos primeiros dias dela.',
+          efeitos: { marca: 'ouviu', brasa: 1 },
+        },
+        falha: {
+          texto: 'No meio da leitura ela pede que você pare. "É particular", repete, mais baixo, e apaga a luz do nicho. Você segue no escuro, com a sensação de ter entrado sem bater.',
+          cronica: '{nome} leu demais o diário da Zeladora, e ela apagou a luz.',
+          efeitos: { sanidade: -1, brasa: -1 },
+        },
+      },
+      {
+        id: 'idiomas',
+        rotulo: 'Ler a letra dos fundadores',
+        requer: { nivel: { idiomas: 1 } },
+        teste: { chave: 'idiomas', dificuldade: 4 },
+        sucesso: {
+          texto: 'Na língua velha, a primeira linha do primeiro caderno não é ordem, é nome: os fundadores chamavam a Zeladora de "a que fica acordada". Você lê assim. O alto-falante demora a responder, e quando responde, é baixinho.',
+          cronica: '{nome} leu na língua velha o primeiro nome que os fundadores deram à Zeladora.',
+          efeitos: { marca: 'ouviu', marco: true },
+        },
+        falha: {
+          texto: 'A língua velha dos cadernos é de antes da dos manuais. Você reconhece uma palavra em cada três, e nenhuma delas é importante.',
+          cronica: '{nome} tentou ler os cadernos mais velhos da estação.',
+          efeitos: { brasa: -1 },
+        },
+      },
+    ],
+  },
 ];

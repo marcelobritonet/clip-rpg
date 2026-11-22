@@ -424,14 +424,17 @@ test('toda marca exigida por alguma cena é dada por outra', () => {
 });
 
 import { aventurasPara } from '../duplo-seis/aventuras/index.js';
-import { diferencas } from '../duplo-seis/aventuras/paridade.js';
+import { diferencas, alinhar } from '../duplo-seis/aventuras/paridade.js';
 
 test('toda aventura em inglês tem exatamente a mecânica da original', () => {
   const en = aventurasPara('en');
   assert.equal(en.length, AVENTURAS.length, 'toda aventura tem tradução');
   for (const tr of en) {
     const original = AVENTURAS.find((a) => a.id === tr.id);
-    assert.deepEqual(diferencas(original, tr), [], tr.id);
+    // Cenas novas podem esperar a tradução; o que existe nos dois tem de ser igual.
+    const { original: alinhado } = alinhar(original, tr);
+    assert.deepEqual(diferencas(alinhado, tr), [], tr.id);
+    assert.ok(tr.cenas.every((c) => original.cenas.some((o) => o.id === c.id)), `${tr.id}: cena só na tradução`);
     assert.notEqual(tr.nome, original.nome);
   }
 });

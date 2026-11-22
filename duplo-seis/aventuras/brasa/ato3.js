@@ -799,4 +799,227 @@ export const cenas = [
       },
     ],
   },
+  {
+    id: 'ato3-lanternas',
+    ato: 3,
+    titulo: 'Os que subiram antes',
+    texto:
+      'Numa curva abrigada da trilha há uma fileira de estacas com lanternas penduradas, iguais à sua. Todas frias, cobertas de geada. Em cada estaca, um nome riscado a faca e um ano. A mais nova é do inverno passado. A Longa Noite já desceu antes, e gente já subiu contra ela. Ninguém voltou para buscar as lanternas.',
+    abordagens: [
+      {
+        id: 'corpo',
+        rotulo: 'Desenterrar a lanterna mais nova',
+        teste: { chave: 'forca', dificuldade: 8 },
+        sucesso: {
+          texto: 'A estaca sai da neve dura com um estalo. Dentro da lanterna, debaixo da cinza, há um fiapo vermelho, teimoso. Você o junta à sua brasa, e as duas se reconhecem.',
+          cronica: '{nome} achou um resto de brasa na lanterna de quem subiu no inverno passado.',
+          efeitos: { brasa: 1 },
+        },
+        falha: {
+          texto: 'A estaca não sai, e a neve em volta é mais funda do que parecia. Você cava com as mãos até não sentir os dedos. Dentro da lanterna, quando enfim abre, só há cinza.',
+          cronica: '{nome} cavou a neve até os dedos doerem atrás de uma lanterna fria.',
+          efeitos: { vida: -2 },
+        },
+      },
+      {
+        id: 'mente',
+        rotulo: 'Ler os nomes e os anos',
+        teste: { chave: 'percepcao', dificuldade: 8 },
+        sucesso: {
+          texto: 'Os anos vêm de sete em sete invernos: a Noite desce em ciclo, e cada vez alguém sobe. Na estaca mais velha o nome é Faroleiro, riscado e depois desriscado, como quem desistiu de desistir. Ele também subiu um dia com uma brasa.',
+          cronica: '{nome} leu nas estacas que o Faroleiro também subiu um dia com uma brasa.',
+          efeitos: { marco: true },
+        },
+        falha: {
+          texto: 'A geada cobre metade dos nomes, e a metade que se lê é de gente que você não conhece e que não voltou. Você lê assim mesmo, até o fim, e eles vão com você.',
+          cronica: '{nome} leu os nomes de quem subiu antes e não voltou.',
+          efeitos: { sanidade: -2 },
+        },
+      },
+      {
+        id: 'espirito',
+        rotulo: 'Acender as lanternas mortas',
+        teste: { chave: 'fe', dificuldade: 8 },
+        sucesso: {
+          texto: 'Você passa de estaca em estaca e encosta em cada pavio um fiapo da brasa. Uma a uma, a fileira acende e sobe a encosta como procissão. A brasa na sua mão parece maior do que antes.',
+          cronica: '{nome} acendeu as lanternas de quem subiu antes, e elas foram junto.',
+          efeitos: { marco: true },
+        },
+        falha: {
+          texto: 'Na terceira lanterna o vento entra pela sua portinhola aberta. A brasa encolhe, e as três que você acendeu apagam juntas, como quem desiste.',
+          cronica: '{nome} tentou acender as lanternas mortas e quase apagou a sua.',
+          efeitos: { brasa: -2, sanidade: -1 },
+        },
+      },
+      {
+        id: 'historia',
+        rotulo: 'Dizer os nomes em voz alta',
+        requer: { nivel: { historia: 1 } },
+        teste: { chave: 'historia', dificuldade: 4 },
+        sucesso: {
+          texto: 'Os livros contam o costume: quem passa pelas lanternas diz o nome de cada um em voz alta, para que subam junto. Você diz. No último nome, o vento muda de lado e passa a soprar nas suas costas.',
+          cronica: '{nome} disse em voz alta os nomes de quem subiu antes, como mandava o costume.',
+          efeitos: { marco: true, brasa: 1 },
+        },
+        falha: {
+          texto: 'Você lembra o costume, mas não a ordem, e começa pelo fim. O vento não muda. Você termina assim mesmo, porque começou.',
+          cronica: '{nome} disse os nomes das lanternas na ordem errada.',
+          efeitos: { brasa: -1 },
+        },
+      },
+    ],
+  },
+  {
+    id: 'ato3-sino',
+    ato: 3,
+    titulo: 'O sino do passo',
+    texto:
+      'No alto do passo há uma casinha de pedra com um sino pendurado na porta. Seu Firmino toca o sino a cada quarto de hora, para que quem estiver perdido na neve ache o caminho. Toca há três noites. Agora toca sentado, de olhos fechados, e o braço já não sobe. Lá fora, longe, alguém grita, e o vento leva o grito embora.',
+    abordagens: [
+      {
+        id: 'corpo',
+        rotulo: 'Tocar o sino no lugar dele',
+        teste: { chave: 'fisico', dificuldade: 8 },
+        sucesso: {
+          texto: 'Você toca até não sentir o ombro. Um quarto de hora, outro, outro. Perto da meia-noite, uma sombra sai do branco seguindo o som: um tropeiro de barba congelada, que chora quando vê a porta. Firmino dorme o tempo todo, sentado, e acorda agradecendo.',
+          cronica: '{nome} tocou o sino do passo noite adentro, e um perdido achou a porta.',
+          efeitos: { lacos: 1 },
+        },
+        falha: {
+          texto: 'O braço cansa antes da noite. Você toca mais espaçado, depois mais fraco, e o grito lá fora para de responder. O tropeiro chega de madrugada, sozinho e por sorte, e você nunca sabe se ele ouviu o sino.',
+          cronica: '{nome} não aguentou tocar o sino do passo a noite inteira.',
+          efeitos: { vida: -1, sanidade: -2 },
+        },
+      },
+      {
+        id: 'mente',
+        rotulo: 'Pôr o vento para tocar',
+        teste: { chave: 'inteligencia', dificuldade: 9 },
+        ajuda: ['corda'],
+        sucesso: {
+          texto: 'O vento do passo nunca para, então que trabalhe. Você amarra o badalo a uma tábua presa no telhado, como uma vela, e o sino passa a tocar sozinho a cada rajada. Um tropeiro chega guiado pelo som e não acredita que ninguém está tocando.',
+          cronica: '{nome} pôs o vento do passo para tocar o sino de Seu Firmino.',
+          efeitos: { lacos: 1 },
+        },
+        falha: {
+          texto: 'A tábua pega o vento errado e arranca o badalo inteiro. O sino fica mudo até você e Firmino o religarem com arame e tocarem à mão o resto da noite.',
+          cronica: '{nome} arrancou o badalo do sino do passo tentando poupar um braço.',
+          efeitos: { brasa: -1, vida: -1 },
+        },
+      },
+      {
+        id: 'espirito',
+        rotulo: 'Responder o grito',
+        teste: { chave: 'presenca', dificuldade: 8 },
+        sucesso: {
+          texto: 'Você sai na porta e grita, e espera, e grita. Do branco, depois de muito, vem a resposta, mais perto. Vocês conversam no grito até ele bater a mão no sino. É um tropeiro, e ele não solta a sua mão por um bom tempo.',
+          cronica: '{nome} chamou um perdido no grito pela nevasca até ele achar a casa do sino.',
+          efeitos: { lacos: 1 },
+        },
+        falha: {
+          texto: 'O vento come a sua voz no meio do caminho. Você grita até a garganta arder, e o grito lá fora para. O tropeiro aparece de manhã, sozinho, sem saber se alguém chamou.',
+          cronica: '{nome} gritou para a nevasca, e a nevasca não devolveu.',
+          efeitos: { sanidade: -2 },
+        },
+      },
+      {
+        id: 'amuleto',
+        rotulo: 'Pendurar o sininho de casa',
+        requer: { item: 'amuleto' },
+        livre: true,
+        resultado: {
+          texto: 'O sininho de Vau-do-Sino tine fino ao lado do grande, e os dois juntos vão mais longe. O tropeiro chega guiado pelo menor. Você deixa o amuleto com Firmino, para as próximas noites.',
+          cronica: '{nome} deixou o sininho de Vau-do-Sino tocando no alto do passo.',
+          efeitos: { lacos: 1, semItem: 'amuleto' },
+        },
+      },
+      {
+        id: 'fuligem',
+        rotulo: 'Mandar Fuligem buscar',
+        requer: { companheiro: 'fuligemCadela' },
+        livre: true,
+        resultado: {
+          texto: 'Fuligem sai para a neve sem esperar a segunda ordem e volta latindo, devagar, com um homem agarrado à coleira. Firmino acorda, olha a cadela e diz que nunca viu sino que latisse.',
+          cronica: '{nome} mandou Fuligem à nevasca, e a cadela trouxe pela coleira um perdido.',
+          efeitos: { lacos: 1, brasa: -1 },
+        },
+      },
+    ],
+  },
+  {
+    id: 'ato3-rosa',
+    ato: 3,
+    titulo: 'A que desceu',
+    texto:
+      'Uma mulher desce a trilha na sua direção, devagar, com uma lanterna igual à sua pendurada na mão, fria. Chama-se Rosa. Subiu há dois dias com a brasa da vila dela, do outro lado do vale, e a brasa morreu no caminho. "Não adianta", diz, sem parar. "Lá em cima está trancado. Volte para casa." Os pés dela já não sentem a neve.',
+    abordagens: [
+      {
+        id: 'corpo',
+        rotulo: 'Levá-la a um abrigo',
+        teste: { chave: 'forca', dificuldade: 8 },
+        sucesso: {
+          texto: 'Ela não quer, e você não pergunta. Leva Rosa nas costas até uma fenda abrigada e faz fogo com o pouco que há. Quando os pés dela começam a doer, é bom sinal. "Eu espero aqui", diz. "Quando o Farol acender, eu vejo."',
+          cronica: '{nome} carregou Rosa, a que desceu, até um abrigo de pedra.',
+          efeitos: { lacos: 1 },
+        },
+        falha: {
+          texto: 'Na metade do caminho as suas pernas pesam o dobro. Vocês chegam à fenda se arrastando, e o fogo que você acende ali sai da sua brasa, que não tinha tanto para dar.',
+          cronica: '{nome} salvou Rosa do frio com um pedaço da própria brasa.',
+          efeitos: { lacos: 1, brasa: -2 },
+        },
+      },
+      {
+        id: 'mente',
+        rotulo: 'Perguntar o que ela viu',
+        teste: { chave: 'sabedoria', dificuldade: 8 },
+        sucesso: {
+          texto: 'Ela chegou à porta do Farol: ferro, trancado por dentro, e uma voz de velho mandando embora. Mas a voz, diz Rosa, tremia, como quem quer ser contrariado. Você agradece e aponta uma fenda abrigada. Ela vai para lá olhando para trás.',
+          cronica: '{nome} soube por Rosa que a voz atrás da porta do Farol tremia.',
+          efeitos: { lacos: 1 },
+        },
+        falha: {
+          texto: 'Ela conta a porta, o ferro, a voz. Conta também o frio, a brasa morrendo, a vergonha. O desânimo dela pega, e você sobe um bom trecho pensando em dar meia-volta.',
+          cronica: '{nome} ouviu Rosa contar como a brasa dela morreu, e levou o desânimo junto.',
+          efeitos: { sanidade: -2 },
+        },
+      },
+      {
+        id: 'espirito',
+        rotulo: 'Mostrar a ela a brasa viva',
+        teste: { chave: 'fe', dificuldade: 8 },
+        sucesso: {
+          texto: 'Você não promete nada. Abre a portinhola e deixa Rosa olhar a brasa, viva. Ela olha muito tempo. Depois diz que vai esperar numa fenda abrigada, de olho no alto. "Se acender, eu desço e conto para a minha vila."',
+          cronica: '{nome} mostrou a brasa a Rosa, e ela resolveu esperar o Farol acender.',
+          efeitos: { lacos: 1 },
+        },
+        falha: {
+          texto: '"Eu também acreditava", diz Rosa, e passa por você sem parar. Você a vê descer até virar um ponto escuro na neve, e não sabe se ela chega.',
+          cronica: '{nome} deixou Rosa descer sozinha a montanha.',
+          efeitos: { sanidade: -2 },
+        },
+      },
+      {
+        id: 'lamparina',
+        rotulo: 'Acender a lamparina para ela',
+        requer: { item: 'lamparina' },
+        livre: true,
+        resultado: {
+          texto: 'Você acende a lamparina na brasa e a põe na mão dela. Rosa desce com luz própria, devagar, e você a vê lá embaixo por muito tempo, um ponto aceso indo para casa.',
+          cronica: '{nome} deu a Rosa uma lamparina acesa na brasa do Farol.',
+          efeitos: { marco: true, semItem: 'lamparina' },
+        },
+      },
+      {
+        id: 'manto',
+        rotulo: 'Dar a ela o seu manto',
+        requer: { item: 'manto' },
+        livre: true,
+        resultado: {
+          texto: 'Você tira o manto de lã e o fecha em volta dela, até o queixo. Rosa não agradece; chora, o que é melhor. Desce devagar, aquecida, e você sobe com o vento entrando pela gola.',
+          cronica: '{nome} deu o manto de lã a Rosa e subiu com frio.',
+          efeitos: { lacos: 1, semItem: 'manto' },
+        },
+      },
+    ],
+  },
 ];
