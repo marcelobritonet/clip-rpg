@@ -288,6 +288,7 @@ function montarFichaLivre(caixa) {
       h('div.blocos', {}, colunas),
       pericias.length ? h('div.bloco', { 'data-caminho': 'livre' }, h('h4', {}, t('livre.pericias')), pericias.map((k) => linha(p.pericias, k, 'pericia'))) : h('p.nota.escura', {}, t('livre.periciasAparecem')),
       h('p.numeros', {}, t('livre.numeros', { vida: v.vida, magia: v.magia, sanidade: v.sanidade, ataque: v.ataqueCurta, defesa: v.defesa, caminho: nomeDoCaminho(v.dominante) })),
+      blocoDeAntecedentes(p, ficha, desenharLivre),
       h('div.bloco', { 'data-caminho': 'livre' },
         h('h4', {}, t('livre.sacola', { n: p.itens.length, total: ITENS_LIVRES })),
         h('div.kit', {}, kit.map(([id]) => h('button.alavanca.clara', { type: 'button', 'aria-pressed': String(p.itens.includes(id)), disabled: !p.itens.includes(id) && p.itens.length >= ITENS_LIVRES, onclick: () => {
@@ -302,6 +303,38 @@ function montarFichaLivre(caixa) {
     );
   };
   desenharLivre();
+}
+
+/**
+ * Antecedentes do manual: os pontos são o menor Caminho; cada Bom custa 1,
+ * cada Mau devolve 1 (até o dobro), e antagônicos não andam juntos.
+ */
+const ANTAGONICOS = { boaFama: 'maFama', maFama: 'boaFama', recursos: 'semRecursos', semRecursos: 'recursos', aliado: null, inimigo: null };
+const MAUS = new Set(['inimigo', 'maFama', 'semRecursos']);
+
+function blocoDeAntecedentes(p, ficha, redesenhar) {
+  // O que não cabe mais (o menor Caminho caiu) sai, começando pelos Bons.
+  for (;;) {
+    const sobra = R.pontosDeAntecedentes(R.novaFicha(p)).livres;
+    const bom = Object.keys(p.antecedentes).find((k) => !p.antecedentes[k].mau);
+    if (sobra >= 0 || !bom) break;
+    delete p.antecedentes[bom];
+  }
+  const conta = R.pontosDeAntecedentes(R.novaFicha(p));
+  const botoes = Object.keys(ANTAGONICOS).map((k) => {
+    const tem = !!p.antecedentes[k];
+    const mau = MAUS.has(k);
+    const travado = !tem && (!!p.antecedentes[ANTAGONICOS[k]] || (!mau && conta.livres <= 0) || (mau && conta.base === 0));
+    return h('button.alavanca.clara', { type: 'button', 'aria-pressed': String(tem), disabled: travado, onclick: () => {
+      if (tem) delete p.antecedentes[k]; else p.antecedentes[k] = mau ? { nivel: 1, mau: true } : { nivel: 1 };
+      som.toque(); redesenhar();
+    } }, nomeDoAntecedente(k), h('b', {}, mau ? '+1' : '−1'));
+  });
+  return h('div.bloco', { 'data-caminho': 'livre' },
+    h('h4', {}, t('livre.antecedentes', { livres: conta.livres, total: conta.total })),
+    h('p.nota.escura', {}, conta.base === 0 ? t('livre.antecedentesZero') : t('livre.antecedentesNota')),
+    h('div.kit', {}, botoes),
+  );
 }
 
 function fecharRascunho() {
@@ -632,6 +665,11 @@ async function rodada(acao, pm) {
 
 function desenharDesfecho(palco) {
   const d = e.desfecho;
+  // A mesa sente o resultado: treme na falha, clareia no duplo seis.
+  if (!RAPIDO && d.tipo !== 'livre') {
+    const classe = d.critico === 'sucesso' ? 'clareia' : d.ok ? '' : 'treme';
+    if (classe) { palco.classList.remove('treme', 'clareia'); void palco.offsetWidth; palco.classList.add(classe); }
+  }
   const filhos = [h('article.carta.mestre.curta', {}, h('p.sobre', {}, e.cena.titulo))];
   if (d.combate) filhos.push(h('section.combate', {}, h('div.log', {}, d.combate.log.map(linhaDeGolpe))));
   if (e.rolagem && d.tipo === 'teste') {
@@ -799,6 +837,22 @@ $('#ficha').addEventListener('click', (ev) => { if (ev.target === $('#ficha')) $
 
 traduzirPagina();
 montarIdiomas();
+/** Teclado: 1 a 6 escolhem, Enter confirma ou continua, F abre a ficha. */
+document.addEventListener('keydown', (ev) => {
+  if ($('#mesa').hidden || $('#ficha').open || ev.ctrlKey || ev.metaKey || ev.altKey) return;
+  if (['INPUT', 'TEXTAREA'].includes(ev.target.tagName)) return;
+  const palco = $('#palco');
+  if (/^[1-9]$/.test(ev.key)) {
+    const alvo = [...palco.querySelectorAll('.escolha:not(:disabled)')][Number(ev.key) - 1];
+    if (alvo) { ev.preventDefault(); alvo.click(); }
+  } else if (ev.key === 'Enter') {
+    const alvo = palco.querySelector('.preparo .principal') ?? palco.querySelector('.insistir .principal') ?? [...palco.querySelectorAll(':scope > .principal')].pop();
+    if (alvo && document.activeElement?.tagName !== 'BUTTON') { ev.preventDefault(); alvo.click(); }
+  } else if (ev.key.toLowerCase() === 'f') {
+    $('#abrir-ficha').click();
+  }
+});
+
 montarInicio();
 if (params.get('jogar') === '1') comecar();
 

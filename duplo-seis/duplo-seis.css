@@ -416,3 +416,10 @@ p.ajuste { flex-direction: initial; margin: 0; font-size: 1rem; line-height: 1.3
 .carta.com-cenario { padding-top: 0; overflow: hidden; }
 .cenario { margin: 0 -1.15rem 0.9rem; height: 7rem; background: #0a0d1c; }
 .cenario svg { display: block; width: 100%; height: 100%; }
+
+.como summary { cursor: pointer; font-family: var(--serif); font-size: 1.1rem; color: var(--fogo-2); }
+.como ul { margin: 0.4rem 0 0; padding-left: 1.1rem; display: grid; gap: 0.4rem; color: var(--claro-2); font-size: 0.95rem; }
+.palco.treme { animation: treme 0.38s cubic-bezier(0.36, 0.07, 0.19, 0.97); }
+.palco.clareia { animation: clareia 0.9s ease-out; }
+@keyframes treme { 10%, 90% { transform: translateX(-2px); } 20%, 80% { transform: translateX(4px); } 30%, 50%, 70% { transform: translateX(-7px); } 40%, 60% { transform: translateX(7px); } }
+@keyframes clareia { 0% { filter: brightness(1.9) saturate(1.3); } 100% { filter: none; } }

@@ -127,6 +127,12 @@ export default {
   },
 
   inicio: {
+    como: 'How to play',
+    como1: 'The Game Master sets the scene. You choose what to do: through Body, Mind or Spirit.',
+    como2: 'Each level in what is being tested rolls one die. Reach the Difficulty or more and it works.',
+    como3: 'An object or a companion adds dice. With Body you can push on, paying in Life for what was missing.',
+    como4: 'The golden die is the luck die: a 6 and then another 6 is a double six. The same goes for 1, for bad luck.',
+    como5: 'Failing does not end the story: it costs time, blood or nerve. Experience comes from what you live through, not from whom you knock down.',
     emAndamento: 'Session in progress',
     emAventura: ' in {aventura}',
     continuar: 'Continue',
@@ -157,6 +163,9 @@ export default {
   },
 
   livre: {
+    antecedentes: 'Backgrounds ({livres} of {total} points free)',
+    antecedentesNota: 'Your points equal your lowest Path. A good one costs 1; a bad one gives 1 back, up to double.',
+    antecedentesZero: 'Background points equal your lowest Path, and yours is at zero.',
     conteudoRei: 'Content is King: write the past before spending points.',
     faltam: '{pontos} left to spend.',
     exemploQuem: 'Who you were, what you lived through, why you agreed to this journey.',

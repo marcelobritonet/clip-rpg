@@ -88,6 +88,12 @@ export default {
   },
 
   inicio: {
+    como: 'Como se joga',
+    como1: 'O Mestre descreve a cena. Você escolhe o que fazer: pelo Corpo, pela Mente ou pelo Espírito.',
+    como2: 'Cada nível no que é testado rola um dado. Somou a Dificuldade ou mais, deu certo.',
+    como3: 'Um objeto ou um companheiro somam dados. No Corpo dá para insistir, pagando em Vida o que faltou.',
+    como4: 'O dado dourado é o da sorte: se cair 6 e depois 6 de novo, é duplo seis. O mesmo vale para o 1, para o azar.',
+    como5: 'Falhar não encerra a história: custa tempo, sangue ou cabeça. Experiência vem do que você vive, não de quem derruba.',
     emAndamento: 'Sessão em andamento',
     emAventura: ' em {aventura}',
     continuar: 'Continuar',
@@ -118,6 +124,9 @@ export default {
   },
 
   livre: {
+    antecedentes: 'Antecedentes ({livres} de {total} pontos livres)',
+    antecedentesNota: 'Os pontos são o seu menor Caminho. Um Bom custa 1; um Mau devolve 1, até o dobro.',
+    antecedentesZero: 'Os pontos de Antecedentes são o seu menor Caminho, e ele está em zero.',
     conteudoRei: 'Conteúdo é o Rei: escreva o passado antes dos pontos.',
     faltam: 'Faltam {pontos} para distribuir.',
     exemploQuem: 'Quem você foi, o que viveu, por que aceitou esta viagem.',
