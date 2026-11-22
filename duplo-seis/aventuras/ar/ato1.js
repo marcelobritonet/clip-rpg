@@ -443,7 +443,7 @@ export const cenas = [
     ato: 1,
     titulo: 'O alarme do Galinheiro Alto',
     texto:
-      'O alarme de fumaça do Galinheiro Alto disparou sem fumaça nenhuma, e a porta corta-fogo do corredor fechou na sua cara. O botão de silenciar fica a dez metros, lá dentro, atrás da tela. Entre a tela e o botão, trezentas galinhas em pânico e o galo Brigadeiro, que nunca gostou de visita e hoje está com razão.',
+      'O alarme de fumaça do Galinheiro Alto disparou sem fumaça nenhuma, e a porta corta-fogo do corredor fechou na sua cara. O botão de silenciar fica a dez metros, lá dentro, atrás da tela. Entre a tela e o botão, trezentas galinhas em pânico e o galo Brigadeiro, que nunca gostou de visita e hoje está com razão. Os dutos dali, todo mundo sabe, são de Bia, a menina de dez anos que cuida das poedeiras.',
     abordagens: [
       {
         id: 'corpo',
@@ -536,7 +536,7 @@ export const cenas = [
         teste: { chave: 'destreza', dificuldade: 6 },
         ajuda: ['cabo'],
         sucesso: {
-          texto: 'Atrás da última grade, lá no alto, há um ninho de cobertor e uma lata com as fichas que sobraram. Você devolve a lata ao conselho sem dizer onde achou. Dona Celeste lhe separa um punhado para a viagem.',
+          texto: 'Atrás da última grade, lá no alto, há um ninho de cobertor e uma lata com as fichas que sobraram. Você devolve a lata ao conselho sem dizer onde achou. A conselheira de turno lhe separa um punhado para a viagem.',
           cronica: '{nome} achou as fichas do conselho num duto e não disse de quem era o esconderijo.',
           efeitos: { item: 'fichas' },
         },

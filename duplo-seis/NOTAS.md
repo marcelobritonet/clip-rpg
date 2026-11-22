@@ -96,6 +96,29 @@ Final de 3 estrelas, robô atento:
 Alvo era todos entre 30% e 60%. Média de estrelas ficou entre 1,95 e 2,53 (antes 1,73 a 2,74).
 O robô ao acaso continua quase sempre em "Cinza".
 
+### Continuidade dos textos (22/11/2026, só pt)
+
+As cenas de cada ato saem sorteadas (4 de 9), então nenhuma pode supor outra. Corrigido só em português; o
+inglês ainda tem a versão antiga destes trechos (pendência 8.11 do `PENDENCIAS.md`).
+
+| Aventura | Cena | Problema | Correção |
+|---|---|---|---|
+| Brasa | A ponte do pedágio | Cruzava o mesmo rio da balsa; com as duas na sessão, o rio era atravessado duas vezes | A ponte agora é sobre um ribeirão |
+| Brasa | Três caminhos e um carroceiro | Encruzilhada vazia, enquanto outras cenas põem a feira na encruzilhada | "Longe da feira", outra bifurcação |
+| Brasa | A picada | A saída de Medicina falava da "folha prateada" que só a saída da Inteligência apresenta | A folha é apresentada na própria saída |
+| Brasa | O homem na neve | Levava Brás "ao refúgio"; se o refúgio tinha esvaziado antes, não fazia sentido | Leva à cabana do irmão dele |
+| Brasa | O refúgio dos pastores | Os pastores choravam Brás perdido, mesmo que você já o tivesse salvado | O perdido é Zé, neto de Jacinta |
+| Brasa | Os lobos brancos | Na derrota, vocês "descem a montanha"; na especial, a alcateia segue "até o refúgio" | Saem do platô; seguem até a próxima dobra |
+| Brasa | A vigília da capela | Irmã Anselma, nome quase igual ao do ganso Anselmo | Irmã Inácia |
+| Ar | A escotilha (abertura) | A Zeladora aparecia no ato 3 sem nunca ter sido apresentada | Apresentada na abertura |
+| Ar | O alarme do Galinheiro Alto | A saída "Pedir a Bia o duto" supunha Bia conhecida | A cena apresenta Bia |
+| Ar | As fichas do conselho | Citava Dona Celeste, que só aparece na creche | A conselheira de turno |
+| Ar | Comporta 3, garrafas, casulos | Tonho Graxa aparecia sem apresentação em duas delas | "o chefe dos estivadores" em cada uma |
+| Ar | O armazém que não existe | "A planta marca" supunha ter o item Planta | "Nas plantas antigas da estação" |
+| Ar | A Doca Aberta | "Primeira vez sem vidro" contradizia quem anda por fora do casco | Frase trocada |
+| Ar | O Trecho Frio | 42 fundadores, contra os mais de 160 nomes lidos na capela | Mais de duzentos |
+| Ar | A voz emprestada | Citava "a janela da capela", que pode não ter aparecido | "o lado de fora sem vidro" |
+
 ## Próximos passos
 
 Estão no `PENDENCIAS.md`, seção 8.

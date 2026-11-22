@@ -46,7 +46,7 @@ export const abertura = {
   titulo: 'A escotilha do almoxarifado',
   efeitosAoEntrar: { item: 'barra' },
   texto:
-    'O reciclador principal da Aurora-7 parou, e o ar de duzentas pessoas tem as horas contadas. O único cartucho catalisador reserva está aqui no Anel Verde, do lado oposto ao Núcleo, e alguém precisa atravessar a estação com ele. Esse alguém é você. O cartucho dorme no almoxarifado, atrás de uma escotilha que emperrou há duas safras. Seu Anselmo estende uma barra de alavanca e cospe nas mãos.',
+    'O reciclador principal da Aurora-7 parou, e a Zeladora, a voz que cuida da estação desde os fundadores, já conta as horas de ar de duzentas pessoas. O único cartucho catalisador reserva está aqui no Anel Verde, do lado oposto ao Núcleo, e alguém precisa atravessar a estação com ele. Esse alguém é você. O cartucho dorme no almoxarifado, atrás de uma escotilha que emperrou há duas safras. Seu Anselmo estende uma barra de alavanca e cospe nas mãos.',
   abordagens: [
     {
       id: 'forca',

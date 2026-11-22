@@ -40,7 +40,7 @@ export const cenas = [
     ato: 2,
     titulo: 'A Comporta 3',
     texto:
-      'A Comporta 3 desceu no meio do turno e ficou. São quatro toneladas de chapa entre você e o resto das Docas, com um palmo de fresta embaixo e uma sirene que ninguém sabe desligar. A turma de Tonho Graxa olha de braços cruzados. "Racionamento", diz ele. "O motor só volta na safra que vem."',
+      'A Comporta 3 desceu no meio do turno e ficou. São quatro toneladas de chapa entre você e o resto das Docas, com um palmo de fresta embaixo e uma sirene que ninguém sabe desligar. A turma de Tonho Graxa, o chefe dos estivadores, olha de braços cruzados. "Racionamento", diz ele. "O motor só volta na safra que vem."',
     abordagens: [
       {
         id: 'forca',
@@ -286,7 +286,7 @@ export const cenas = [
     ato: 2,
     titulo: 'O armazém que não existe',
     texto:
-      'Entre o depósito de sucata e a parede do casco, a planta marca um espaço vazio. O espaço cheira a café de verdade. Uma pilha de caixas tapa o corredor, e atrás dela alguém conta fichas sem pressa. Todo mundo nas Docas sabe que Madame Rute tem trajes de pressão. Ninguém sabe onde fica a porta.',
+      'Nas plantas antigas da estação, entre o depósito de sucata e a parede do casco, há um espaço vazio. O espaço cheira a café de verdade. Uma pilha de caixas tapa o corredor, e atrás dela alguém conta fichas sem pressa. Todo mundo nas Docas sabe que Madame Rute tem trajes de pressão. Ninguém sabe onde fica a porta.',
     abordagens: [
       {
         id: 'destreza',
@@ -370,7 +370,7 @@ export const cenas = [
     ato: 2,
     titulo: 'As garrafas que faltam',
     texto:
-      'O depósito de garrafas de ar está aberto e seis ganchos estão vazios. Tonho Graxa bloqueia a passagem com o corpo inteiro. Ninguém atravessa as Docas enquanto as garrafas não aparecerem. Ele sabe quem pegou, dá para ver, e não vai entregar gente da turma a alguém de fora. Atrás dele, oito estivadores estudam as próprias botas.',
+      'O depósito de garrafas de ar está aberto e seis ganchos estão vazios. Tonho Graxa, o chefe dos estivadores, bloqueia a passagem com o corpo inteiro. Ninguém atravessa as Docas enquanto as garrafas não aparecerem. Ele sabe quem pegou, dá para ver, e não vai entregar gente da turma a alguém de fora. Atrás dele, oito estivadores estudam as próprias botas.',
     abordagens: [
       {
         id: 'forca',
@@ -464,7 +464,7 @@ export const cenas = [
     ato: 2,
     titulo: 'A Doca Aberta',
     texto:
-      'A Doca Aberta perdeu a porta de fora há duas safras. Entre esta eclusa e a outra há dez metros de piso gradeado, e além da grade, nada: o escuro inteiro, com estrelas que não piscam. A eclusa de lá abre e fecha sozinha, num ciclo teimoso. Não há ar nenhum no meio. É a primeira vez que você vê o lado de fora sem vidro.',
+      'A Doca Aberta perdeu a porta de fora há duas safras. Entre esta eclusa e a outra há dez metros de piso gradeado, e além da grade, nada: o escuro inteiro, com estrelas que não piscam. A eclusa de lá abre e fecha sozinha, num ciclo teimoso. Não há ar nenhum no meio. Daqui, o lado de fora não tem vidro nenhum.',
     abordagens: [
       {
         id: 'fisico',
@@ -634,7 +634,7 @@ export const cenas = [
     ato: 2,
     titulo: 'A fila dos casulos',
     texto:
-      'Os estivadores largaram o serviço e fizeram fila diante dos casulos de emergência. São doze casulos para sessenta pessoas, e a conta já começou a ser feita aos empurrões. A passagem para o Eixo fica atrás da fila. Tonho Graxa tenta segurar a turma no grito e está perdendo. Alguém já quebrou o lacre do primeiro casulo.',
+      'Os estivadores largaram o serviço e fizeram fila diante dos casulos de emergência. São doze casulos para sessenta pessoas, e a conta já começou a ser feita aos empurrões. A passagem para o Eixo fica atrás da fila. Tonho Graxa, o chefe da turma, tenta segurar todo mundo no grito e está perdendo. Alguém já quebrou o lacre do primeiro casulo.',
     abordagens: [
       {
         id: 'forca',

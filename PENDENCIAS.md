@@ -110,7 +110,7 @@ Jogar: https://marcelobritonet.github.io/clip-rpg/duplo-seis/ · Notas e decisõ
 
 | # | Tópico | Situação | Por onde começar | Decisão |
 |---|---|---|---|---|
-| 8.1 | Revisão de continuidade dos textos | ☐ Começada e interrompida, nada foi alterado. As cenas de cada ato saem em ordem sorteada (4 de 9), então uma cena não pode supor outra. Falta ler as 54 cenas das duas aventuras, em português e inglês | Um revisor por aventura; só texto | ✅ 22/11/2026: só a versão pt. O inglês vira a 8.11 |
+| 8.1 | Revisão de continuidade dos textos | ✅ 22/11/2026, só pt: 15 problemas corrigidos nas duas aventuras (lista em `duplo-seis/NOTAS.md`). Cada cena agora se sustenta sozinha, em qualquer ordem. O inglês não acompanhou: está na 8.11 | Só texto | ✅ 22/11/2026: só a versão pt. O inglês vira a 8.11 |
 | 8.2 | Equilíbrio entre os passados da Brasa | ✅ 22/11/2026: final de 3 estrelas do robô atento entre 37% (Desertora) e 54% (Aprendiz); antes 21% a 82%. Quatro efeitos mudados, texto intocado, espelho `en/` conferido. Números e motivos em `duplo-seis/NOTAS.md`. Ainda não está numa versão publicada | `node duplo-seis/simular.mjs 400 atento brasa`; mexer nos `lacos` das cenas ou nas condições de `finais` em `aventuras/brasa/base.js` (e no espelho `en/`) | Seguir |
 | 8.3 | Você jogar e dizer o que achou | ☐ Só robôs e eu jogamos até agora. Falta o seu teste de mão: ritmo, dificuldade, se o texto prende | Jogar uma sessão de cada aventura no celular | Preciso de você |
 | 8.4 | Lacunas do manual que a mesa decidiu | ☐ 14 decisões registradas em `duplo-seis/NOTAS.md` (custo de evolução, experiência por marcos, efeito dos críticos, recuperação, Vida 0, Sanidade 0, cansaço de quem une forças...). Nenhuma mudou regra escrita | Ler a tabela e dizer quais viram regra do manual | Preciso de você |
@@ -118,7 +118,7 @@ Jogar: https://marcelobritonet.github.io/clip-rpg/duplo-seis/ · Notas e decisõ
 | 8.6 | Mais cenas por ato | ☐ Hoje são 9 por ato; com 12 as sessões se repetem menos | `duplo-seis/aventuras/FORMATO.md` descreve o formato | ✅ 22/11/2026: com Opus 5.5, só cenas boas. Só pt; o inglês vai para a 8.11 |
 | 8.7 | Terceira aventura e mais idiomas | ☐ Ideia: investigação ou horror, para a Sanidade pesar; espanhol | Copiar a estrutura de `aventuras/ar/` | ✅ 22/11/2026: terceira aventura só em pt-br. Espanhol e inglês dela vão para a 8.11 |
 | 8.8 | Conferências que faltaram | ☐ Jogar sem rede depois de instalar, botão de compartilhar a crônica, e teste em celular de verdade (só foi visto em janela de 375 px) | Instalar pelo navegador do celular e desligar a rede | |
-| 8.11 | Tudo que não for pt-br | ☐ Despriorizado em 22/11/2026: revisão do texto em inglês (8.1), inglês das cenas novas (8.6), inglês e espanhol da terceira aventura (8.7). Até lá, a versão em inglês pode ficar atrás da pt | Só depois de fechar as pendências em pt | ✅ 22/11/2026: fim da fila |
+| 8.11 | Tudo que não for pt-br | ☐ Despriorizado em 22/11/2026: espelhar no inglês as 15 correções de continuidade da 8.1 (lista em `duplo-seis/NOTAS.md`), inglês das cenas novas (8.6), inglês e espanhol da terceira aventura (8.7). Até lá, a versão em inglês pode ficar atrás da pt | Só depois de fechar as pendências em pt | ✅ 22/11/2026: fim da fila |
 
 ### 8.9 Que modelo dá conta de cada pendência do Duplo Seis
 

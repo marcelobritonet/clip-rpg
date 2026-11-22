@@ -428,7 +428,7 @@ export const cenas = [
     ato: 1,
     titulo: 'A ponte do pedágio',
     texto:
-      'A ponte de pedra tem uma cancela nova e um homem de chapéu grande sentado num banquinho. "Pedágio dobrou. Ordem do barão", diz ele, sem olhar para você. Atrás, pregado torto, um edital com a tinta ainda fresca. Que você saiba, o vale não tem barão. O rio corre embaixo, largo e frio.',
+      'A ponte de pedra tem uma cancela nova e um homem de chapéu grande sentado num banquinho. "Pedágio dobrou. Ordem do barão", diz ele, sem olhar para você. Atrás, pregado torto, um edital com a tinta ainda fresca. Que você saiba, o vale não tem barão. O ribeirão corre embaixo, fundo e frio.',
     abordagens: [
       {
         id: 'corpo',
@@ -437,11 +437,11 @@ export const cenas = [
         ajuda: ['corda'],
         sucesso: {
           texto: 'Você entra na água com a lanterna erguida acima da cabeça e sai do outro lado bufando, de brasa seca. Na ponte, o homem do chapéu acompanha tudo com cara de quem perdeu um freguês.',
-          cronica: '{nome} atravessou o rio a nado para não pagar pedágio a barão nenhum.',
+          cronica: '{nome} atravessou o ribeirão a nado para não pagar pedágio a barão nenhum.',
         },
         falha: {
-          texto: 'A correnteza tem opinião própria. Você sai meia légua rio abaixo, engolindo água, com a lanterna salva por um triz e as botas pesando o dobro.',
-          cronica: '{nome} foi levado rio abaixo e voltou a pé, pingando.',
+          texto: 'A correnteza tem opinião própria. Você sai meia légua ribeirão abaixo, engolindo água, com a lanterna salva por um triz e as botas pesando o dobro.',
+          cronica: '{nome} foi levado ribeirão abaixo e voltou a pé, pingando.',
           efeitos: { vida: -1, brasa: -1 },
         },
       },
@@ -506,7 +506,7 @@ export const cenas = [
     ato: 1,
     titulo: 'Três caminhos e um carroceiro',
     texto:
-      'Onde a estrada se parte em três, o marco de pedra está tombado de cara na lama. Um carroceiro coça a cabeça diante dele, com uma carga de sal para entregar antes do escuro. "Um vai para o Alto, um para o brejo, um para a casa da minha sogra", diz. "Não sei qual é o pior."',
+      'Longe da feira, onde uma estrada de terra se parte em três, o marco de pedra está tombado de cara na lama. Um carroceiro coça a cabeça diante dele, com uma carga de sal para entregar antes do escuro. "Um vai para o Alto, um para o brejo, um para a casa da minha sogra", diz. "Não sei qual é o pior."',
     abordagens: [
       {
         id: 'corpo',

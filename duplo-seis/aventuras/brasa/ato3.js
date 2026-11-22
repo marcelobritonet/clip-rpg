@@ -134,8 +134,8 @@ export const cenas = [
         rotulo: 'Ouvir do que eles têm medo',
         teste: { chave: 'sabedoria', dificuldade: 7 },
         sucesso: {
-          texto: 'O medo tem nome: Brás, que subiu atrás de uma ovelha e não voltou. Você promete procurar por ele no caminho. Jacinta desfaz o nó, devagar, e põe um pote de unguento na sua mão.',
-          cronica: '{nome} descobriu que os pastores fugiam por causa de um homem perdido, e prometeu procurá-lo.',
+          texto: 'O medo tem nome: Zé, o neto de Jacinta, que subiu atrás de uma ovelha e não voltou. Você promete procurar por ele no caminho. Jacinta desfaz o nó, devagar, e põe um pote de unguento na sua mão.',
+          cronica: '{nome} descobriu que os pastores fugiam por causa de um neto perdido, e prometeu procurá-lo.',
           efeitos: { lacos: 1, item: 'unguento' },
         },
         falha: {
@@ -270,7 +270,7 @@ export const cenas = [
     ato: 3,
     titulo: 'O homem na neve',
     texto:
-      'Uma cadela preta de focinho branco sai do escuro, late duas vezes e volta por onde veio, olhando para trás. Você a segue. Ao pé de um barranco está um pastor grande, Brás, com a perna torcida num ângulo ruim e a barba cheia de gelo. "Vá embora com essa luz", ele resmunga. "Eu peso mais que uma porta." O refúgio fica a meia hora, morro acima.',
+      'Uma cadela preta de focinho branco sai do escuro, late duas vezes e volta por onde veio, olhando para trás. Você a segue. Ao pé de um barranco está um pastor grande, Brás, com a perna torcida num ângulo ruim e a barba cheia de gelo. "Vá embora com essa luz", ele resmunga. "Eu peso mais que uma porta." A cabana do irmão dele fica a meia hora, morro acima.',
     abordagens: [
       {
         id: 'corpo',
@@ -278,17 +278,17 @@ export const cenas = [
         teste: { chave: 'forca', dificuldade: 9 },
         ajudantes: [{ nome: 'a cadela, puxando pela manga', nivel: 1 }],
         sucesso: {
-          texto: 'Ele pesa mesmo como uma porta, e reclama o caminho todo. Você o larga diante do refúgio com as costas em brasa. "Fuligem vai com você", diz Brás. "Ela sabe o Cimo melhor do que eu."',
+          texto: 'Ele pesa mesmo como uma porta, e reclama o caminho todo. Você o larga diante da cabana com as costas em brasa. "Fuligem vai com você", diz Brás. "Ela sabe o Cimo melhor do que eu."',
           cronica: '{nome} carregou o pastor Brás morro acima e ganhou a companhia da cadela Fuligem.',
           efeitos: { lacos: 1, companheiro: 'fuligemCadela' },
         },
         falha: {
-          texto: 'Na metade da subida as pernas dobram e vocês dois rolam na neve. Chegam ao refúgio rastejando lado a lado, e alguma coisa nas suas costas ficou lá no barranco.',
-          cronica: '{nome} levou o pastor Brás até o refúgio e deixou as costas no caminho.',
+          texto: 'Na metade da subida as pernas dobram e vocês dois rolam na neve. Chegam à cabana rastejando lado a lado, e alguma coisa nas suas costas ficou lá no barranco.',
+          cronica: '{nome} levou o pastor Brás até a cabana e deixou as costas no caminho.',
           efeitos: { vida: -3, lacos: 1 },
         },
         critico: {
-          texto: 'Você sobe o morro com Brás no ombro como quem leva um saco de lã. No refúgio, ele tira o próprio manto e o joga sobre você. "Fuligem vai junto. E não discuta comigo."',
+          texto: 'Você sobe o morro com Brás no ombro como quem leva um saco de lã. Na cabana, ele tira o próprio manto e o joga sobre você. "Fuligem vai junto. E não discuta comigo."',
           cronica: '{nome} carregou o pastor Brás como se ele não pesasse, e saiu de lá com manto e cadela.',
           efeitos: { lacos: 1, companheiro: 'fuligemCadela', item: 'manto' },
         },
@@ -299,12 +299,12 @@ export const cenas = [
         teste: { chave: 'inteligencia', dificuldade: 7 },
         ajuda: ['corda'],
         sucesso: {
-          texto: 'Dois galhos de zimbro, o cajado dele, o cinto dos dois. O trenó é feio e desliza. Brás vai deitado, dando palpite. Na porta do refúgio, manda a cadela seguir com você.',
-          cronica: '{nome} fez um trenó de galhos e arrastou o pastor Brás até o refúgio.',
+          texto: 'Dois galhos de zimbro, o cajado dele, o cinto dos dois. O trenó é feio e desliza. Brás vai deitado, dando palpite. Na porta da cabana, manda a cadela seguir com você.',
+          cronica: '{nome} fez um trenó de galhos e arrastou o pastor Brás até a cabana.',
           efeitos: { lacos: 1, companheiro: 'fuligemCadela' },
         },
         falha: {
-          texto: 'O trenó desmancha três vezes, e três vezes você o refaz com os dedos duros. Brás chega vivo ao refúgio. A brasa chega menor, e a cadela não larga a porta do dono.',
+          texto: 'O trenó desmancha três vezes, e três vezes você o refaz com os dedos duros. Brás chega vivo à cabana. A brasa chega menor, e a cadela não larga a porta do dono.',
           cronica: '{nome} salvou o pastor Brás num trenó que desmanchava a cada cem passos.',
           efeitos: { brasa: -2, lacos: 1 },
         },
@@ -319,7 +319,7 @@ export const cenas = [
           efeitos: { lacos: 1, companheiro: 'fuligemCadela' },
         },
         falha: {
-          texto: '"Me deixe", ele repete, e fecha os olhos. Você cobre o homem com ramos, grita pelo refúgio até ver uma luz descer, e segue. O rosto dele vai junto, por dentro.',
+          texto: '"Me deixe", ele repete, e fecha os olhos. Você cobre o homem com ramos, grita na direção da cabana até ver uma luz descer, e segue. O rosto dele vai junto, por dentro.',
           cronica: '{nome} deixou o pastor Brás para os outros buscarem e não se perdoou depressa.',
           efeitos: { sanidade: -3 },
         },
@@ -448,7 +448,7 @@ export const cenas = [
     ato: 3,
     titulo: 'A vigília da capela',
     texto:
-      'A capela do Cimo não tem mais porta nem metade do telhado, mas há uma vela acesa no altar. Irmã Anselma, pequena e muito velha, vigia a chama enrolada em três cobertores. "Enquanto alguém velar aqui, elas não entram", diz, apontando o escuro que se mexe atrás das janelas. Ela não dorme há duas noites. O sino está preso no gelo.',
+      'A capela do Cimo não tem mais porta nem metade do telhado, mas há uma vela acesa no altar. Irmã Inácia, pequena e muito velha, vigia a chama enrolada em três cobertores. "Enquanto alguém velar aqui, elas não entram", diz, apontando o escuro que se mexe atrás das janelas. Ela não dorme há duas noites. O sino está preso no gelo.',
     abordagens: [
       {
         id: 'corpo',
@@ -461,7 +461,7 @@ export const cenas = [
           efeitos: { lacos: 1 },
         },
         falha: {
-          texto: 'Um degrau cede e você desce a sineira bem mais depressa do que subiu. O sino continua mudo. Irmã Anselma faz o sinal da cruz e ajeita o seu tornozelo sem dizer nada.',
+          texto: 'Um degrau cede e você desce a sineira bem mais depressa do que subiu. O sino continua mudo. Irmã Inácia faz o sinal da cruz e ajeita o seu tornozelo sem dizer nada.',
           cronica: '{nome} caiu da sineira da capela do Cimo.',
           efeitos: { vida: -2, brasa: -1 },
         },
@@ -488,7 +488,7 @@ export const cenas = [
         teste: { chave: 'fe', dificuldade: 7 },
         ajuda: ['amuleto'],
         sucesso: {
-          texto: 'Você se ajoelha e manda a velha dormir. As vozes vêm, pedem, ameaçam, choram. Você olha a vela. Quando Anselma acorda, a chama está do mesmo tamanho, e ela lhe prepara um chá de melissa com as mãos trêmulas.',
+          texto: 'Você se ajoelha e manda a velha dormir. As vozes vêm, pedem, ameaçam, choram. Você olha a vela. Quando Inácia acorda, a chama está do mesmo tamanho, e ela lhe prepara um chá de melissa com as mãos trêmulas.',
           cronica: '{nome} velou a noite na capela do Cimo para que uma velha freira dormisse.',
           efeitos: { lacos: 1, item: 'cha', marco: true },
         },
@@ -521,7 +521,7 @@ export const cenas = [
         },
         falha: {
           texto: 'Você lembra do rito pela metade e inventa o resto. A irmã corrige com paciência de professora. A noite passa, mais comprida do que precisava.',
-          cronica: '{nome} errou o rito da vigília, e Irmã Anselma teve de ensinar.',
+          cronica: '{nome} errou o rito da vigília, e Irmã Inácia teve de ensinar.',
           efeitos: { brasa: -1, lacos: 1 },
         },
       },
@@ -723,7 +723,7 @@ export const cenas = [
           efeitos: { lacos: 1 },
         },
         derrota: {
-          texto: 'O lobo é mais rápido do que a fome faria supor. Você cai, e é o grito de Dito, lá de cima, jogando pedras, que faz a alcateia recuar. Os dois descem a montanha amparando um ao outro.',
+          texto: 'O lobo é mais rápido do que a fome faria supor. Você cai, e é o grito de Dito, lá de cima, jogando pedras, que faz a alcateia recuar. Os dois saem do platô amparando um ao outro.',
           cronica: '{nome} apanhou do lobo branco e foi salvo pelas pedradas de um menino.',
           efeitos: { brasa: -1, lacos: 1 },
         },
@@ -771,7 +771,7 @@ export const cenas = [
         requer: { nivel: { lidarAnimais: 1 } },
         teste: { chave: 'lidarAnimais', dificuldade: 4 },
         sucesso: {
-          texto: 'Você se agacha, olha de lado, boceja. O lobo da frente boceja também. Fome, medo e frio você entende, e ele entende que você entende. A alcateia desce a encosta atrás de você, de longe, até o refúgio.',
+          texto: 'Você se agacha, olha de lado, boceja. O lobo da frente boceja também. Fome, medo e frio você entende, e ele entende que você entende. A alcateia desce a encosta atrás de você, de longe, até a próxima dobra da montanha.',
           cronica: '{nome} conversou com os lobos brancos do Cimo no idioma do bocejo.',
           efeitos: { lacos: 1, item: 'unguento' },
         },

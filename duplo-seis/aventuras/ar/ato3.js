@@ -160,7 +160,7 @@ export const cenas = [
         teste: { chave: 'fe', dificuldade: 7 },
         ajuda: ['amuleto'],
         sucesso: {
-          texto: 'Os fundadores são quarenta e dois, e o anel inteiro sabe a lista de cor. Você diz um nome por alça. No trigésimo o frio ainda morde, mas você já não está só no corredor. No último, chegou.',
+          texto: 'Os fundadores são mais de duzentos, e todo mundo no anel sabe de cor ao menos os primeiros. Você diz um nome por alça. No trigésimo o frio ainda morde, mas você já não está só no corredor. No quadragésimo, chegou.',
           cronica: '{nome} atravessou o Trecho Frio dizendo um fundador por alça.',
         },
         falha: {
@@ -366,7 +366,7 @@ export const cenas = [
           efeitos: { marca: 'ouviu' },
         },
         falha: {
-          texto: 'Você estende a sintonia e encontra uma atenção do tamanho da estação, que se vira inteira para você. É como olhar a janela da capela por dentro da cabeça.',
+          texto: 'Você estende a sintonia e encontra uma atenção do tamanho da estação, que se vira inteira para você. É como olhar o lado de fora sem vidro, por dentro da cabeça.',
           cronica: '{nome} sintonizou a Zeladora, e ela olhou de volta.',
           efeitos: { sanidade: -3 },
         },

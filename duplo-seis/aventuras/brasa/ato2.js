@@ -256,7 +256,7 @@ export const cenas = [
         requer: { nivel: { medicina: 1 } },
         teste: { chave: 'medicina', dificuldade: 3 },
         sucesso: {
-          texto: 'Corte pequeno, sucção, cinza fria por cima. Trabalho limpo. Sobra folha prateada para uma pasta, que você guarda num trapo: alguém mais vai precisar dela nesta mata.',
+          texto: 'Corte pequeno, sucção, cinza fria por cima. Trabalho limpo. Na beira do córrego cresce a folha de avesso prateado, e você soca uma pasta num trapo: alguém mais vai precisar dela nesta mata.',
           cronica: '{nome} tratou a própria picada de cobra e ainda saiu com um unguento.',
           efeitos: { item: 'unguento' },
         },
