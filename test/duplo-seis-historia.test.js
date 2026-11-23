@@ -180,6 +180,8 @@ test('o prompt inicial leva o pedido, a ficha e o formato', () => {
   assert.ok(p.includes('violência com crianças'));
   assert.ok(p.includes('A Relojoeira'));
   assert.ok(p.includes('maquinas 2'));
+  assert.ok(p.includes('inteligencia 3, percepcao 2, sabedoria 0'), 'os dados de todos os Atributos');
+  assert.ok(p.includes('| 3 | 8 | 10 | 12 |'), 'a tabela de Dificuldade por dados');
   assert.ok(p.includes(H.FORMATO_HISTORIA));
   assert.ok(p.includes('Ato 3: a torre'));
   assert.ok(p.includes('português do Brasil'));
@@ -228,4 +230,107 @@ test('o pedido de conserto lista os erros', () => {
 
 test('a ficha do exemplo cabe nos 12 pontos', () => {
   assert.deepEqual(R.validar(R.novaFicha(FICHA), H.PONTOS), []);
+});
+
+/* ---------- Medir o que foi colado ---------- */
+
+test('o medidor acusa a história fácil demais e a que tem escolha sem dados em toda cena', async () => {
+  const { medir } = await import('../duplo-seis/aventuras/medir.js');
+  const { readFileSync } = await import('node:fs');
+  const exemplo = JSON.parse(readFileSync(new URL('../duplo-seis/aventuras/exemplos/as-tres-da-tarde.json', import.meta.url), 'utf8'));
+  const ato1 = { ...exemplo, cenas: exemplo.cenas.filter((c) => c.ato === 1), desfecho: [], finais: [] };
+  const m = medir(ato1, null, { n: 60 });
+  assert.ok(m.sucesso > 0.9);
+  assert.ok(m.avisos.includes('facil'));
+  assert.equal(m.final, null, 'sem final escrito, não mede finais');
+  const p = P.promptAjuste(m);
+  assert.ok(p.includes('fácil demais') && p.includes('60 vezes') && p.includes('inteiro'));
+});
+
+test('o medidor parte de onde o jogador está, sem mexer na sessão dele, e mede os finais', async () => {
+  const { medir } = await import('../duplo-seis/aventuras/medir.js');
+  const h = nova();
+  const e = J.nova({ semente: 'viva-0', passado: 'criador', aventura: h });
+  seguir(e);
+  assert.equal(J.faltaSequencia(e), 2);
+  const antes = JSON.stringify(J.guardar(e));
+  const prova = J.anexar(copia(h), copia(ATO2));
+  const m = medir(prova, J.guardar(e), { n: 40 });
+  assert.equal(JSON.stringify(J.guardar(e)), antes, 'a sessão do jogador fica como estava');
+  assert.equal(h.cenas.length, 4, 'e a história dele também');
+  assert.ok(m.sucesso > 0 && m.sucesso <= 1 && m.queda >= 0 && m.relogio <= 10);
+  // Até o final: a medida traz a chance de 3 estrelas.
+  for (const s of [ATO2, ATO3]) { J.anexar(h, copia(s)); seguir(e); if (e.fase === 'fim') return; }
+  const fim = medir(J.anexar(copia(h), copia(FINAL)), J.guardar(e), { n: 40 });
+  assert.ok(fim.final.tres >= 0 && fim.final.tres <= 1);
+  assert.ok(Object.keys(fim.final.finais).every((id) => FINAL.finais.some((f) => f.id === id)));
+});
+
+test('a tabela de Dificuldade acompanha os dados', () => {
+  assert.equal(P.dificuldadePara(2, P.DEGRAUS.justo), 7);
+  assert.equal(P.dificuldadePara(3, P.DEGRAUS.folgado), 8);
+  assert.ok(P.dificuldadePara(4, P.DEGRAUS.apertado) > P.dificuldadePara(4, P.DEGRAUS.justo));
+});
+
+/* ---------- Capítulo seguinte ---------- */
+
+/** Joga a história de mentira até um final que não seja queda. */
+function terminada() {
+  for (let i = 0; i < 40; i++) {
+    const h = nova();
+    // Sem a saída de deixar Nico na estação, que o robô sempre escolhe por ser livre.
+    for (const c of h.cenas) c.abordagens = c.abordagens.filter((x) => x.id !== 'deixar');
+    for (const s of [ATO2, ATO3, FINAL]) J.anexar(h, copia(s));
+    const e = jogar({ semente: `cap-${i}`, passado: 'criador', aventura: h });
+    if (!['morte', 'perdido'].includes(e.fim.id) && e.companheiros.includes('nico') && e.marcas.length) return { h, e };
+  }
+  throw new Error('nenhuma semente terminou com Nico e marcas');
+}
+
+test('o capítulo seguinte leva a ficha evoluída, as marcas e os companheiros', () => {
+  const { h, e } = terminada();
+  h.ultimoFim = H.resumoDoFim(e);
+  assert.ok(H.podeSeguir(h));
+  assert.ok(!H.podeSeguir({ ultimoFim: { final: { id: 'morte' } } }));
+  const herda = H.herancaDe(h);
+  assert.deepEqual(herda.marcas, e.marcas);
+  assert.deepEqual(Object.keys(herda.catalogo), ['nico']);
+
+  const p = P.promptCapitulo(h, 'quero saber o que houve com a filha', 'pt');
+  assert.ok(p.includes('capítulo 2'));
+  for (const linha of e.cronica) assert.ok(p.includes(linha));
+  assert.ok(p.includes(e.fim.titulo));
+  assert.ok(p.includes('`nico`: Nico'));
+  assert.ok(p.includes(`\`${e.marcas[0]}\``));
+  assert.ok(p.includes('quero saber o que houve com a filha'));
+  assert.ok(p.includes(H.FORMATO_HISTORIA));
+
+  // A IA devolve um núcleo novo que usa o que ele traz, sem declarar Nico de novo.
+  const doc = copia(NUCLEO);
+  doc.nome = 'As Quatro e Meia';
+  delete doc.companheiros.nico;
+  doc.cenas[0].abordagens[0].sucesso.efeitos = { lacos: 1 };
+  doc.cenas[1].abordagens.push({ id: 'lembra', rotulo: 'Lembrar a velha dívida', requer: { marca: e.marcas[0] }, livre: true, resultado: { texto: 'A dívida antiga abre a porta nova.', cronica: '{nome} cobrou uma dívida do capítulo anterior.', efeitos: { brasa: -1 } } });
+  assert.match(H.validarHistoria(copia(doc)).join('\n'), /companheiro desconhecido "nico"|nenhuma cena concede/, 'sem a herança, não passa');
+  assert.deepEqual(H.validarHistoria(copia(doc), { herda }), []);
+
+  const cap2 = H.montarHistoria(doc, { ...h.ultimoFim.ficha, id: 'livre', itens: [] }, { agora: 1900000000000, herda, capitulo: 2, anterior: { nome: h.nome, resumo: h.resumo, final: e.fim.titulo, cronica: e.cronica } });
+  assert.equal(cap2.capitulo, 2);
+  assert.ok(cap2.pontos >= H.PONTOS);
+  const s = J.nova({ semente: 'cap2', passado: 'criador', aventura: cap2 });
+  assert.deepEqual(s.marcas, e.marcas);
+  assert.deepEqual(s.companheiros, ['nico']);
+  assert.equal(R.nivel(s.ficha, 'inteligencia'), R.nivel(e.ficha, 'inteligencia'), 'a ficha chega evoluída');
+  seguir(s);
+  assert.ok(s.fase === 'fim' || J.faltaSequencia(s) === 2);
+
+  // E o capítulo 2 exporta e importa com a herança.
+  const arquivo = copia(cap2);
+  assert.deepEqual(H.validarArquivo(arquivo), []);
+  const volta = H.daImportacao(arquivo);
+  assert.equal(volta.capitulo, 2);
+  assert.deepEqual(volta.passados[0].marcas, e.marcas);
+  assert.deepEqual(volta.passados[0].companheiros, ['nico']);
+  assert.equal(volta.anterior.nome, h.nome);
+  assert.ok(volta.companheiros.nico);
 });

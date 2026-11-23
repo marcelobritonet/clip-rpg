@@ -9,6 +9,7 @@ import { VERSAO } from './versao.js';
 import { cenario } from './cenario.js';
 import * as H from './aventuras/historia.js';
 import * as P from './aventuras/prompt.js';
+import { medir } from './aventuras/medir.js';
 
 const $ = (s) => document.querySelector(s);
 const params = new URLSearchParams(location.search);
@@ -97,7 +98,7 @@ function guardarHistoria(historia) {
 }
 
 function exportarHistoria(historia) {
-  const { formulario, ...arquivo } = historia;
+  const { formulario, ultimoFim, ...arquivo } = historia; // o pedido e a sessão do jogador não vão no arquivo
   const url = URL.createObjectURL(new Blob([JSON.stringify(arquivo, null, 2)], { type: 'application/json' }));
   const a = h('a', { href: url, download: `${historia.id}.json` });
   document.body.append(a);
@@ -154,7 +155,7 @@ function montarInicio() {
 
   // Aventuras.
   $('#aventuras').replaceChildren(...AVENTURAS.map((av) => h(`button.aventura${ehHistoria(av) ? '.sua' : ''}`, { type: 'button', role: 'radio', 'aria-checked': String(av === AVENTURA && !oficina), disabled: modoDia && av !== AVENTURA, onclick: () => { AVENTURA = av; oficina = null; rascunho = null; som.toque(); montarInicio(); } },
-    h('small', {}, ehHistoria(av) ? t('oficina.sua', { genero: av.genero }) : av.genero),
+    h('small', {}, !ehHistoria(av) ? av.genero : av.capitulo > 1 ? t('oficina.suaCapitulo', { n: av.capitulo, genero: av.genero }) : t('oficina.sua', { genero: av.genero })),
     h('strong', {}, av.nome),
     h('span', {}, av.resumo),
     h('em', {}, ehHistoria(av) && H.escritaAte(av) < 4
@@ -419,6 +420,7 @@ function montarAcoesDaOficina() {
       rascunho = null; som.toque(); montarInicio();
     } }, t('oficina.criar')),
     h('button.secundario', { type: 'button', disabled: modoDia, onclick: () => arquivo.click() }, t('oficina.importar')),
+    sua && H.podeSeguir(AVENTURA) ? h('button.secundario', { type: 'button', onclick: () => abrirCapitulo(AVENTURA) }, t('oficina.capitulo')) : null,
     sua ? h('button.secundario', { type: 'button', onclick: () => exportarHistoria(AVENTURA) }, t('oficina.exportar')) : null,
     sua ? h('button.secundario.perigo', { type: 'button', onclick: () => {
       if (!confirm(t('oficina.apagarConfirma', { nome: AVENTURA.nome }))) return;
@@ -435,6 +437,27 @@ function montarAcoesDaOficina() {
   );
 }
 
+/** Abre a oficina no capítulo seguinte de uma história terminada (da tela de início ou da tela de fim). */
+function abrirCapitulo(origem) {
+  oficina = { passo: 4, origem, desejo: '' };
+  rascunho = null;
+  $('#mesa').hidden = true;
+  $('#inicio').hidden = false;
+  montarInicio();
+  $('#escolhido').scrollIntoView({ behavior: RAPIDO ? 'auto' : 'smooth', block: 'start' });
+}
+
+/**
+ * Passou na conferência: o robô joga o trecho e diz se o equilíbrio saiu da
+ * faixa. Devolve a medida quando há o que avisar, ou null.
+ */
+function foraDaFaixa(historia, guardada) {
+  try {
+    const m = medir(historia, guardada);
+    return m?.avisos.length ? m : null;
+  } catch { return null; /* a medida é um conselho: se ela falhar, a história segue */ }
+}
+
 function montarOficina() {
   const caixa = $('#escolhido');
   caixa.hidden = false;
@@ -445,6 +468,44 @@ function montarOficina() {
   const cabecalho = (n) => [h('p.passo', {}, t(`oficina.passo${n}`)), h('h3', {}, t('oficina.titulo'))];
   const voltar = (passo) => h('button.secundario', { type: 'button', onclick: () => ir(passo) }, t('oficina.voltar'));
 
+  if (oficina.passo === 4) {
+    const origem = oficina.origem;
+    const fim = origem.ultimoFim;
+    const desejo = h('textarea', { rows: '2', maxlength: '300', placeholder: t('oficina.exemploDesejo') });
+    desejo.value = oficina.desejo;
+    desejo.addEventListener('input', () => { oficina.desejo = desejo.value; });
+    por(caixa,
+      h('p.passo', {}, t('oficina.capituloTitulo', { n: (origem.capitulo ?? 1) + 1 })),
+      h('h3', {}, t('oficina.capitulo')),
+      h('p.quem', {}, t('oficina.capituloExplica', { nome: fim.ficha.nome, historia: origem.nome })),
+      h('p.numeros', {}, `${estrelas(fim.final.estrelas)} ${fim.final.titulo}`),
+      h('label.campo', {}, t('oficina.desejo'), desejo),
+      blocoDeTroca({
+        pedido: () => P.promptCapitulo(origem, oficina.desejo, idiomaAtual()),
+        rotulo: t('oficina.conferir'),
+        aoColar: (doc, aceitar) => {
+          const herda = H.herancaDe(origem);
+          const erros = H.validarHistoria(doc, { herda });
+          if (erros.length) return erros;
+          const nova = H.montarHistoria(doc, { ...fim.ficha, id: 'livre', itens: [] }, {
+            herda,
+            capitulo: (origem.capitulo ?? 1) + 1,
+            anterior: { nome: origem.nome, resumo: origem.resumo, final: fim.final.titulo, cronica: fim.cronica },
+          });
+          const medida = aceitar ? null : foraDaFaixa(nova, null);
+          if (medida) return { medida };
+          if (!guardarHistoria(nova)) return [t('oficina.semEspaco')];
+          AVENTURA = nova; oficina = null; rascunho = null;
+          escolhido = nova.passados[0];
+          caixa.replaceChildren();
+          comecar();
+          return [];
+        },
+      }),
+      h('button.secundario', { type: 'button', onclick: () => { oficina = null; montarInicio(); } }, t('oficina.cancelar')),
+    );
+    return;
+  }
   if (oficina.passo === 1) {
     const campo = (chave, linhas = 1) => {
       const el = linhas > 1 ? h('textarea', { rows: String(linhas), maxlength: '400', placeholder: t(`oficina.exemplo${chave[0].toUpperCase()}${chave.slice(1)}`) }) : h('input', { type: 'text', maxlength: '160', placeholder: t(`oficina.exemplo${chave[0].toUpperCase()}${chave.slice(1)}`), autocomplete: 'off' });
@@ -482,10 +543,12 @@ function montarOficina() {
       blocoDeTroca({
         pedido: () => P.promptInicial(f, oficina.ficha, idiomaAtual()),
         rotulo: t('oficina.conferir'),
-        aoColar: (doc) => {
+        aoColar: (doc, aceitar) => {
           const erros = H.validarHistoria(doc);
           if (erros.length) return erros;
           const nova = H.montarHistoria(doc, oficina.ficha, { formulario: f });
+          const medida = aceitar ? null : foraDaFaixa(nova, null);
+          if (medida) return { medida };
           if (!guardarHistoria(nova)) return [t('oficina.semEspaco')];
           const g = guardado(); delete g.oficina; guardar(g);
           AVENTURA = nova; oficina = null; rascunho = null;
@@ -520,7 +583,8 @@ function blocoDeTroca({ titulo = null, explica = null, pedido, rotulo, aoColar }
   const erros = h('div');
   const botao = h('button.principal', { type: 'button', disabled: !colado.trim(), onclick: () => {
     const lido = H.lerColado(campo.value);
-    const lista = lido.erro ? [lido.erro] : aoColar(lido.doc);
+    const lista = lido.erro ? [lido.erro] : aoColar(lido.doc, false);
+    if (lista.medida) { mostrarMedida(lista.medida, lido.doc); return; }
     if (!lista.length) { colado = ''; som.sucesso(); return; }
     const avisoConserto = h('span.copiado', { role: 'status' });
     erros.replaceChildren(h('div.erros', { role: 'alert' },
@@ -532,6 +596,32 @@ function blocoDeTroca({ titulo = null, explica = null, pedido, rotulo, aoColar }
     ));
     erros.scrollIntoView({ behavior: RAPIDO ? 'auto' : 'smooth', block: 'nearest' });
   } }, rotulo);
+  /** Passou na conferência, mas o robô achou o trecho fora da faixa: avisa, e o jogador decide. */
+  function mostrarMedida(m, doc) {
+    const pc = (x) => Math.round(x * 100);
+    const frases = {
+      facil: t('oficina.medidaFacil', { p: pc(m.sucesso) }),
+      dificil: t('oficina.medidaDificil', { p: pc(m.sucesso) }),
+      mortal: t('oficina.medidaMortal', { p: pc(m.queda) }),
+      semDados: t('oficina.medidaSemDados', { p: pc(m.semDados) }),
+      garantido: t('oficina.medidaGarantido', { p: pc(m.final?.tres ?? 0) }),
+      inalcancavel: t('oficina.medidaInalcancavel', { p: pc(m.final?.tres ?? 0) }),
+    };
+    const avisoAjuste = h('span.copiado', { role: 'status' });
+    erros.replaceChildren(h('div.erros.medida', { role: 'alert' },
+      h('p', {}, h('b', {}, t('oficina.medidaTitulo', { n: m.n }))),
+      h('ul', {}, m.avisos.map((a) => h('li', {}, frases[a]))),
+      h('p', {}, t('oficina.medidaExplica')),
+      h('button.secundario', { type: 'button', onclick: () => copiar(P.promptAjuste(m), avisoAjuste) }, t('oficina.copiarAjuste')),
+      avisoAjuste,
+      h('button.secundario', { type: 'button', onclick: () => {
+        const lista = aoColar(doc, true);
+        if (!lista.length) { colado = ''; som.sucesso(); return; }
+        erros.replaceChildren(h('div.erros', { role: 'alert' }, h('ul', {}, lista.map((x) => h('li', {}, x)))));
+      } }, t('oficina.seguirAssim')),
+    ));
+    erros.scrollIntoView({ behavior: RAPIDO ? 'auto' : 'smooth', block: 'nearest' });
+  }
   return h('section.troca', {},
     titulo ? h('h3', {}, titulo) : null,
     explica ? h('p', {}, explica) : null,
@@ -939,9 +1029,12 @@ function desenharAcampamento(palco) {
         explica: t('oficina.sequenciaExplica', { nome: e.nome }),
         pedido: () => P.promptSequencia(AVENTURA, e, falta, idiomaAtual()),
         rotulo: t('oficina.conferirSeguir'),
-        aoColar: (doc) => {
+        aoColar: (doc, aceitar) => {
           const erros = H.validarSequencia(doc, AVENTURA, falta);
           if (erros.length) return erros;
+          // Mede numa cópia: a história e a sessão do jogador só mudam se ele seguir.
+          const medida = aceitar ? null : foraDaFaixa(J.anexar(JSON.parse(JSON.stringify(AVENTURA)), doc), J.guardar(e));
+          if (medida) return { medida };
           J.anexar(AVENTURA, doc);
           if (!guardarHistoria(AVENTURA)) return [t('oficina.semEspaco')];
           desenhar();
@@ -966,6 +1059,8 @@ function desenharFim(palco) {
     if (e.dia) { g.dias ??= {}; g.dias[e.dia] ??= { estrelas: f.estrelas, titulo: f.titulo, passado: e.passado }; }
     e.contada = true;
     guardar(g);
+    // História viva: o fim fica guardado nela, para o capítulo seguinte poder nascer depois.
+    if (ehHistoria(AVENTURA)) { AVENTURA.ultimoFim = H.resumoDoFim(e); guardarHistoria(AVENTURA); }
   }
   const vistos = g.vistos?.[AVENTURA.id] ?? [];
   const endereco = `${location.origin}${location.pathname}?aventura=${AVENTURA.id}&semente=${encodeURIComponent(e.semente)}`;
@@ -999,6 +1094,7 @@ function desenharFim(palco) {
     ),
     h('button.principal', { type: 'button', onclick: () => { location.search = `?aventura=${AVENTURA.id}${COM_IDIOMA}`; } }, t('fim.outraSessao')),
     e.dia ? null : h('button.secundario', { type: 'button', onclick: () => { location.search = `?aventura=${AVENTURA.id}&semente=${encodeURIComponent(e.semente)}${COM_IDIOMA}`; } }, t('fim.mesmaSemente')),
+    ehHistoria(AVENTURA) && H.podeSeguir(AVENTURA) ? h('button.secundario', { type: 'button', onclick: () => abrirCapitulo(AVENTURA) }, t('oficina.escreverCapitulo')) : null,
     ehHistoria(AVENTURA) ? h('button.secundario', { type: 'button', onclick: () => exportarHistoria(AVENTURA) }, t('oficina.guardarArquivo')) : null,
   );
 }

@@ -55,9 +55,9 @@ export function nova({ semente, passado = 'desertora', nome, aventura }) {
     sanidade: v.sanidade,
     brasa: MESA.brasa,
     lacos: 0,
-    marcas: [],
+    marcas: [...(p.marcas ?? [])], // capítulo seguinte de uma história viva: o que ele já viveu
     itens: [...p.itens],
-    companheiros: [],
+    companheiros: [...(p.companheiros ?? [])],
     pontos: 0,
     marcosDoAto: 0,
     quedas: 0,

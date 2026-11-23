@@ -12,7 +12,7 @@ as regras foram reescritas do zero em `regras.js`, cada função citando a seç�
 
 | Versão | Data | O que mudou |
 |---|---|---|
-| 0.4.0 | 22/11/2026, ainda sem publicar | **História viva: o jogador cria a aventura com uma IA de fora.** Formulário guiado e ficha livre viram um pedido completo; a IA devolve o núcleo e o ato 1 em JSON, que se cola no jogo. A cada pausa o jogo monta o pedido da sequência com a crônica, as escolhas e o estado do personagem, e o ato seguinte (e por fim o final) nasce disso. Conferência do que foi colado com pedido de conserto, exportar e importar `.json`. Os finais das três aventuras da casa passaram de função a condição declarada, sem mudar resultado. Detalhes na seção "História viva" |
+| 0.4.0 | 23/11/2026 | **História viva: o jogador cria a aventura com uma IA de fora.** Formulário guiado e ficha livre viram um pedido completo; a IA devolve o núcleo e o ato 1 em JSON, que se cola no jogo. A cada pausa o jogo monta o pedido da sequência com a crônica, as escolhas e o estado do personagem, e o ato seguinte (e por fim o final) nasce disso. Conferência do que foi colado com pedido de conserto, exportar e importar `.json`. Ao colar, o robô joga o trecho e avisa se o equilíbrio saiu da faixa. Quem chega a um final pode pedir o capítulo seguinte, levando ficha, marcas e companheiros. Os finais das três aventuras da casa passaram de função a condição declarada, sem mudar resultado. Detalhes na seção "História viva" |
 | 0.3.0 | 22/11/2026 | **Terceira aventura e as duas primeiras revistas.** "O Sino Afogado", horror de interior nos anos 1950, só em português: um sino toca no lago seco e quem ouve dormindo esquece o nome; a vela da última missa é o relógio. Abertura, 36 cenas, duas cenas na torre, cinco finais, seis passados e cinco cenários desenhados. A Brasa e o Ar passam a ter 12 cenas por ato (18 novas, só em português), com uma revisão de continuidade dos textos (15 correções). Equilíbrio refeito, robô atento, final de 3 estrelas: Brasa de 32% a 58%, Ar de 33% a 54% (o Piloto subiu de 16% para 36%), Sino de 32% a 57%. Em inglês, o que ainda não foi traduzido aparece em português (PENDENCIAS 8.11). |
 | 0.2.1 | 21/11/2026 | **Polimento.** "Como se joga" na tela inicial, Antecedentes na ficha livre (pontos pelo menor Caminho, como no manual), vibração nos dados, tremor de tela na falha e clarão no duplo seis, atalhos de teclado (1 a 9, Enter, F), título "Double Six" em inglês. Ficou por fazer: revisão de continuidade dos textos das duas aventuras e equilíbrio entre os passados da Brasa. |
 | 0.2.0 | 21/11/2026 | **Genérico e adaptável: outra aventura, outro idioma, as mesmas regras.** Segunda aventura, "Ar Rarefeito", ficção científica numa estação orbital: 27 cenas, seis passados, sete finais; a magia do suplemento vira "sintonia" (o manual prevê poderes psíquicos ou nascidos com o personagem) sem mudar regra nenhuma. O jogo inteiro em inglês ("Double Six": interface, "The Last Ember" e "Thin Air"), com um teste que confere que a tradução tem exatamente a mesma mecânica. Robô atento, 400 sessões por passado, final de 3 estrelas: na Brasa de 21% (Desertora) a 82% (Menestrel); no Ar de 17% (Piloto) a 56% (Sensitiva). |
@@ -106,6 +106,57 @@ foi a mesma IA que escreveu o pedido e a conferência, então o teste é generos
 | Ajustes no pedido | No máximo uma especial livre por ato; cada marca vai com a frase da crônica que a concedeu (uma IA em conversa nova só via a palavra) |
 
 A história que saiu está em `aventuras/exemplos/as-tres-da-tarde.json`: dá para importar no jogo e jogar.
+
+### Medir ao colar (23/11/2026, 8.16)
+
+A conferência garante a forma, não o equilíbrio. Ao colar, `aventuras/medir.js` põe o robô atento para jogar o
+trecho novo 120 vezes, a partir da sessão do jogador (mesmo personagem, outros dados), numa cópia: a história e a
+sessão só mudam se ele seguir.
+
+| Aviso | Quando | Faixa das aventuras da casa |
+|---|---|---|
+| Fácil demais / difícil demais | Escolhas que dão certo acima de 90% ou abaixo de 50% | 70% a 83% |
+| Perigoso | Morte ou loucura em 20% ou mais das vezes dentro do trecho | 0% a 6% na sessão inteira |
+| Pouco dado | Mais da metade das escolhas do robô foi sem dados | |
+| Melhor final garantido / fora de alcance | 3 estrelas acima de 80% ou abaixo de 8% (só ao colar o final) | 32% a 58% |
+
+O robô atento escolhe pela chance, não pela história. Um final que pede a escolha pior nos dados ele nunca vê; por
+isso, antes de dizer "fora de alcance", o medidor joga também ao acaso e fica com o melhor dos dois.
+
+Com aviso, o jogador copia um **pedido de ajuste** (só Dificuldades, efeitos e condições dos finais; a história não
+muda) ou segue assim mesmo. A medida é conselho: se ela falhar, a história segue.
+
+O pedido à IA também mudou. As faixas fixas por ato ("ato 1 entre 4 e 8") davam certo para as fichas da casa e
+ficavam fáceis para um personagem que evolui. Agora a IA recebe os dados que ele rola em cada Atributo e uma
+tabela: folgado (85%), justo (65%) e apertado (40%) para 1 a 6 dados. Abertas do Caminho forte: justo no ato 1,
+apertado no ato 3; especiais: folgado, nunca certeza; no máximo uma especial livre por ato.
+
+Conferido reescrevendo as Dificuldades do exemplo pela tabela, sem mexer no texto:
+
+| Trecho | Como a IA escreveu | Pela tabela |
+|---|---|---|
+| Ato 1 | 100% | 87% |
+| Ato 2 | 100% (75% sem dados) | 92% a 95%: ainda fácil, por ter três especiais livres, o que o pedido novo proíbe |
+| Ato 3 | 100% | 65% a 82% |
+| Final | 100%, 3 estrelas garantidas | 63% a 85%; 3 estrelas fora de alcance para o robô atento, que prefere arrancar a aliança |
+
+Falta ver se uma IA de verdade segue a tabela (8.17).
+
+### Capítulo seguinte (23/11/2026, 8.14)
+
+Quem chega a um final pode pedir outro capítulo: uma história nova, com o mesmo personagem, que parte dali.
+Quem morre ou perde a cabeça no caminho não segue.
+
+| Tópico | Como ficou |
+|---|---|
+| O que ele leva | A ficha evoluída, as marcas (cada uma com a frase da crônica que a concedeu) e os companheiros que estão com ele |
+| O que recomeça | Laços, Vida, Sanidade, Magia e o relógio. Os itens a IA escolhe de novo, sabendo o que ele tinha |
+| O pedido | Leva o resumo, o segredo e a crônica do capítulo anterior, o final alcançado, o que ele traz e uma linha opcional do jogador sobre o que quer |
+| No jogo | O fim fica guardado na história (`ultimoFim`), então o capítulo pode nascer depois: botão na tela de fim e na tela inicial |
+| No motor | O passado da história nova traz `marcas` e `companheiros`, que `J.nova` põe na sessão; `pontos` guarda quanto a ficha já vale, para a importação aceitar mais de 12 |
+| Arquivo | O capítulo exporta e importa com a herança e com `anterior` (nome, resumo, final e crônica do capítulo de onde veio) |
+
+Limite conhecido: o capítulo 3 só conhece o capítulo 2. A crônica do capítulo 1 não segue adiante, só as marcas.
 
 ## Medir a mesa
 

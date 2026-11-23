@@ -113,7 +113,7 @@ function conferirForma(cenas, onde, erros) {
       if (a.requer?.nivel != null && !ehObjeto(a.requer.nivel)) { erros.push(`${ondeA}: "requer.nivel" precisa ser { chave: n }`); forma = false; }
       if (a.ajuda != null && !Array.isArray(a.ajuda)) { erros.push(`${ondeA}: "ajuda" precisa ser uma lista de tags`); forma = false; }
       if (a.ajudantes != null && !(Array.isArray(a.ajudantes) && a.ajudantes.every(ehObjeto))) { erros.push(`${ondeA}: "ajudantes" precisa ser uma lista de { nome, nivel }`); forma = false; }
-      if (a.teste && !a.requer && (a.teste.dificuldade > 12)) erros.push(`${ondeA}: dificuldade de abordagem aberta vai até 12`);
+      if (a.teste && !a.requer && (a.teste.dificuldade > 25)) erros.push(`${ondeA}: dificuldade de abordagem aberta vai até 25`);
       if (a.custo != null && !ehObjeto(a.custo)) { erros.push(`${ondeA}: "custo" precisa ser um objeto`); forma = false; }
       for (const d of ['sucesso', 'falha', 'critico', 'desastre', 'vitoria', 'derrota', 'fuga', 'resultado']) {
         const x = a[d];
@@ -148,8 +148,8 @@ function marcasConcedidas(cenas) {
   return marcas;
 }
 
-function conferirMarcas(cenas, anteriores, erros) {
-  const marcas = new Set([...marcasConcedidas(anteriores), ...marcasConcedidas(cenas)]);
+function conferirMarcas(cenas, anteriores, erros, herdadas = []) {
+  const marcas = new Set([...herdadas, ...marcasConcedidas(anteriores), ...marcasConcedidas(cenas)]);
   for (const c of cenas) for (const a of c.abordagens ?? []) {
     for (const m of lista(a.requer?.marca)) if (!marcas.has(m)) erros.push(`cena ${c.id} / ${a.id}: exige a marca "${m}", que nenhuma cena concede`);
   }
@@ -216,8 +216,12 @@ function conferirFinais(doc, marcas, companheiros, erros) {
   if (!finais.some((f) => f.estrelas === 3)) erros.push('finais: precisa haver ao menos um final de 3 estrelas');
 }
 
-/** Confere o núcleo e o ato 1 que a IA devolveu ao prompt inicial. */
-export function validarHistoria(doc) {
+/**
+ * Confere o núcleo e o ato 1 que a IA devolveu ao prompt inicial. `herda`
+ * (capítulo seguinte): `{ marcas: [ids], catalogo: { id: companheiro } }` que
+ * o personagem traz da história anterior.
+ */
+export function validarHistoria(doc, { herda = null } = {}) {
   const erros = [];
   if (!ehObjeto(doc)) return ['o JSON precisa ser um objeto'];
   if (doc.formato !== FORMATO_HISTORIA) erros.push(`"formato" precisa ser "${FORMATO_HISTORIA}"`);
@@ -232,9 +236,9 @@ export function validarHistoria(doc) {
   if (abertura[0] && abertura[0].ato !== 0) erros.push('abertura: "ato" precisa ser 0');
   const cenas = conferirForma(doc.cenas, 'cenas', erros);
   if (Array.isArray(doc.cenas)) conferirAto(doc.cenas.filter(ehObjeto), 1, erros);
-  const catalogo = { itens, companheiros: doc.companheiros ?? {}, inimigos: doc.inimigos ?? {} };
+  const catalogo = { itens, companheiros: { ...doc.companheiros, ...herda?.catalogo }, inimigos: doc.inimigos ?? {} };
   conferirCenas([...abertura, ...cenas], catalogo, erros);
-  conferirMarcas([...abertura, ...cenas], [], erros);
+  conferirMarcas([...abertura, ...cenas], [], erros, herda?.marcas);
   return [...new Set(erros)];
 }
 
@@ -253,6 +257,7 @@ export function validarSequencia(doc, historia, ato) {
     catalogo[campo] = { ...historia[campo], ...doc[campo] };
   }
   const anteriores = [historia.abertura, ...historia.cenas];
+  const herdadas = historia.passados?.[0]?.marcas ?? [];
   const final = ato > ATOS;
   const campo = final ? 'desfecho' : 'cenas';
   const cenas = conferirForma(doc[campo], campo, erros);
@@ -266,7 +271,7 @@ export function validarSequencia(doc, historia, ato) {
   const usados = new Set(anteriores.map((c) => c.id));
   for (const c of cenas) if (usados.has(c.id)) erros.push(`cena ${c.id}: esse id já foi usado num ato anterior`);
   conferirCenas(cenas, catalogo, erros);
-  const marcas = conferirMarcas(cenas, anteriores, erros);
+  const marcas = conferirMarcas(cenas, anteriores, erros, herdadas);
   if (final) conferirFinais(doc, marcas, catalogo.companheiros, erros);
   return [...new Set(erros)];
 }
@@ -276,14 +281,17 @@ export function validarSequencia(doc, historia, ato) {
 const semAcento = (s) => s.normalize('NFD').replace(/[^\w\s-]/g, '').trim().toLowerCase().replace(/[\s_]+/g, '-').slice(0, 24) || 'historia';
 
 /** Monta a aventura a partir do núcleo conferido e da ficha do criador. */
-export function montarHistoria(doc, ficha, { agora = Date.now(), formulario = null } = {}) {
-  const passado = { ...ficha, id: 'criador', itens: [...doc.itensIniciais] };
+export function montarHistoria(doc, ficha, { agora = Date.now(), formulario = null, herda = null, capitulo = 1, anterior = null } = {}) {
+  const passado = { ...ficha, id: 'criador', itens: [...doc.itensIniciais], marcas: [...(herda?.marcas ?? [])], companheiros: Object.keys(herda?.catalogo ?? {}) };
   return {
     formato: FORMATO_HISTORIA,
     id: `h-${semAcento(doc.nome)}-${agora.toString(36)}`,
     ordem: 'escrita',
     criada: new Date(agora).toISOString().slice(0, 10),
     formulario,
+    capitulo,
+    anterior, // { nome, resumo, final, cronica }: de onde este capítulo continua
+    pontos: Math.max(PONTOS, R.pontosGastos(R.novaFicha(ficha))), // o personagem de um capítulo seguinte já evoluiu
     nome: doc.nome,
     resumo: doc.resumo,
     genero: doc.genero,
@@ -295,7 +303,7 @@ export function montarHistoria(doc, ficha, { agora = Date.now(), formulario = nu
     rumo: doc.rumo,
     passados: [passado],
     itens: { ...doc.itens },
-    companheiros: { ...doc.companheiros },
+    companheiros: { ...doc.companheiros, ...herda?.catalogo },
     inimigos: { ...doc.inimigos },
     abertura: doc.abertura,
     cenas: [...doc.cenas],
@@ -327,10 +335,14 @@ export function validarArquivo(doc) {
   const p = doc.passados[0];
   for (const k of ['atributos', 'aprimoramentos', 'pericias', 'antecedentes']) if (p[k] != null && !ehObjeto(p[k])) return [`personagem: "${k}" precisa ser um objeto`];
   if (!ehTexto(p.titulo) || !ehTexto(p.nome)) erros.push('personagem: falta titulo ou nome');
-  erros.push(...R.validar(R.novaFicha(p), PONTOS).map((x) => `personagem: ${x}`));
+  const pontos = Number.isInteger(doc.pontos) ? Math.max(PONTOS, Math.min(doc.pontos, PONTOS_MAXIMOS)) : PONTOS;
+  erros.push(...R.validar(R.novaFicha(p), pontos).map((x) => `personagem: ${x}`));
   if (!Array.isArray(p.itens)) erros.push('personagem: falta "itens"');
-  const nucleo = { ...doc, formato: FORMATO_HISTORIA, itensIniciais: Array.isArray(p.itens) ? p.itens : [], cenas: doc.cenas.filter((c) => c?.ato === 1) };
-  erros.push(...validarHistoria(nucleo));
+  const herda = herancaDoPassado(p, doc, erros);
+  // Os companheiros herdados já estão no catálogo do arquivo: para a conferência, saem dele e voltam como herança.
+  const proprios = Object.fromEntries(Object.entries(doc.companheiros ?? {}).filter(([id]) => !herda.catalogo[id]));
+  const nucleo = { ...doc, companheiros: proprios, formato: FORMATO_HISTORIA, itensIniciais: Array.isArray(p.itens) ? p.itens : [], cenas: doc.cenas.filter((c) => c?.ato === 1) };
+  erros.push(...validarHistoria(nucleo, { herda }));
   if (erros.length) return [...new Set(erros)];
   // Os atos seguintes entram um a um, como entraram na criação.
   const ate = { ...doc, cenas: nucleo.cenas, desfecho: [], finais: [] };
@@ -347,11 +359,62 @@ export function validarArquivo(doc) {
   return [...new Set(erros)];
 }
 
+const PONTOS_MAXIMOS = 60;
+
+/** O que o personagem de um arquivo traz de um capítulo anterior, conferido. */
+function herancaDoPassado(p, doc, erros) {
+  const marcas = Array.isArray(p.marcas) ? p.marcas.filter((m) => ehTexto(m) && ID.test(m)) : [];
+  if (Array.isArray(p.marcas) && marcas.length !== p.marcas.length) erros.push('personagem: marca fora do padrão');
+  const catalogo = {};
+  for (const id of Array.isArray(p.companheiros) ? p.companheiros : []) {
+    if (ehTexto(id) && ID.test(id) && ehObjeto(doc.companheiros?.[id])) catalogo[id] = doc.companheiros[id];
+    else erros.push(`personagem: companheiro desconhecido "${id}"`);
+  }
+  return { marcas, catalogo };
+}
+
+/**
+ * O que fica de uma história terminada para o capítulo seguinte: o final a que
+ * o personagem chegou, a crônica, a ficha como ficou, as marcas (com a frase
+ * que as concedeu) e quem segue com ele.
+ */
+export function resumoDoFim(e) {
+  const p = e.aventura.passados.find((x) => x.id === e.passado) ?? {};
+  return {
+    final: { ...e.fim },
+    cronica: [...e.cronica],
+    ficha: {
+      titulo: e.tituloDoPassado, nome: e.nome, quem: p.quem ?? '', motivo: p.motivo ?? '',
+      caminho: R.caminhoDominante(e.ficha),
+      atributos: { ...e.ficha.atributos }, aprimoramentos: { ...e.ficha.aprimoramentos }, pericias: { ...e.ficha.pericias }, antecedentes: { ...e.ficha.antecedentes },
+    },
+    marcas: e.marcas.map((id) => ({ id, de: e.origens?.[id] != null ? e.cronica[e.origens[id]] : '' })),
+    companheiros: [...e.companheiros],
+    perdidos: [...(e.perdidos ?? [])],
+    lacos: e.lacos,
+    itens: e.itens.map((i) => e.aventura.itens[i]?.nome ?? i),
+  };
+}
+
+/** Só quem chegou a um final (não quem caiu no caminho) segue para outro capítulo. */
+export const podeSeguir = (historia) => !!historia.ultimoFim && !['morte', 'perdido'].includes(historia.ultimoFim.final.id);
+
+/** A herança que a conferência e a montagem do capítulo seguinte usam. */
+export function herancaDe(historia) {
+  const fim = historia.ultimoFim;
+  return {
+    marcas: fim.marcas.map((m) => m.id),
+    catalogo: Object.fromEntries(fim.companheiros.filter((id) => historia.companheiros[id]).map((id) => [id, historia.companheiros[id]])),
+  };
+}
+
 /** Um arquivo importado vira aventura: só os campos conhecidos, com id próprio. */
 export function daImportacao(doc, { agora = Date.now() } = {}) {
   const p = doc.passados[0];
-  const base = montarHistoria({ ...doc, itensIniciais: p.itens }, p, { agora, formulario: null });
-  base.passados = [{ id: 'criador', titulo: p.titulo, nome: p.nome, quem: p.quem ?? '', motivo: p.motivo ?? '', caminho: R.caminhoDominante(R.novaFicha(p)), atributos: { ...p.atributos }, aprimoramentos: { ...p.aprimoramentos }, pericias: { ...p.pericias }, antecedentes: { ...p.antecedentes }, itens: [...p.itens] }];
+  const herda = herancaDoPassado(p, doc, []);
+  const ant = ehObjeto(doc.anterior) && ehTexto(doc.anterior.nome) ? { nome: doc.anterior.nome, resumo: String(doc.anterior.resumo ?? ''), final: String(doc.anterior.final ?? ''), cronica: (Array.isArray(doc.anterior.cronica) ? doc.anterior.cronica : []).filter(ehTexto).slice(0, 80) } : null;
+  const base = montarHistoria({ ...doc, itensIniciais: p.itens }, p, { agora, formulario: null, herda, capitulo: Number.isInteger(doc.capitulo) && doc.capitulo > 1 ? doc.capitulo : 1, anterior: ant });
+  base.passados = [{ id: 'criador', titulo: p.titulo, nome: p.nome, quem: p.quem ?? '', motivo: p.motivo ?? '', caminho: R.caminhoDominante(R.novaFicha(p)), atributos: { ...p.atributos }, aprimoramentos: { ...p.aprimoramentos }, pericias: { ...p.pericias }, antecedentes: { ...p.antecedentes }, itens: [...p.itens], marcas: herda.marcas, companheiros: Object.keys(herda.catalogo) }];
   base.cenas = [...doc.cenas];
   base.desfecho = doc.desfecho?.length ? [...doc.desfecho] : [];
   base.finais = doc.finais?.length ? doc.finais.map((f) => ({ id: f.id, titulo: f.titulo, estrelas: f.estrelas, texto: f.texto, ...(f.quando ? { quando: f.quando } : {}) })) : [];

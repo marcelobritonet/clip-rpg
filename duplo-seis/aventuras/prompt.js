@@ -6,7 +6,7 @@
  * As regras de escrita são as de FORMATO.md, ditas para a IA e em JSON.
  */
 import * as R from '../regras.js';
-import { MESA } from '../jogo.js';
+import { MESA, chanceDeSucesso } from '../jogo.js';
 import { PAISAGENS_DISPONIVEIS } from '../cenario.js';
 import { FORMATO_HISTORIA, FORMATO_SEQUENCIA, CENAS_POR_ATO, ITENS_INICIAIS, TEXTOS_OBRIGATORIOS } from './historia.js';
 
@@ -98,6 +98,21 @@ export const EXEMPLO = {
 };
 
 const j = (x) => JSON.stringify(x, null, 1);
+
+/** A Dificuldade que dá a chance mais próxima de `alvo` para quem rola `dados`. */
+export function dificuldadePara(dados, alvo) {
+  let melhor = 2;
+  for (let d = 2; d <= 25; d++) if (Math.abs(chanceDeSucesso(dados, d) - alvo) < Math.abs(chanceDeSucesso(dados, melhor) - alvo)) melhor = d;
+  return melhor;
+}
+
+/** Três degraus de aperto: a IA escolhe a Dificuldade pelos dados que o personagem rola, não por uma faixa fixa. */
+export const DEGRAUS = { folgado: 0.85, justo: 0.65, apertado: 0.4 };
+
+function tabelaDeDificuldade() {
+  const linhas = [1, 2, 3, 4, 5, 6].map((n) => `| ${n} | ${dificuldadePara(n, DEGRAUS.folgado)} | ${dificuldadePara(n, DEGRAUS.justo)} | ${dificuldadePara(n, DEGRAUS.apertado)} |`);
+  return ['| Dados que ele rola | Folgado (85%) | Justo (65%) | Apertado (40%) |', '|---|---|---|---|', ...linhas].join('\n');
+}
 const chaves = (tabela) => Object.keys(tabela).join(' ');
 
 /** As regras de escrita, iguais em todos os prompts. */
@@ -126,9 +141,18 @@ Uma abordagem é exatamente um destes três tipos:
 - **combate**: \`combate: "idDoInimigo"\`, com \`vitoria\`, \`derrota\` e \`fuga\`.
 - **livre** (sem dados): \`livre: true\`, com \`resultado\`. Sempre tem um preço claro. \`custo: { magia: -1 }\` cobra antes.
 
-O personagem rola 1D6 por nível (0 a 3) contra a Dificuldade. Chances: 1 dado alcança 4 em 50% das vezes e 6 em 17%; 2 dados alcançam 6 em 72%, 8 em 42% e 10 em 17%; 3 dados alcançam 8 em 84%, 10 em 63% e 12 em 38%. Um item (+1 ou +2 dados) ou um companheiro mudam tudo: use \`ajuda\` e \`ajudantes\` sempre que fizer sentido.
+O personagem rola 1D6 por nível na chave testada, contra a Dificuldade; com nível 0 rola 1D6-2 e quase nunca passa de 3. Cada item de \`ajuda\` que ele tenha soma o \`mod\` em dados, e cada ajudante ou companheiro soma o nível. Use \`ajuda\` e \`ajudantes\` sempre que fizer sentido, e conte esses dados.
 
-Dificuldade das abordagens abertas: ato 1 entre 4 e 8; ato 2 entre 5 e 9; ato 3 entre 6 e 11; final entre 7 e 12. Especial de perícia comum: 3 a 5. De perícia mágica (o jogador gasta Pontos de Magia e rola 1 dado por ponto): 3 a 6.
+**A Dificuldade se escolhe pelos dados que este personagem rola**, não por uma faixa fixa. Some os dados dele naquela chave (nível, mais a ajuda que a abordagem oferece e ele tem) e leia a tabela:
+
+${tabelaDeDificuldade()}
+
+- Aberta do Caminho forte dele (2 dados ou mais): **justo** no ato 1, entre justo e apertado no ato 2, **apertado** no ato 3 e no final.
+- Aberta em que ele rola 0 ou 1 dado: Dificuldade de 4 a 6. Já é um aperto; não precisa de mais.
+- Especial (com \`requer\`): **folgado**, um degrau mais fácil que a aberta. Nunca certeza.
+- Perícia mágica (ele gasta Pontos de Magia e rola 1 dado por ponto, até o nível da perícia): folgado para esse número de dados.
+
+A medida de uma boa mesa: jogando bem, ele acerta umas três em cada quatro. Se ele acerta tudo, não há história; se erra quase tudo, não há jogo.
 
 \`requer\` de uma abordagem aceita: \`nivel: { chave: n }\`, \`antecedente\` (aliado inimigo boaFama maFama recursos semRecursos), \`item: "id"\`, \`companheiro: "id"\`, \`marca: "palavra"\`, \`semMarca: "palavra"\`, \`lacos: n\`. Item, companheiro e marca aceitam também uma lista (todos têm de valer). A cena em si não leva \`requer\`.
 
@@ -182,6 +206,8 @@ Responda com **um único bloco de código JSON** e nada mais: nenhum texto antes
 
 /* ---------- O personagem e o que já aconteceu ---------- */
 
+/** Os nove Atributos, inclusive os zerados: é por aqui que a IA escolhe a Dificuldade. */
+const dados = (ficha) => Object.keys(R.ATRIBUTOS).map((k) => `${k} ${ficha.atributos[k] ?? 0}`).join(', ');
 const niveis = (o) => Object.entries(o ?? {}).filter(([, n]) => n > 0).map(([k, n]) => `${k} ${n}`).join(', ') || 'nenhum';
 
 function fichaEmTexto(p, ficha = R.novaFicha(p)) {
@@ -191,7 +217,7 @@ function fichaEmTexto(p, ficha = R.novaFicha(p)) {
     `- Quem é: ${p.titulo}${p.nome ? `, chamado(a) ${p.nome}` : ''}. ${p.quem ?? ''}`.trim(),
     p.motivo ? `- Por que está nisso: ${p.motivo}` : null,
     `- Caminho dominante: ${v.dominante}`,
-    `- Atributos: ${niveis(ficha.atributos)}`,
+    `- Dados que rola em cada Atributo: ${dados(ficha)}`,
     `- Aprimoramentos: ${niveis(ficha.aprimoramentos)}`,
     `- Perícias: ${niveis(ficha.pericias)}`,
     `- Antecedentes: ${ant}`,
@@ -216,8 +242,8 @@ function pedidoEmTexto(f = {}) {
 
 /* ---------- Prompt inicial ---------- */
 
-/** O núcleo da história e o ato 1, a partir do formulário e da ficha do jogador. */
-export function promptInicial(formulario, passado, idioma = 'pt') {
+/** O formato do núcleo e as notas de cada campo: igual na história nova e no capítulo seguinte. */
+function oQueDevolverNoComeco(idioma) {
   const esquema = {
     formato: FORMATO_HISTORIA,
     nome: 'título da história',
@@ -245,6 +271,24 @@ export function promptInicial(formulario, passado, idioma = 'pt') {
     abertura: { id: 'abertura', ato: 0, titulo: '...', texto: '...', abordagens: ['...'] },
     cenas: ['4 cenas com "ato": 1, na ordem em que acontecem'],
   };
+  return `\`\`\`json
+${j(esquema)}
+\`\`\`
+
+- \`cenarios\`: cinco paisagens, só dentre estas: ${PAISAGENS_DISPONIVEIS.map((x) => `\`${x}\` (${PAISAGENS[x] ?? 'paisagem'})`).join(', ')}. Escolha as que mais se aproximam; o desenho é só o fundo.
+- \`relogio.palavras\`: seis estados, do vazio ao cheio, para o jogo dizer em palavras quanto resta.
+- \`textos\`: obrigatórios ${TEXTOS_OBRIGATORIOS.map((k) => `\`${k}\``).join(', ')}. Pode acrescentar \`pausa\` (nome da pausa) e \`seguir\` (rótulo do botão de seguir viagem).
+- \`itens\`: todos os que a abertura e o ato 1 usam, mais os iniciais. \`itensIniciais\`: até ${ITENS_INICIAIS} itens que esse personagem teria consigo.
+- \`abertura\`: a cena que entrega o relógio e a missão. Tem \`"ato": 0\` e três abordagens abertas, com Dificuldade no degrau justo.
+- \`cenas\`: exatamente ${CENAS_POR_ATO}, com \`"ato": 1\`. Problemas humanos, pequenos, que apresentam o lugar e as pessoas.
+
+Escreva todos os textos da história em ${IDIOMAS[idioma] ?? idioma}. As chaves do JSON ficam como estão.
+
+${SAIDA}`;
+}
+
+/** O núcleo da história e o ato 1, a partir do formulário e da ficha do jogador. */
+export function promptInicial(formulario, passado, idioma = 'pt') {
   return `Você vai ser o Mestre de uma história para o jogo Duplo Seis. Leia as regras, o pedido do jogador e o personagem, e devolva o começo da história no formato pedido.
 
 ${guia()}
@@ -257,26 +301,76 @@ ${pedidoEmTexto(formulario)}
 
 ${fichaEmTexto(passado)}
 
-Escreva em volta dele. Nas especiais, use as perícias e os antecedentes que ele tem: ao menos metade das cenas deve ter uma especial que esse personagem alcance. Os níveis dele dizem que abordagens abertas serão fáceis e quais serão um aperto.
+Escreva em volta dele. Nas especiais, use as perícias e os antecedentes que ele tem: ao menos metade das cenas deve ter uma especial que esse personagem alcance. Escolha cada Dificuldade pelos dados dele naquela chave, como manda a tabela.
 
 ## O que devolver agora
 
 O núcleo da história, a abertura e o ato 1. Os atos 2 e 3 e o final ficam para depois: o jogador vai jogar o ato 1 e voltar com o que fez, e você escreve a sequência a partir disso. Por isso, plante coisas que possam voltar: gente com nome, dívidas, promessas, e \`marca\` nos desfechos que mudam alguma coisa.
 
-\`\`\`json
-${j(esquema)}
-\`\`\`
+${oQueDevolverNoComeco(idioma)}`;
+}
 
-- \`cenarios\`: cinco paisagens, só dentre estas: ${PAISAGENS_DISPONIVEIS.map((p) => `\`${p}\` (${PAISAGENS[p] ?? 'paisagem'})`).join(', ')}. Escolha as que mais se aproximam; o desenho é só o fundo.
-- \`relogio.palavras\`: seis estados, do vazio ao cheio, para o jogo dizer em palavras quanto resta.
-- \`textos\`: obrigatórios ${TEXTOS_OBRIGATORIOS.map((k) => `\`${k}\``).join(', ')}. Pode acrescentar \`pausa\` (nome da pausa) e \`seguir\` (rótulo do botão de seguir viagem).
-- \`itens\`: todos os que a abertura e o ato 1 usam, mais os iniciais. \`itensIniciais\`: até ${ITENS_INICIAIS} itens que esse personagem teria consigo.
-- \`abertura\`: a cena que entrega o relógio e a missão. Tem \`"ato": 0\` e três abordagens abertas, com dificuldade em torno de 5.
-- \`cenas\`: exatamente ${CENAS_POR_ATO}, com \`"ato": 1\`. Problemas humanos, pequenos, que apresentam o lugar e as pessoas.
+/**
+ * O capítulo seguinte: uma história nova, com o mesmo personagem, que parte do
+ * final a que ele chegou na anterior. `fim` é o `resumoDoFim` guardado nela.
+ */
+export function promptCapitulo(historia, desejo = '', idioma = 'pt') {
+  const fim = historia.ultimoFim;
+  const n = (historia.capitulo ?? 1) + 1;
+  const seguem = fim.companheiros.filter((id) => historia.companheiros[id]).map((id) => {
+    const c = historia.companheiros[id];
+    return `- \`${id}\`: ${c.nome}, ${c.quem} (${niveis(c.niveis)})`;
+  });
+  const ficaram = fim.perdidos.map((id) => historia.companheiros[id]?.nome ?? id);
+  return `Você vai ser o Mestre do capítulo ${n} de uma história do jogo Duplo Seis. O capítulo anterior terminou; o personagem é o mesmo, mais vivido, e o que ele fez lá continua valendo. Leia as regras, o que aconteceu e como ele está, e devolva o começo de uma história nova que parte dali.
 
-Escreva todos os textos da história em ${IDIOMAS[idioma] ?? idioma}. As chaves do JSON ficam como estão.
+${guia()}
 
-${SAIDA}`;
+## O capítulo anterior: ${historia.nome} (${historia.genero})
+
+- Resumo: ${historia.resumo}
+- Atos: ${historia.atos.slice(1).join(' / ')}
+- O segredo de Mestre, como terminou: ${historia.rumo}
+
+### A crônica
+
+${fim.cronica.map((l) => `- ${l}`).join('\n')}
+
+### O final a que ele chegou: ${fim.final.titulo} (${fim.final.estrelas} de 3 estrelas)
+
+${fim.final.texto}
+
+## O personagem, agora
+
+${fichaEmTexto(fim.ficha)}
+- Laços que fez no capítulo anterior: ${fim.lacos} (recomeçam em zero, mas as pessoas lembram)
+- Tinha consigo: ${fim.itens.join(', ') || 'nada'}
+
+### O que ele traz (já está no jogo: não declare de novo)
+
+- Marcas: ${fim.marcas.map((m) => `\`${m.id}\`${m.de ? ` (${m.de})` : ''}`).join('; ') || 'nenhuma'}
+- Companheiros que seguem com ele:
+${seguem.join('\n') || '- ninguém'}
+- Companheiros que ficaram pelo caminho: ${ficaram.join(', ') || 'ninguém'}
+
+As marcas e os companheiros acima começam o capítulo com ele. Use-os: \`requer: { "marca": "..." }\` e \`requer: { "companheiro": "..." }\` nas especiais, \`ajudantes\`, e \`semCompanheiro\` se a história levar alguém embora. Não repita os ids deles em \`companheiros\`.
+
+## O que o jogador quer deste capítulo
+
+${desejo.trim() ? `- ${desejo.trim()}` : '- (em branco: decida você, a partir de como o anterior terminou)'}
+
+## A história é viva, e este capítulo é consequência
+
+- Não recomece do zero: o lugar, as pessoas e as dívidas do capítulo anterior existem. O final a que ele chegou é o ponto de partida, com o que ele ganhou e o que deixou por resolver.
+- Um capítulo novo precisa de um problema novo, maior ou mais íntimo, e de um relógio próprio (pode ser outro objeto).
+- Quem ele ajudou aparece para retribuir; quem ele feriu, para cobrar. Ao menos duas cenas do ato 1 devem ter uma especial que só existe por causa de uma marca ou de um companheiro que ele traz.
+- Ele evoluiu: escolha as Dificuldades pelos dados que ele rola agora.
+
+## O que devolver agora
+
+O núcleo do capítulo ${n}, a abertura e o ato 1, no mesmo formato de uma história nova. Os atos 2 e 3 e o final ficam para depois, a partir do que ele fizer.
+
+${oQueDevolverNoComeco(idioma)}`;
 }
 
 /* ---------- Prompt da sequência ---------- */
@@ -307,7 +401,7 @@ function estado(historia, e) {
   return [
     `- Quem é: ${evoluida.titulo}, chamado(a) ${evoluida.nome}. ${evoluida.quem ?? ''}`.trim(),
     `- Caminho dominante: ${v.dominante}`,
-    `- Atributos: ${niveis(e.ficha.atributos)}`,
+    `- Dados que rola em cada Atributo: ${dados(e.ficha)}`,
     `- Aprimoramentos: ${niveis(e.ficha.aprimoramentos)}`,
     `- Perícias: ${niveis(e.ficha.pericias)}`,
     `- Antecedentes: ${Object.keys(e.ficha.antecedentes ?? {}).join(', ') || 'nenhum'}`,
@@ -354,6 +448,7 @@ O que o personagem fez conta, e tem de aparecer:
 - O que falhou deixou marca no mundo: a ponte que caiu continua caída.
 - Use \`requer: { "marca": "..." }\` e \`requer: { "companheiro": "..." }\` nas especiais para que as escolhas dele abram portas que outro personagem não teria; use \`semMarca\` para o contrário. Só exija marcas que ele tem (ou que esta mesma sequência concede).
 - Leve em conta o estado dele: ferido, sem relógio ou sozinho, a história aperta de outro jeito; não o mate por descuido.
+- Ele evoluiu: confira de novo os dados que rola em cada Atributo antes de escolher as Dificuldades. O que era justo no ato anterior pode ter ficado fácil.
 - Atualize o \`rumo\` com o que mudou no seu plano por causa do que ele fez.`;
 
 /** A sequência do ato que falta (2 ou 3), ou o final (4), a partir do que o jogador fez. */
@@ -386,7 +481,7 @@ export function promptSequencia(historia, e, ato, idioma = 'pt') {
   const pedido = final
     ? `O final da história: \`desfecho\` (1 ou 2 cenas com \`"ato": 4\`, em "${historia.atos[4]}", onde tudo se decide) e \`finais\`.
 
-- As cenas do desfecho são as mais difíceis (abertas entre 7 e 12) e é nelas que as marcas e os companheiros dele mais devem pesar. Podem conceder a marca que o melhor final exige.
+- As cenas do desfecho são as mais difíceis (abertas no degrau apertado) e é nelas que as marcas e os companheiros dele mais devem pesar. Podem conceder a marca que o melhor final exige.
 - \`finais\`: de 4 a 5, do melhor para o pior. O jogo fica com o **primeiro** cuja condição \`quando\` fecha, então a ordem importa. O último não tem \`quando\`.
 - \`quando\` aceita: \`brasa\`, \`lacos\` e \`vida\` com \`{ "min": n }\` e/ou \`{ "max": n }\`; \`marca\`, \`semMarca\`, \`companheiro\`, \`semCompanheiro\` com um id ou uma lista.
 - Os finais têm de nascer do que ele fez: ao menos dois devem depender de marcas que ele tem, de quem está (ou não está) com ele, ou dos laços. Um final de 3 estrelas tem de estar ao alcance dele, sem estar garantido: as falhas do desfecho ainda podem gastar o relógio.
@@ -428,4 +523,24 @@ export function promptConserto(erros) {
   return `O JSON que você mandou não passou na conferência do jogo. Corrija só o que está listado e devolva o JSON **inteiro** de novo, num único bloco de código, sem texto antes nem depois.
 
 ${erros.map((x) => `- ${x}`).join('\n')}`;
+}
+
+const pc = (x) => `${Math.round(x * 100)}%`;
+
+/**
+ * Quando o trecho passa na conferência mas o robô o achou fácil ou difícil
+ * demais (`medir`): o que pedir à IA, sem mudar a história.
+ */
+export function promptAjuste(medida) {
+  const oQue = {
+    facil: `Está fácil demais: ele acertou ${pc(medida.sucesso)} das escolhas (o saudável é entre 50% e 90%). Suba as Dificuldades das abordagens em que ele rola mais dados, pela tabela, e deixe as especiais no degrau folgado, sem certeza.`,
+    dificil: `Está difícil demais: ele acertou só ${pc(medida.sucesso)} das escolhas (o saudável é entre 50% e 90%). Baixe as Dificuldades pela tabela e dê a ele ao menos uma abordagem no degrau justo por cena.`,
+    mortal: `Ele morreu ou perdeu a cabeça neste trecho em ${pc(medida.queda)} das vezes. Reduza as perdas de vida e de sanidade nas falhas: ele está com pouco.`,
+    semDados: `${pc(medida.semDados)} das escolhas foram sem dados. Troque especiais livres por testes no degrau folgado: no máximo uma livre por ato.`,
+    garantido: `O final de 3 estrelas saiu em ${pc(medida.final?.tres ?? 0)} das vezes: está garantido. Aperte a condição do melhor final (mais laços, uma marca que se ganha num teste apertado) ou as cenas do desfecho.`,
+    inalcancavel: `O final de 3 estrelas quase nunca saiu (${pc(medida.final?.tres ?? 0)} das vezes). Confira se as marcas que ele exige podem ser ganhas no desfecho por uma abordagem com boa chance para este personagem, e afrouxe a condição do relógio ou dos laços.`,
+  };
+  return `O JSON passou na conferência, mas o jogo testou o trecho jogando ${medida.n} vezes com este personagem, e o equilíbrio saiu fora da faixa. Não mude a história, as cenas nem os ids: ajuste só Dificuldades, efeitos e, se for o caso, as condições dos finais. Devolva o JSON **inteiro** de novo, num único bloco de código, sem texto antes nem depois.
+
+${medida.avisos.map((a) => `- ${oQue[a]}`).join('\n')}`;
 }

@@ -104,7 +104,7 @@ O protótipo [`crawler/`](crawler/) precisou decidir estas regras para funcionar
 | 7.8 | Penalidade por ferimento | O manual não diz se o personagem ferido luta pior | Lentidão e tremor com Vida baixa | ✅ 21/11/2026: −1 nos testes físicos com Vida abaixo da metade; −2 abaixo de um quarto. O Desvario usa lentidão e tremor. Falta escrever no manual |
 | 7.9 | Manobras de combate | Não há defesa total, empurrar nem preparar golpe | Defender (+2 na defesa e contra-golpe), empurrar (teste de Força), golpe preparado (avisado, +2 no ataque) | ✅ 21/11/2026: só defender (defesa total). Empurrar e golpe preparado ficam no Desvario. Falta escrever no manual |
 
-## 8. Duplo Seis (jogo novo em `duplo-seis/`, parado na 0.2.1 em 21/11/2026)
+## 8. Duplo Seis (em `duplo-seis/`, na 0.4.0 em 23/11/2026)
 
 Jogar: https://marcelobritonet.github.io/clip-rpg/duplo-seis/ · Notas e decisões da mesa: `duplo-seis/NOTAS.md`
 
@@ -112,18 +112,34 @@ Jogar: https://marcelobritonet.github.io/clip-rpg/duplo-seis/ · Notas e decisõ
 |---|---|---|---|---|
 | 8.1 | Revisão de continuidade dos textos | ✅ 22/11/2026, só pt: 15 problemas corrigidos nas duas aventuras (lista em `duplo-seis/NOTAS.md`). Cada cena agora se sustenta sozinha, em qualquer ordem. O inglês não acompanhou: está na 8.11 | Só texto | ✅ 22/11/2026: só a versão pt. O inglês vira a 8.11 |
 | 8.2 | Equilíbrio entre os passados da Brasa | ✅ 22/11/2026: final de 3 estrelas do robô atento entre 37% (Desertora) e 54% (Aprendiz); antes 21% a 82%. Quatro efeitos mudados, texto intocado, espelho `en/` conferido. Números e motivos em `duplo-seis/NOTAS.md`. Ainda não está numa versão publicada | `node duplo-seis/simular.mjs 400 atento brasa`; mexer nos `lacos` das cenas ou nas condições de `finais` em `aventuras/brasa/base.js` (e no espelho `en/`) | Seguir |
-| 8.3 | Você jogar e dizer o que achou | ☐ Só robôs e eu jogamos até agora. Falta o seu teste de mão: ritmo, dificuldade, se o texto prende | Jogar uma sessão de cada aventura no celular | Preciso de você |
-| 8.4 | Lacunas do manual que a mesa decidiu | ☐ 14 decisões registradas em `duplo-seis/NOTAS.md` (custo de evolução, experiência por marcos, efeito dos críticos, recuperação, Vida 0, Sanidade 0, cansaço de quem une forças...). Nenhuma mudou regra escrita | Ler a tabela e dizer quais viram regra do manual | Preciso de você |
 | 8.5 | Menu das outras páginas | ✅ 22/11/2026: nova página `jogos/` com Duplo Seis, Arena, Travessia e Desvario. No menu das 6 páginas, Arena, Cartas e Crawler deram lugar a um só link, Jogos (marcado quando se está num jogo). O README aponta para `/jogos` e lista os quatro. Ainda não está publicado | Criar a página `/jogos` reunindo todos os jogos; pôr o link dela no menu das 6 páginas e no README | ✅ 22/11/2026: todos os jogos numa mesma aba `/jogos` |
 | 8.6 | Mais cenas por ato | ✅ 22/11/2026, só pt: 12 cenas por ato nas duas aventuras (18 novas). Equilíbrio medido de novo: Brasa 32% a 58%, Ar 16% a 54%. Lista em `duplo-seis/NOTAS.md` | `duplo-seis/aventuras/FORMATO.md` descreve o formato | ✅ 22/11/2026: com Opus 5.5, só cenas boas. Só pt; o inglês vai para a 8.11 |
 | 8.7 | Terceira aventura e mais idiomas | ✅ 22/11/2026, só pt: **O Sino Afogado** (horror de interior, anos 1950). Abertura, 36 cenas (12 por ato), duas cenas de torre, cinco finais, seis passados e cinco cenários desenhados. Robô atento: 32% a 57% de final de 3 estrelas. Na versão em inglês ela aparece em português. Bíblia em `duplo-seis/aventuras/sino/HISTORIA.md`, números em `duplo-seis/NOTAS.md`. Ainda não está publicada | Copiar a estrutura de `aventuras/ar/` | ✅ 22/11/2026: terceira aventura só em pt-br. Espanhol e inglês dela vão para a 8.11 |
-| 8.8 | Conferências que faltaram | ☐ Jogar sem rede depois de instalar, botão de compartilhar a crônica, e teste em celular de verdade (só foi visto em janela de 375 px) | Instalar pelo navegador do celular e desligar a rede | |
-| 8.11 | Tudo que não for pt-br | ☐ Despriorizado em 22/11/2026: espelhar no inglês as 15 correções de continuidade da 8.1 (lista em `duplo-seis/NOTAS.md`), traduzir as 18 cenas novas da 8.6 (`node duplo-seis/aventuras/paridade.js brasa en` lista as que faltam), inglês e espanhol da terceira aventura (8.7). Até lá, a versão em inglês pode ficar atrás da pt | Só depois de fechar as pendências em pt | ✅ 22/11/2026: fim da fila |
-| 8.13 | História viva: o jogador cria a aventura com uma IA | ✅ 22/11/2026 feito e testado com o Claude no papel da IA (passou; dois ajustes, em `duplo-seis/NOTAS.md`), ☐ falta testar no ChatGPT e no Gemini. Formulário guiado + ficha livre geram o pedido; a IA devolve JSON (núcleo e ato 1), que se cola; a cada pausa o jogo gera o pedido da sequência com a crônica e o estado do personagem; o final nasce do que ele fez. Exporta e importa `.json`. A história do teste está em `duplo-seis/aventuras/exemplos/as-tres-da-tarde.json`. Ainda não está publicado. Detalhes em `duplo-seis/NOTAS.md` | Criar uma história no jogo, levar o pedido ao Claude, ChatGPT e Gemini e ver: a resposta cabe sem cortar? passa na conferência de primeira? a sequência usa mesmo o que o personagem fez? | Preciso de você: jogar uma história inteira com uma IA e dizer o que emperrou |
-| 8.14 | História viva: capítulos | ☐ Uma história tem 3 atos e final. Levar ficha, laços e marcas do personagem para uma história seguinte ficou de fora | Novo pedido "capítulo seguinte" a partir de uma história terminada; decidir o que o personagem carrega | |
-| 8.15 | História viva: galeria | ☐ Histórias saem do aparelho só por arquivo `.json`. Uma pasta no repositório com histórias de jogadores, aceitas por PR, ficou de fora | Pasta `duplo-seis/aventuras/galeria/` lida pela tela inicial | |
-| 8.16 | História viva: medir ao colar | ☐ A conferência garante o formato, não o equilíbrio. No primeiro teste a história saiu fácil demais (robô atento: 3 estrelas em 100%). O robô poderia jogar o ato colado e avisar se está impossível ou fácil demais | `seguir` em `duplo-seis/robo.js` já joga uma história pela metade | |
+| 8.13 | História viva: o jogador cria a aventura com uma IA | ✅ 22/11/2026 feito, publicado na 0.4.0. Formulário guiado e ficha livre geram o pedido; a IA devolve JSON (núcleo e ato 1), que se cola; a cada pausa o jogo gera o pedido da sequência com a crônica e o estado do personagem; o final nasce do que ele fez. Exporta e importa `.json`. Testado com o Claude no papel da IA (resultado em `duplo-seis/NOTAS.md`); a história do teste está em `duplo-seis/aventuras/exemplos/as-tres-da-tarde.json` | | ✅ 23/11/2026: o exemplo fica no repositório |
+| 8.14 | História viva: capítulos | ✅ 23/11/2026: quem chega a um final (não quem cai no caminho) pode pedir o capítulo seguinte, na tela de fim ou na tela inicial. O personagem leva a ficha evoluída, as marcas (com a frase que as concedeu) e os companheiros que seguem com ele; laços, Vida, Sanidade e relógio recomeçam. O pedido leva a crônica e o final do capítulo anterior. Exporta e importa com a herança | | ✅ 23/11/2026: faça |
+| 8.15 | História viva: galeria | ☐ Parado até o Marcelo decidir se quer. Hoje uma história só sai do aparelho como arquivo `.json`, que cada um manda a quem quiser. A galeria seria uma lista de histórias prontas dentro do próprio jogo, para qualquer jogador escolher e jogar sem importar nada | Pasta `duplo-seis/aventuras/galeria/` lida pela tela inicial; as histórias entrariam por PR no repositório | Preciso de você: 23/11/2026 pediu explicação |
+| 8.16 | História viva: medir ao colar | ✅ 23/11/2026: ao colar, o robô joga o trecho 120 vezes a partir de onde o jogador está e avisa se saiu fácil demais, difícil demais, mortal, sem dados ou com o melhor final garantido ou fora de alcance. O jogador copia um pedido de ajuste ou segue assim mesmo. O pedido à IA trocou as faixas fixas de Dificuldade por uma tabela pelos dados que o personagem rola. Números em `duplo-seis/NOTAS.md` | `duplo-seis/aventuras/medir.js` | ✅ 23/11/2026: importante, faça |
 | 8.12 | O Piloto do Ar fica para trás | ✅ 22/11/2026: 16% → 36% no final de 3 estrelas do robô atento; os outros passados não mudaram (33% a 54%). As especiais dele somavam 2 laços, contra 4 a 9 dos outros. Mudanças em `duplo-seis/NOTAS.md`; espelho `en/` feito onde a cena já existia | `node duplo-seis/simular.mjs 1500 atento ar`; mesmo caminho da 8.2 | |
+
+### Próxima etapa
+
+| # | Tópico | Situação | Por onde começar | Decisão |
+|---|---|---|---|---|
+| 8.17 | História viva em outras IAs | ☐ Só o Claude respondeu aos pedidos, e foi ele que os escreveu. Falta o teste real no ChatGPT e no Gemini: a resposta cabe sem cortar? passa na conferência de primeira? a sequência usa o que o personagem fez? o aviso de equilíbrio aparece e o ajuste resolve? | Criar uma história no jogo publicado e levar cada pedido às duas IAs | ✅ 23/11/2026: teste real, na próxima etapa |
+
+### Separado: o Marcelo decide depois
+
+| # | Tópico | Situação | Por onde começar | Decisão |
+|---|---|---|---|---|
+| 8.4 | Lacunas do manual que a mesa decidiu | ☐ 14 decisões registradas em `duplo-seis/NOTAS.md` (custo de evolução, experiência por marcos, efeito dos críticos, recuperação, Vida 0, Sanidade 0, cansaço de quem une forças...). Nenhuma mudou regra escrita | Ler a tabela e dizer quais viram regra do manual | 23/11/2026: farei depois; fica separado |
+
+### Rodadas futuras
+
+| # | Tópico | Situação | Por onde começar | Decisão |
+|---|---|---|---|---|
+| 8.11 | Tudo que não for pt-br | ☐ Despriorizado em 22/11/2026: espelhar no inglês as 15 correções de continuidade da 8.1 (lista em `duplo-seis/NOTAS.md`), traduzir as 18 cenas novas da 8.6 (`node duplo-seis/aventuras/paridade.js brasa en` lista as que faltam), inglês e espanhol da terceira aventura (8.7). Até lá, a versão em inglês pode ficar atrás da pt | Só depois de fechar as pendências em pt | ✅ 23/11/2026: sem outras línguas por agora; fica para rodadas futuras |
+
+Saíram da tabela em 23/11/2026, por estarem com o Marcelo e em andamento: 8.3 (jogar e dizer o que achou) e 8.8 (jogar sem rede e em celular de verdade).
 
 ### 8.9 Que modelo dá conta de cada pendência do Duplo Seis
 
@@ -133,13 +149,11 @@ Auditoria de 21/11/2026. "Modelo mínimo" é o mais barato em que dá para confi
 |---|---|---|---|---|
 | 8.1 | Revisão de continuidade | Ler 54 cenas em dois idiomas e editar prosa sem perder a voz | Opus 5.5 | Dá para dividir: Sonnet lista os problemas, Opus corrige |
 | 8.2 | Equilíbrio da Brasa | Simular, mexer em números, simular de novo | Sonnet 5.5 | Laço fechado com medição objetiva. Enunciado pronto em 8.10 |
-| 8.3 | Jogar e opinar | Gosto humano | Nenhum | Só o Marcelo |
 | 8.4 | Lacunas que viram regra | Decisão de autor | Nenhum para decidir; Sonnet 5.5 para escrever no README | |
 | 8.5 | Link no menu e no README | Uma linha em sete arquivos | Haiku 5.5 | Depende de decisão do Marcelo |
 | 8.6 | Mais cenas por ato | Escrita criativa em formato rígido, com validador | Sonnet 5.5 (corretas), Opus 5.5 (boas) | O validador garante a forma, não a graça |
 | 8.7 | Terceira aventura | Conceber cenário, tom, final e 27 cenas | Opus 5.5 na base e na bíblia; Sonnet 5.5 nos atos | |
 | 8.7 | Espanhol | Tradução literária com paridade conferida por teste | Sonnet 5.5; Haiku 5.5 no dicionário da interface | |
-| 8.8 | Conferir em celular de verdade | Instalar, desligar a rede, tocar na tela | Nenhum sozinho | Precisa do aparelho |
 
 Fable 5.2 não é necessário para nenhuma delas; só valeria para desenhar um jogo novo ou repensar a estrutura deste.
 Na primeira rodada, traduções e atos da segunda aventura rodaram no modelo mais caro e caberiam em Sonnet com bíblia e glossário prontos.
