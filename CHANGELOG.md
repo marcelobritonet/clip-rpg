@@ -51,6 +51,20 @@ Primeira versão das ferramentas.
 
 ## Regras do Sistema Clip
 
+### 0.9.4
+
+- Nova Regra: Surto (Sanidade zero)
+- Nova Regra: Testando o Caminho da Mente (Isto é real?)
+- Nova Regra: Testando o Caminho do Espírito (Convencendo no meio de um combate)
+- Nova Regra: Personagem ferido
+- Nova Regra: Defesa Total
+- Novo Aprimoramento: Autocontrole (Vontade)
+- Modificação de Regra: Defesa contra Mágicas de Ataque Mental e de Controle soma Autocontrole
+- Correção: Pontos de Sanidade podem ser recuperados até o valor inicial (o texto dizia "jamais")
+- Modificação de Regra: Recalcular valores ao mudar o Caminho de maior valor
+- Modificação de Regra: Aliados do Mestre também unem forças
+- Modificação de Regra: Cansaço desconta Pontos de Magia
+
 ### 0.9.3
 
 - Regras para Evolução do Personagem

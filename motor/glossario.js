@@ -173,6 +173,11 @@ export const GLOSSARIO = {
     termo: 'Liderança',
     resumo: 'Impacto positivo e firme: conduzir um grupo, discursar para mover pessoas.',
   },
+  autocontrole: {
+    termo: 'Autocontrole',
+    resumo: 'Manter a mente sob o próprio comando, sem ceder ao medo, à manipulação ou à loucura.',
+    regra: '+1 por nível na Defesa contra Mágicas de Ataque Mental e de Controle.',
+  },
 
   /* Valores Resumidos --------------------------------------------------- */
   'valores-resumidos': {
@@ -279,7 +284,7 @@ export const GLOSSARIO = {
   'magicas-de-ataque-mental': {
     termo: 'Mágicas de Ataque Mental',
     resumo: 'Ataques invisíveis à mente do alvo. O alvo sabe que algo está errado.',
-    regra: 'Defesa do alvo: 1D6 + Vontade + Fé. O dano sai da Sanidade.',
+    regra: 'Defesa do alvo: 1D6 + Vontade + Fé + Autocontrole. O dano sai da Sanidade.',
   },
   'magicas-de-suporte': {
     termo: 'Mágicas de Suporte',

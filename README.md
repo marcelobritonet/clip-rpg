@@ -96,7 +96,7 @@ Cada **Atributo** permite acessar seus próprios **Aprimoramentos**. Esses Aprim
 | Caminho do Corpo  |   Caminho da Mente |  Caminho do Espírito  |  
 | ------------ | ------------ | ------------ |  
 | Atributo Força  | Atributo Inteligência  |  Atributo Vontade |  
-|  - Ataque Corporal | | |  
+|  - Ataque Corporal | | - Autocontrole |  
 |  - Arremesso | | |
 |  - Manipulação de Peso | | |  
   
@@ -204,6 +204,12 @@ Capacidade de compreender o meio externo e pessoas; assimilar vivências e exper
   
 a força da mente  
   
+* Autocontrole  
+  
+Capacidade de manter a mente sob o próprio comando, sem ceder ao medo, à manipulação ou à loucura.  
+  
+> Cada nível nesta aprimoramento dá um modificador +1 no Valor de Defesa contra Mágicas de Ataque Mental e Mágicas de Controle.  
+  
 ###### Presença  
   
 Nível de impacto no ambiente  
@@ -273,6 +279,10 @@ XX
   
 Agora é o momento de determinar valores numéricos iniciais para o personagem. Calcule e anote esses valores em sua Ficha de Personagem.  
 
+Alguns valores dependem do Caminho de maior valor do personagem. Caso, ao evoluir, o personagem passe a ter um outro Caminho como o de maior valor, recalcule os Pontos de Vida e de Sanidade de acordo com o novo Caminho. O dano já sofrido continua descontado.  
+
+> Ex: Um personagem do Caminho do Corpo, com 14 Pontos de Vida, tinha sofrido 4 de dano e estava com 10. Ao evoluir ele passou a ter o Caminho do Espírito como o de maior valor e seus Pontos de Vida passam a ser 11. Os 4 de dano continuam, então ele fica com 7.  
+
 * Ataque à Curta Distância
 
 Definem valores para ataques com armas usadas em combate próximo.
@@ -319,6 +329,8 @@ Um personagem sem Pontos de Magia está incapacidade de realizar mágicas. Um pe
 
 Ao evoluir o nível de algum Atributo que serve de base calculo para os Pontos de Magia recalcule o valor inicial.  
 
+Os Pontos de Magia também representam o fôlego do personagem. Em esforços longos, como correr por muito tempo, passar noites sem dormir ou lutar sem descanso, o Mestre pode descontar Pontos de Magia pelo cansaço. Um personagem sem Pontos de Magia está exausto e, além de não realizar mágicas, precisa parar e descansar.  
+
 `2x (Inteligência + Percepção + Sabedoria)`
 
 * Sanidade
@@ -327,7 +339,22 @@ Define o quanto o seu personagem é vulnerável à stress mental durante sua jor
 
 Um personagem sem Pontos de Sanidade está fora de sí e perde o controle sobre suas ações. Este pode reagir de formas variadas e inesperadas como entrar em fúria, loucura impulsiva, ter convulsões ou simplesmente entrar num torpor imediato.  
 
-Um personagem jamais pode recuperar os seus Pontos de Sanidade até no máximo o seu valor inicial.  
+**Surto**
+
+Quando a Sanidade chega a zero o personagem entra em **surto**. Durante o surto o jogador não decide nada, quem age pelo personagem é o Mestre. Proceda assim:
+
+1. O surto dura alguns turnos, à critério do Mestre.
+2. Durante o surto o personagem pode:
+    1. Atacar quem estiver perto, seja inimigo ou aliado.
+    2. Quebrar o que encontra pelo caminho, como objetos, móveis e portas.
+    3. Correr sem rumo, sem escolher direção, até bater em algo.
+    4. Perder itens. Algo cai da mão ou do bolso e fica para trás.
+3. Ao fim do surto o personagem volta a si com metade do seu valor inicial de Sanidade (o valor de antes da cicatriz) e uma **cicatriz**. Cada cicatriz diminui 3 pontos do valor inicial de Sanidade.
+4. No terceiro surto o personagem não volta mais. Ele está fora de jogo.
+
+> Ex: Um personagem com 12 Pontos de Sanidade chega a zero. O Mestre faz ele correr pelo corredor e atacar o aliado que tentou segurá-lo. Depois de três turnos ele volta a si com 6 Pontos de Sanidade e seu valor inicial passa a ser 9.  
+
+Um personagem pode recuperar os seus Pontos de Sanidade até no máximo o seu valor inicial.  
 
 Ao evoluir algum Atributo que serve de base de calculo para os Pontos de Sanidade recalcule o valor inicial.  
 
@@ -416,6 +443,19 @@ Caso seja obtivo o resultado 1 novamente houve uma falha crítica.|
 |Sucesso Crítico|Caso seja obtido 6 na rolagem de dados role novamente o D6. \
 Caso seja obtivo o resultado 6 novamente houve uma sucesso crítico.|
 
+**Personagem ferido**
+
+Um personagem ferido não luta da mesma forma que um personagem inteiro. Desconte do resultado dos testes do Caminho do Corpo, do Valor de Ataque e do Valor de Defesa:
+
+|Pontos de Vida|Modificador|
+|--- |--- |
+|Abaixo da metade do valor inicial|-1|
+|Abaixo de um quarto do valor inicial|-2|
+
+**Defesa Total**
+
+Em vez de atacar o personagem pode usar a sua vez para se defender. Até a sua próxima vez some 2 ao seu Valor de Defesa. Nesse turno ele não ataca.
+
 ## Testes
 
 Em algumas situações do jogo o Mestre pode solicitar algum teste envolvendo algum Atributo, Aprimoramento ou Perícia.
@@ -465,13 +505,41 @@ O primeiro personagem com Força1 agora possui algum objeto que ajuda à realiza
 
 Dois personagens com Força1 decidem juntar forças para derrubar esta porta. Caso o mestre autorize, pode ser feita a soma das Forças para o teste. Então os personagens possuem, para derrubar a porta Força 2. E uma rolagem de 2D6 pode ser feita.
 
+O mesmo vale para os aliados do Mestre. Um personagem do Mestre que acompanha o grupo também pode juntar forças com os personagens dos jogadores, somando o seu Atributo ao teste.
+
 **Stualção 6: Personagens incapazes de testar**
 
 Personagem que possui Força 0. Aqueles que possuem o atributo testado no nível  0 (zero), à critério do mestre obtém falha automática nos testes. Caso um teste seja permitido, eles rolam 1D6-2 (rola 1D6 e diminue 2 do resultado) e jamais podem **Insistir **no teste.
 
 ### Testando o Caminho da Mente
 
+Um personagem caminha por um corredor escuro e vê, ao fundo, um vulto parado. O jogador desconfia que aquilo não é real.
+
+**Situação 1: Isto é real?**
+
+Para desconfiar de uma ilusão o personagem testa Percepção ou Sabedoria, o que tiver o maior nível. Proceda assim:
+
+1. O Mestre define a **Dificuldade** normalmente.
+2. Quanto menos Sanidade o personagem tiver, mais difícil é separar o que é real do que não é. Com metade ou menos da sua Sanidade a Dificuldade sobe um grau na tabela (de Normal para Difícil, por exemplo).
+3. Role 1D6 para cada nível no Atributo escolhido.
+4. Se a Dificuldade foi alcançada o personagem percebe que o vulto é falso. Se não, ele continua acreditando no que vê.
+
+> Ex: Um personagem com Percepção1 e Sabedoria2 usa a Sabedoria e rola 2D6. Ele está com metade da sua Sanidade, então o Mestre sobe a Dificuldade de 4 para 6.
+
 ### Testando o Caminho do Espírito
+
+No meio de um combate um personagem tenta convencer o inimigo a baixar a arma.
+
+**Situação 1: Convencendo no meio de um combate**
+
+Proceda assim:
+
+1. Some a Presença com o Aprimoramento social mais adequado (Empatia/Carisma, Intimidação ou Liderança).
+2. A **Dificuldade** será 3 + a Vontade do alvo. O Mestre pode aumentar a Dificuldade se o alvo tiver motivos fortes para continuar lutando.
+3. Role 1D6 para cada nível obtido na soma.
+4. Se a Dificuldade foi alcançada o alvo para de lutar.
+
+> Ex: Um personagem com Presença2 e Intimidação1 rola 3D6. O guarda possui Vontade2, a Dificuldade será 5.
 
 ### Exemplo de Testes
 
@@ -550,7 +618,7 @@ Perícia que permite ao Conjurador realizar terríveis ataques à mente do alvo.
 
 Ao realizar um Ataque Mágico Mental proceda assim: O Valor de Ataque será 1D6 + modificador desta perícia. Gaste 1PM para cada modificador no Valor de Ataque. Deve ser acrescentado pelo menos 1 modificador por Ataque Mágico Mental. O modificador do Valor de Ataque será no máximo igual ao nível da Perícia Mágica de Ataque.
 
-O Valor de Defesa do Alvo será calculado do seguinte modo: 1D6 + Vontade + Fé. O Dano recebido pelo Alvo será descontado da sua Sanidade. Quando um personagem não possuir nenhum ponto de Sanidade proceda normalmente com as regras de Sanidade.
+O Valor de Defesa do Alvo será calculado do seguinte modo: 1D6 + Vontade + Fé + Autocontrole. O Dano recebido pelo Alvo será descontado da sua Sanidade. Quando um personagem não possuir nenhum ponto de Sanidade proceda normalmente com as regras de Sanidade.
 
 ##### Mágicas de Suporte
 
@@ -596,7 +664,7 @@ O Conjurador pode afetar a mente e o espírito de um alvo inteligente.
 
 O Conjurador poder tentar realizar qualquer ação mental (medo, amor, confiança, por ex.) sobre o alvo, porém deve possuir Vontade superior ao alvo. O custo dessa açao é de 1PM. Caso não possua Vontade superior à do alvo a mágica falha instantaneamente.
 
-Se o alvo souber das intenções do mago ou não concordar com o resultado do Controle é possível tentar impedir. Caso o Conjurador tente ainda assim forçar o Controle, deve para isso gastar 1PM para fazer uma rolagem 1D6+Nivel de Mágica de Controle. O Alvo do controle rola 1D6+Vontade.
+Se o alvo souber das intenções do mago ou não concordar com o resultado do Controle é possível tentar impedir. Caso o Conjurador tente ainda assim forçar o Controle, deve para isso gastar 1PM para fazer uma rolagem 1D6+Nivel de Mágica de Controle. O Alvo do controle rola 1D6+Vontade+Autocontrole.
 
 O Controle persiste até que o alvo tenha algum motivo para desacreditar na veracidade do Controle.
 
@@ -642,7 +710,7 @@ Segue algumas sugestões de Antecedentes:
 |--- |--- |--- |--- |--- |--- |
 |Caminho do Corpo||Caminho da Mente||Caminho do Espírito||
 |Força||Inteligência||Vontade||
-|Ataque Corporal||||||
+|Ataque Corporal||||Autocontrole||
 |Arremesso||||||
 |Manip. de Peso||||||
 |Destreza||Percepção||Presença||
