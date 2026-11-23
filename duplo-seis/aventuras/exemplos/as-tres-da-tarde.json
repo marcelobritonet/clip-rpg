@@ -1,0 +1,1968 @@
+{
+ "formato": "duplo-seis/historia@1",
+ "id": "h-as-tres-da-tarde-mws2nzcc",
+ "ordem": "escrita",
+ "criada": "2026-11-22",
+ "nome": "As Três da Tarde",
+ "resumo": "O relógio da praça parou às três e a cidade inteira ficou presa no mesmo minuto. Só o seu relógio de bolso ainda anda, e a corda não dura para sempre.",
+ "genero": "Mistério",
+ "inicio": "Oficina dos Relógios",
+ "atos": [
+  "",
+  "A Praça",
+  "A Rua do Comércio",
+  "A Torre",
+  "A Casa das Máquinas"
+ ],
+ "cenarios": [
+  "oratorio",
+  "vila",
+  "vilanova",
+  "torre",
+  "oratorio"
+ ],
+ "relogio": {
+  "nome": "Corda",
+  "palavras": [
+   "parada",
+   "no último dente",
+   "frouxa",
+   "pela metade",
+   "firme",
+   "cheia"
+  ]
+ },
+ "textos": {
+  "noite": "Você se senta num degrau, abre a tampa do relógio de bolso e fica ouvindo. É o único som da cidade. Cada tique custa um pouco da corda.",
+  "velar": "Dar corda com cuidado",
+  "velou": "Você limpa a engrenagem com a ponta do lenço e dá corda devagar, contando as voltas como sua mãe ensinou.",
+  "subir": "Entrar na casa das máquinas",
+  "pausa": "Um degrau para sentar",
+  "seguir": "Seguir pela cidade parada"
+ },
+ "rumo": "Fim. Dora chegou com a praça inteira, o prazo, as contas feitas em voz alta e a valsa tocando lá embaixo. Não forçou o alçapão. Não leu a carta de Celina nem viu a aliança: vai vê-la agora. O pai abre a mão se ela pedir; se ela tirar, o tempo volta do mesmo jeito, e ele não.",
+ "passados": [
+  {
+   "id": "criador",
+   "titulo": "A Relojoeira",
+   "nome": "Dora",
+   "quem": "Conserta relógios na praça desde menina e desconfia de tudo que anda certo demais.",
+   "motivo": "O relógio da praça parou, e o pai dela parou junto.",
+   "caminho": "mente",
+   "atributos": {
+    "inteligencia": 3,
+    "percepcao": 2,
+    "destreza": 2,
+    "vontade": 1,
+    "fe": 1
+   },
+   "aprimoramentos": {
+    "precisao": 1
+   },
+   "pericias": {
+    "maquinas": 2
+   },
+   "antecedentes": {
+    "boaFama": {
+     "nivel": 1
+    }
+   },
+   "itens": [
+    "lupa",
+    "chave-corda"
+   ]
+  }
+ ],
+ "itens": {
+  "lupa": {
+   "nome": "Lupa de Relojoeiro",
+   "mod": 1,
+   "tipo": "objeto",
+   "tags": [
+    "lente"
+   ]
+  },
+  "chave-corda": {
+   "nome": "Chave de Corda",
+   "mod": 1,
+   "tipo": "objeto",
+   "tags": [
+    "ferramenta"
+   ]
+  },
+  "barra": {
+   "nome": "Barra do Sineiro",
+   "mod": 1,
+   "tipo": "objeto",
+   "tags": [
+    "alavanca"
+   ]
+  },
+  "pao": {
+   "nome": "Pão da Ilda",
+   "tipo": "consumivel",
+   "cura": {
+    "vida": "1d6"
+   }
+  },
+  "fita": {
+   "nome": "Fita do Telégrafo",
+   "mod": 1,
+   "tipo": "objeto",
+   "tags": [
+    "prova"
+   ]
+  },
+  "cronometro": {
+   "nome": "Cronômetro do Banco",
+   "mod": 2,
+   "tipo": "objeto",
+   "tags": [
+    "ferramenta"
+   ]
+  },
+  "balde": {
+   "nome": "Balde do Armazém",
+   "mod": 1,
+   "tipo": "objeto",
+   "tags": [
+    "agua"
+   ]
+  },
+  "licor": {
+   "nome": "Licor de Jenipapo",
+   "tipo": "consumivel",
+   "cura": {
+    "sanidade": "1d6"
+   }
+  },
+  "carta": {
+   "nome": "Carta de Celina",
+   "mod": 1,
+   "tipo": "objeto",
+   "tags": [
+    "prova"
+   ]
+  }
+ },
+ "companheiros": {
+  "nico": {
+   "nome": "Nico",
+   "quem": "engraxate de dez anos, dormia debaixo do coreto com um despertador roubado no bolso",
+   "niveis": {
+    "destreza": 2,
+    "percepcao": 1
+   }
+  }
+ },
+ "inimigos": {
+  "eco": {
+   "nome": "O Eco das Três",
+   "ataque": 2,
+   "defesa": 2,
+   "vida": 4,
+   "arma": 0,
+   "armadura": 0,
+   "resistencia": 0,
+   "reflexo": 1,
+   "vontade": 2,
+   "fe": 0,
+   "mental": true
+  }
+ },
+ "abertura": {
+  "id": "abertura",
+  "ato": 0,
+  "titulo": "O tique que sobrou",
+  "texto": "Na oficina, o pêndulo de todos os relógios parou no mesmo lado. A poeira está parada no ar, dourada. Seu pai não está na bancada: a cadeira dele ficou afastada, como de quem saiu com pressa. No meio do silêncio, um tique. É o relógio de bolso que sua mãe fez, e a corda está no fim.",
+  "abordagens": [
+   {
+    "id": "destreza",
+    "rotulo": "Dar corda sem forçar",
+    "teste": {
+     "chave": "destreza",
+     "dificuldade": 5
+    },
+    "ajuda": [
+     "ferramenta"
+    ],
+    "sucesso": {
+     "texto": "A mola aceita volta por volta, sem um estalo. O tique firma. Você fecha a tampa e, pela primeira vez na tarde, respira no compasso de alguma coisa.",
+     "cronica": "{nome} deu corda no relógio da mãe sem forçar a mola."
+    },
+    "falha": {
+     "texto": "A coroa escapa dos seus dedos e a mola devolve duas voltas com um zunido feio. O relógio continua andando, mas mais magro.",
+     "cronica": "{nome} deixou a mola escapar e perdeu corda logo na saída.",
+     "efeitos": {
+      "brasa": -1
+     }
+    }
+   },
+   {
+    "id": "inteligencia",
+    "rotulo": "Entender por que só este anda",
+    "teste": {
+     "chave": "inteligencia",
+     "dificuldade": 5
+    },
+    "ajuda": [
+     "lente"
+    ],
+    "sucesso": {
+     "texto": "Você abre a tampa de trás. Gravado na platina, na letra da sua mãe: 'Este não obedece à torre.' Todos os outros da oficina foram acertados pelo relógio grande. Este, nunca.",
+     "cronica": "{nome} leu no relógio da mãe que ele não obedecia à torre.",
+     "efeitos": {
+      "marca": "gravacao"
+     }
+    },
+    "falha": {
+     "texto": "Você desmonta meia oficina atrás de uma razão e não acha nenhuma. Quando olha de novo, o relógio de bolso andou um bocado sem você.",
+     "cronica": "{nome} procurou a razão na oficina inteira e só gastou corda.",
+     "efeitos": {
+      "brasa": -1
+     }
+    }
+   },
+   {
+    "id": "vontade",
+    "rotulo": "Sair para a praça sem olhar para trás",
+    "teste": {
+     "chave": "vontade",
+     "dificuldade": 5
+    },
+    "sucesso": {
+     "texto": "Você põe o relógio no bolso do colete, ajeita a cadeira do seu pai no lugar e abre a porta. A praça inteira está de pé, imóvel, como uma fotografia em que só você se mexe.",
+     "cronica": "{nome} arrumou a cadeira do pai e saiu para a praça parada."
+    },
+    "falha": {
+     "texto": "Você chama pelo seu pai três vezes, cada vez mais alto. A voz volta das paredes, e o que volta não parece a sua. Você sai com o coração na boca.",
+     "cronica": "{nome} chamou pelo pai numa oficina que não respondia.",
+     "efeitos": {
+      "sanidade": -2
+     }
+    }
+   }
+  ]
+ },
+ "cenas": [
+  {
+   "id": "ato1-carroca",
+   "ato": 1,
+   "titulo": "A carroça do leiteiro",
+   "texto": "A carroça do leiteiro parou atravessada na esquina, o cavalo com uma pata no ar. Debaixo da roda, uma caixa de engraxate, e agarrado à caixa um menino que se mexe, chora baixo e não larga. No bolso dele, um despertador de lata faz mais barulho que a cidade toda.",
+   "abordagens": [
+    {
+     "id": "forca",
+     "rotulo": "Erguer a roda",
+     "teste": {
+      "chave": "forca",
+      "dificuldade": 6
+     },
+     "ajuda": [
+      "alavanca"
+     ],
+     "ajudantes": [
+      {
+       "nome": "o menino",
+       "nivel": 1
+      }
+     ],
+     "sucesso": {
+      "texto": "A roda sobe um palmo, o bastante. O menino puxa a caixa, confere as latas de graxa uma por uma e só então olha para você. 'Nico', ele diz, como quem paga uma dívida.",
+      "cronica": "{nome} ergueu a roda da carroça e ganhou a companhia de Nico.",
+      "efeitos": {
+       "lacos": 1,
+       "companheiro": "nico"
+      }
+     },
+     "falha": {
+      "texto": "A roda não se move e as suas costas reclamam alto. O menino acaba arrancando a caixa sozinho, com a tampa rachada, e segue você de longe, desconfiado.",
+      "cronica": "{nome} não moveu a roda e ficou com as costas doendo.",
+      "efeitos": {
+       "vida": -1,
+       "companheiro": "nico"
+      }
+     }
+    },
+    {
+     "id": "inteligencia",
+     "rotulo": "Calçar a roda com método",
+     "teste": {
+      "chave": "inteligencia",
+      "dificuldade": 5
+     },
+     "sucesso": {
+      "texto": "Dois latões de leite, uma tábua da carroceria, e a roda sobe sozinha quando você pisa na ponta. O menino ri sem querer. 'Nico', ele se apresenta, e pega a sua mão suja de graxa.",
+      "cronica": "{nome} fez uma alavanca com latões de leite e libertou a caixa de Nico.",
+      "efeitos": {
+       "lacos": 1,
+       "companheiro": "nico",
+       "item": "barra"
+      }
+     },
+     "falha": {
+      "texto": "A tábua racha no meio e um latão vira. O leite se espalha e para no ar a um palmo do chão, branco e imóvel. O menino olha aquilo e depois olha para você.",
+      "cronica": "{nome} derramou o leite do leiteiro, e o leite parou no ar.",
+      "efeitos": {
+       "sanidade": -1,
+       "companheiro": "nico"
+      }
+     }
+    },
+    {
+     "id": "presenca",
+     "rotulo": "Convencer o menino a largar",
+     "teste": {
+      "chave": "presenca",
+      "dificuldade": 6
+     },
+     "sucesso": {
+      "texto": "Você se agacha e fala da caixa como quem fala de ferramenta boa. Ele larga. Sem o peso dele, a caixa sai com um puxão. 'Nico', diz o menino. 'Você é a dos relógios.'",
+      "cronica": "{nome} falou de ferramenta com um engraxate e ganhou um amigo.",
+      "efeitos": {
+       "lacos": 1,
+       "companheiro": "nico"
+      }
+     },
+     "falha": {
+      "texto": "Ele não larga, e você não insiste. Fica ali um tempo que a cidade não conta, mas o seu relógio conta. Por fim ele puxa a caixa sozinho e vem atrás de você.",
+      "cronica": "{nome} esperou um menino teimoso soltar a própria caixa.",
+      "efeitos": {
+       "brasa": -1,
+       "companheiro": "nico"
+      }
+     }
+    },
+    {
+     "id": "maquinas",
+     "rotulo": "Soltar o eixo da carroça",
+     "requer": {
+      "nivel": {
+       "maquinas": 1
+      }
+     },
+     "teste": {
+      "chave": "maquinas",
+      "dificuldade": 3
+     },
+     "ajuda": [
+      "ferramenta"
+     ],
+     "sucesso": {
+      "texto": "Uma cupilha, um pino, e a roda sai inteira na sua mão. Nico pega a caixa intacta e fica olhando você recolocar tudo no lugar. 'Me ensina?', ele pergunta. Você diz que depois.",
+      "cronica": "{nome} desmontou a roda do leiteiro e prometeu ensinar Nico.",
+      "efeitos": {
+       "lacos": 1,
+       "companheiro": "nico",
+       "marco": true,
+       "marca": "promessa"
+      }
+     },
+     "falha": {
+      "texto": "O pino está emperrado de ferrugem e leva um pedaço da sua unha. A roda sai, torta. Nico agradece assim mesmo, com a caixa no colo.",
+      "cronica": "{nome} deixou uma unha na roda do leiteiro.",
+      "efeitos": {
+       "vida": -1,
+       "companheiro": "nico"
+      }
+     }
+    }
+   ]
+  },
+  {
+   "id": "ato1-padaria",
+   "ato": 1,
+   "titulo": "O forno de Seu Honório",
+   "texto": "Seu Honório parou com a pá dentro do forno e a chama parou junto, dura como vidro laranja. Dona Ilda, a mulher dele, se mexe em câmera lenta atrás do balcão: leva um minuto para erguer a mão. No pulso, um relógio pequeno, de pulseira de couro, quase sem corda.",
+   "abordagens": [
+    {
+     "id": "destreza",
+     "rotulo": "Dar corda no relógio dela",
+     "teste": {
+      "chave": "destreza",
+      "dificuldade": 5
+     },
+     "ajuda": [
+      "ferramenta"
+     ],
+     "sucesso": {
+      "texto": "Três voltas na coroa miúda e Dona Ilda desperta no meio de uma frase de horas atrás. Ela olha o marido, olha você, e põe um pão morno na sua mão sem dizer por quê.",
+      "cronica": "{nome} deu corda no relógio de Dona Ilda e a trouxe de volta.",
+      "efeitos": {
+       "lacos": 1,
+       "item": "pao",
+       "marca": "pulso"
+      }
+     },
+     "falha": {
+      "texto": "A coroa é pequena demais para a sua pressa e gira em falso. Dona Ilda continua devagar, a mão a caminho de um gesto que vai levar a tarde inteira.",
+      "cronica": "{nome} não conseguiu dar corda no relógio de Dona Ilda.",
+      "efeitos": {
+       "sanidade": -1
+      }
+     }
+    },
+    {
+     "id": "percepcao",
+     "rotulo": "Reparar em quem ainda se mexe",
+     "teste": {
+      "chave": "percepcao",
+      "dificuldade": 5
+     },
+     "ajuda": [
+      "lente"
+     ],
+     "sucesso": {
+      "texto": "Ela se mexe, ele não. A diferença está no pulso dela. Você aproxima o seu relógio de Seu Honório e a chama do forno dá um tremor. Quem está perto de um relógio que anda, acorda um pouco.",
+      "cronica": "{nome} descobriu que um relógio andando acorda quem está perto.",
+      "efeitos": {
+       "marca": "pulso",
+       "marco": true
+      }
+     },
+     "falha": {
+      "texto": "Você olha os dois por muito tempo e só vê um casal velho numa padaria. Do lado de fora, alguma coisa range, e você não sabe dizer se foi a cidade ou a sua cabeça.",
+      "cronica": "{nome} ficou olhando o casal da padaria sem entender a diferença.",
+      "efeitos": {
+       "sanidade": -1
+      }
+     }
+    },
+    {
+     "id": "fe",
+     "rotulo": "Rezar a hora com Dona Ilda",
+     "teste": {
+      "chave": "fe",
+      "dificuldade": 6
+     },
+     "sucesso": {
+      "texto": "Você reza o Ângelus das três, que nem existe, na velocidade dela. No amém, ela aperta a sua mão com força de gente acordada. 'Seu pai passou correndo', diz. 'Para a torre.'",
+      "cronica": "{nome} rezou devagar com Dona Ilda e soube que o pai correu para a torre.",
+      "efeitos": {
+       "lacos": 1,
+       "marca": "viu-pai"
+      }
+     },
+     "falha": {
+      "texto": "Você perde a paciência no meio da reza e termina sozinha. Dona Ilda continua na segunda palavra. Você sai antes de ouvir a terceira.",
+      "cronica": "{nome} largou uma reza pela metade na padaria.",
+      "efeitos": {
+       "brasa": -1
+      }
+     }
+    },
+    {
+     "id": "fama",
+     "rotulo": "Dizer de quem você é filha",
+     "requer": {
+      "antecedente": "boaFama"
+     },
+     "livre": true,
+     "resultado": {
+      "texto": "'Sou a Dora, do Anselmo.' O nome atravessa a lentidão dela como água. Dona Ilda aponta a torre com o queixo e empurra um pão para você por cima do balcão, devagar, com firmeza.",
+      "cronica": "{nome} disse o nome do pai na padaria e saiu com pão e um rumo.",
+      "efeitos": {
+       "item": "pao",
+       "marca": "viu-pai",
+       "brasa": -1
+      }
+     }
+    }
+   ]
+  },
+  {
+   "id": "ato1-coreto",
+   "ato": 1,
+   "titulo": "A valsa no ar",
+   "texto": "A banda parou no meio da valsa das três. O maestro tem a batuta no alto e o tubista, que escorregou do degrau, está inclinado sobre o vazio, a meio caminho da queda. Na estante do maestro, um metrônomo de mogno com o pêndulo preso de lado.",
+   "abordagens": [
+    {
+     "id": "fisico",
+     "rotulo": "Escorar o tubista",
+     "teste": {
+      "chave": "fisico",
+      "dificuldade": 6
+     },
+     "ajudantes": [
+      {
+       "nome": "o bombeiro da banda, meio acordado",
+       "nivel": 1
+      }
+     ],
+     "sucesso": {
+      "texto": "Você mete o ombro debaixo da tuba e empurra o homem de volta ao degrau, centímetro por centímetro. Ele fica de pé, parado, a salvo, com cara de quem ia dizer um palavrão.",
+      "cronica": "{nome} empurrou o tubista de volta ao coreto antes que ele caísse.",
+      "efeitos": {
+       "lacos": 1
+      }
+     },
+     "falha": {
+      "texto": "Ele pesa como um piano. Você consegue só deitar um banco debaixo dele, torto. Quando o tempo voltar, vai doer, mas menos.",
+      "cronica": "{nome} pôs um banco debaixo do tubista e torceu o pulso.",
+      "efeitos": {
+       "vida": -1
+      }
+     }
+    },
+    {
+     "id": "inteligencia",
+     "rotulo": "Armar um apoio com as estantes",
+     "teste": {
+      "chave": "inteligencia",
+      "dificuldade": 6
+     },
+     "sucesso": {
+      "texto": "Quatro estantes de partitura, travadas em cruz, fazem um cavalete debaixo da tuba. Fica feio e fica firme. Você confere os ângulos duas vezes, por hábito.",
+      "cronica": "{nome} fez um cavalete de estantes para segurar o tubista.",
+      "efeitos": {
+       "lacos": 1
+      }
+     },
+     "falha": {
+      "texto": "As estantes dobram uma depois da outra, com estalos que ecoam na praça muda. As partituras ficam espalhadas no ar, paradas, como pombos.",
+      "cronica": "{nome} derrubou as estantes da banda, e as partituras pararam no ar.",
+      "efeitos": {
+       "sanidade": -1,
+       "brasa": -1
+      }
+     }
+    },
+    {
+     "id": "vontade",
+     "rotulo": "Chamar o maestro pelo relógio",
+     "teste": {
+      "chave": "vontade",
+      "dificuldade": 7
+     },
+     "sucesso": {
+      "texto": "Você encosta o relógio de bolso no ouvido do maestro e espera. A batuta desce um dedo. Os olhos dele acham os seus. 'A valsa', ele sopra, 'estava atrasada. O relógio é que parou adiantado.'",
+      "cronica": "{nome} acordou o maestro por um instante e ouviu que o relógio parou adiantado.",
+      "efeitos": {
+       "lacos": 1,
+       "marca": "adiantado"
+      }
+     },
+     "falha": {
+      "texto": "Você segura o relógio no ouvido dele até o braço tremer. Nada. Só a corda indo embora, tique por tique, num homem que não ouve.",
+      "cronica": "{nome} gastou corda no ouvido de um maestro que não acordou.",
+      "efeitos": {
+       "brasa": -1
+      }
+     }
+    },
+    {
+     "id": "maquinas",
+     "rotulo": "Soltar o pêndulo do metrônomo",
+     "requer": {
+      "nivel": {
+       "maquinas": 1
+      }
+     },
+     "teste": {
+      "chave": "maquinas",
+      "dificuldade": 3
+     },
+     "ajuda": [
+      "ferramenta",
+      "lente"
+     ],
+     "sucesso": {
+      "texto": "O pêndulo solta e bate. Um, dois, três. A banda inteira respira no compasso: o tubista se endireita sozinho, o maestro pisca. Não tocam, mas estão ali, e seguem você com os olhos.",
+      "cronica": "{nome} pôs o metrônomo para bater, e a banda voltou a respirar.",
+      "efeitos": {
+       "lacos": 1,
+       "marca": "metronomo",
+       "marco": true
+      }
+     },
+     "falha": {
+      "texto": "A mola do metrônomo estava no fim e parte na sua mão. O pêndulo dá três batidas e morre. O tubista se inclina mais um dedo.",
+      "cronica": "{nome} partiu a mola do metrônomo da banda.",
+      "efeitos": {
+       "sanidade": -1
+      }
+     }
+    }
+   ]
+  },
+  {
+   "id": "ato1-telegrafo",
+   "ato": 1,
+   "titulo": "A fita pela metade",
+   "texto": "Na agência do telégrafo, o Zé Miúdo parou com a fita de papel entre os dedos, a mensagem pela metade. A porta de grade está trancada por dentro e a chave está na cintura dele. Pela janela alta dá para ler o começo: 'CHEGO TREM TRES E CINCO PARA'.",
+   "abordagens": [
+    {
+     "id": "destreza",
+     "rotulo": "Pescar a fita pela grade",
+     "teste": {
+      "chave": "destreza",
+      "dificuldade": 6
+     },
+     "ajuda": [
+      "ferramenta"
+     ],
+     "sucesso": {
+      "texto": "Com a chave de corda amarrada num barbante, você fisga a fita e puxa sem rasgar. O resto diz: 'EXECUCAO HIPOTECA PRACA INTEIRA PT PROENCA BANCO'. A praça. A oficina. Tudo.",
+      "cronica": "{nome} pescou a fita do telégrafo e leu que o banco vinha tomar a praça.",
+      "efeitos": {
+       "item": "fita",
+       "marca": "telegrama",
+       "marco": true
+      }
+     },
+     "falha": {
+      "texto": "A fita rasga no meio. Você fica com 'HIPOTECA PRACA' na mão e o nome de quem assina do lado de dentro, fora do alcance.",
+      "cronica": "{nome} rasgou a fita do telégrafo e ficou com metade da notícia.",
+      "efeitos": {
+       "marca": "telegrama",
+       "brasa": -1
+      }
+     }
+    },
+    {
+     "id": "percepcao",
+     "rotulo": "Ler os furos de longe",
+     "teste": {
+      "chave": "percepcao",
+      "dificuldade": 6
+     },
+     "ajuda": [
+      "lente"
+     ],
+     "sucesso": {
+      "texto": "Ponto, traço, traço. Você lê a fita inteira pelo vidro, com a lupa, soletrando baixo. Hipoteca. Praça inteira. Às três e cinco. Alguém nesta cidade tinha um motivo para que as três e cinco não chegassem.",
+      "cronica": "{nome} leu o telegrama do banco pelos furos da fita, do lado de fora.",
+      "efeitos": {
+       "marca": "telegrama",
+       "marco": true
+      }
+     },
+     "falha": {
+      "texto": "Os furos embaralham. Você lê 'hipoteca', ou talvez 'hipótese', e fica com dor atrás dos olhos e uma certeza pela metade.",
+      "cronica": "{nome} forçou a vista na fita do telégrafo e não teve certeza do que leu.",
+      "efeitos": {
+       "sanidade": -1
+      }
+     }
+    },
+    {
+     "id": "presenca",
+     "rotulo": "Acordar o Zé Miúdo no grito",
+     "teste": {
+      "chave": "presenca",
+      "dificuldade": 7
+     },
+     "sucesso": {
+      "texto": "Você grita o nome dele com o relógio encostado na grade. Zé Miúdo pisca, vê você, e lê a fita em voz alta sem entender o que está lendo. Depois para de novo, de boca aberta.",
+      "cronica": "{nome} acordou o telegrafista no grito e ouviu a notícia do banco.",
+      "efeitos": {
+       "marca": "telegrama",
+       "lacos": 1
+      }
+     },
+     "falha": {
+      "texto": "O grito bate na cidade e volta em pedaços. Zé Miúdo não se mexe. Um vidro da agência racha de cima a baixo, devagar, e para no meio.",
+      "cronica": "{nome} gritou na porta do telégrafo e só rachou um vidro.",
+      "efeitos": {
+       "sanidade": -2
+      }
+     }
+    },
+    {
+     "id": "nico",
+     "rotulo": "Passar o Nico pela janela",
+     "requer": {
+      "companheiro": "nico"
+     },
+     "livre": true,
+     "resultado": {
+      "texto": "Nico sobe nos seus ombros, passa pela bandeira da janela e volta com a fita inteira e a cara séria. 'Não sei ler', ele diz, 'mas quem escreveu isso não é daqui.' Vocês demoram a descer.",
+      "cronica": "{nome} passou Nico pela janela do telégrafo e saiu com a fita do banco.",
+      "efeitos": {
+       "item": "fita",
+       "marca": "telegrama",
+       "brasa": -1
+      }
+     }
+    }
+   ]
+  },
+  {
+   "id": "ato2-barbearia",
+   "ato": 2,
+   "titulo": "A navalha do Seu Quincas",
+   "texto": "Na barbearia, Seu Quincas parou com a navalha encostada no pescoço ensaboado do juiz de paz. A mão dele treme, muito devagar: ele está acordando, e a lâmina anda junto. O juiz tem os olhos abertos e sabe exatamente o que está acontecendo. Atrás de você, na rua, o metrônomo bate.",
+   "abordagens": [
+    {
+     "id": "destreza",
+     "rotulo": "Tirar a navalha da mão dele",
+     "teste": {
+      "chave": "destreza",
+      "dificuldade": 6
+     },
+     "ajudantes": [
+      {
+       "nome": "o aprendiz, que acordou com o compasso",
+       "nivel": 1
+      }
+     ],
+     "sucesso": {
+      "texto": "Dedo por dedo, você abre a mão do barbeiro e a navalha sai limpa. O juiz solta o ar que segurava desde as três. 'Menina', ele diz devagar, 'seu pai assinou por todos nós.'",
+      "cronica": "{nome} tirou a navalha da mão do barbeiro e ouviu do juiz que o pai assinou por todos.",
+      "efeitos": {
+       "lacos": 1,
+       "marca": "fiador"
+      }
+     },
+     "falha": {
+      "texto": "A navalha escapa e risca a sua palma antes de cair na bacia. O juiz está inteiro. Você enrola a mão na toalha quente do freguês e o sangue demora a decidir se corre.",
+      "cronica": "{nome} cortou a própria mão para salvar o pescoço do juiz.",
+      "efeitos": {
+       "vida": -2,
+       "lacos": 1
+      }
+     }
+    },
+    {
+     "id": "inteligencia",
+     "rotulo": "Travar o braço com a cadeira",
+     "teste": {
+      "chave": "inteligencia",
+      "dificuldade": 6
+     },
+     "ajuda": [
+      "ferramenta"
+     ],
+     "sucesso": {
+      "texto": "A cadeira de barbeiro tem uma alavanca de inclinar. Você a baixa um dente e o pescoço do juiz desce para longe da lâmina. Seu Quincas termina o gesto no ar, raspando nada.",
+      "cronica": "{nome} salvou o juiz baixando a cadeira do barbeiro um dente.",
+      "efeitos": {
+       "lacos": 1,
+       "marco": true
+      }
+     },
+     "falha": {
+      "texto": "A alavanca desce de uma vez e o juiz escorrega da cadeira para o chão, ensaboado e a salvo. Ele não diz nada. Fica olhando você de baixo, e dá para ler o que pensa.",
+      "cronica": "{nome} derrubou o juiz de paz da cadeira do barbeiro.",
+      "efeitos": {
+       "sanidade": -1
+      }
+     }
+    },
+    {
+     "id": "presenca",
+     "rotulo": "Falar com o barbeiro até ele parar",
+     "teste": {
+      "chave": "presenca",
+      "dificuldade": 7
+     },
+     "sucesso": {
+      "texto": "Você fala do tempo, do preço do sabão, de qualquer coisa, na voz de quem não tem pressa. A mão de Seu Quincas para de tremer. Ele afasta a navalha sozinho e pergunta que horas são.",
+      "cronica": "{nome} conversou com o barbeiro até a mão dele sossegar.",
+      "efeitos": {
+       "lacos": 1
+      }
+     },
+     "falha": {
+      "texto": "Sua voz sai fina. A mão dele treme mais. O juiz fecha os olhos, e você acaba empurrando a cadeira com o pé, sem jeito nenhum, gastando um tempo que só o seu relógio conta.",
+      "cronica": "{nome} perdeu a voz na barbearia e resolveu no empurrão.",
+      "efeitos": {
+       "brasa": -1
+      }
+     }
+    },
+    {
+     "id": "fita",
+     "rotulo": "Mostrar a fita ao juiz",
+     "requer": {
+      "item": "fita"
+     },
+     "livre": true,
+     "resultado": {
+      "texto": "Você segura a fita diante dos olhos do juiz. Ele lê e a cor volta ao rosto dele de raiva. Ergue a mão, afasta a navalha por conta própria e diz, mastigando: 'Seu pai foi fiador. De todos. Sem contar a ninguém.'",
+      "cronica": "{nome} mostrou a fita ao juiz de paz e soube que o pai foi fiador da praça inteira.",
+      "efeitos": {
+       "marca": "fiador",
+       "lacos": 1,
+       "brasa": -1
+      }
+     }
+    }
+   ]
+  },
+  {
+   "id": "ato2-armazem",
+   "ato": 2,
+   "titulo": "O lampião do Salim",
+   "texto": "No armazém do Salim, um lampião aceso caiu da prateleira e parou a um palmo do chão, onde um galão de querosene vazou e parou também, brilhante. Quando o tempo voltar, o armazém vai junto com meia rua. Salim está no balcão, parado no meio de uma conta de somar.",
+   "abordagens": [
+    {
+     "id": "destreza",
+     "rotulo": "Colher o lampião no ar",
+     "teste": {
+      "chave": "destreza",
+      "dificuldade": 7
+     },
+     "sucesso": {
+      "texto": "Você pega o lampião pela alça como quem tira uma fruta do pé e sopra a chama, que demora a entender que apagou. Deixa-o no balcão, ao lado da conta de Salim, que estava errada.",
+      "cronica": "{nome} colheu no ar o lampião que ia queimar o armazém.",
+      "efeitos": {
+       "lacos": 1
+      }
+     },
+     "falha": {
+      "texto": "A alça está quente e você solta. O lampião desce mais um dedo e para de novo, pior do que estava. Você apaga a chama com a manga, e a manga fica.",
+      "cronica": "{nome} queimou a manga apagando o lampião do armazém.",
+      "efeitos": {
+       "vida": -1,
+       "lacos": 1
+      }
+     }
+    },
+    {
+     "id": "percepcao",
+     "rotulo": "Achar por onde o querosene foge",
+     "teste": {
+      "chave": "percepcao",
+      "dificuldade": 6
+     },
+     "ajuda": [
+      "lente"
+     ],
+     "sucesso": {
+      "texto": "O fio de querosene vai para o ralo da calçada, e do ralo para a rua inteira. Você calça o galão, enxuga o caminho com sacos de farinha e leva um balde, por via das dúvidas.",
+      "cronica": "{nome} estancou o querosene do armazém antes que chegasse à rua.",
+      "efeitos": {
+       "lacos": 1,
+       "item": "balde"
+      }
+     },
+     "falha": {
+      "texto": "Você enxuga o que vê e não vê o que escorreu por baixo do balcão. Fica o cheiro, e a certeza ruim de ter deixado alguma coisa para depois.",
+      "cronica": "{nome} enxugou metade do querosene e deixou a outra metade.",
+      "efeitos": {
+       "sanidade": -1,
+       "marca": "querosene"
+      }
+     }
+    },
+    {
+     "id": "vontade",
+     "rotulo": "Acordar o Salim para ajudar",
+     "teste": {
+      "chave": "vontade",
+      "dificuldade": 7
+     },
+     "sucesso": {
+      "texto": "Relógio no ouvido dele, e paciência. Salim acorda no susto, vê o lampião, e resolve tudo em quatro gestos de quem conhece a própria loja. Depois enche o seu bolso de licor, sem cobrar.",
+      "cronica": "{nome} acordou Salim a tempo de salvar o próprio armazém.",
+      "efeitos": {
+       "lacos": 1,
+       "item": "licor"
+      }
+     },
+     "falha": {
+      "texto": "Salim não acorda. Você acaba fazendo sozinha, mal, com a corda indo embora no ouvido de um homem que continua somando.",
+      "cronica": "{nome} gastou corda tentando acordar Salim e apagou o lampião sozinha.",
+      "efeitos": {
+       "brasa": -1
+      }
+     }
+    },
+    {
+     "id": "banda",
+     "rotulo": "Chamar a banda para os baldes",
+     "requer": {
+      "marca": "metronomo"
+     },
+     "livre": true,
+     "resultado": {
+      "texto": "Eles vieram atrás de você, no compasso, devagar. Você aponta o poço e eles fazem fila sem palavra: bombo, clarinete, tuba, baldes de mão em mão. O armazém fica encharcado e inteiro. Leva tempo, e gente.",
+      "cronica": "{nome} pôs a banda para passar baldes e encharcou o armazém do Salim.",
+      "efeitos": {
+       "lacos": 2,
+       "marca": "mutirao",
+       "brasa": -1,
+       "marco": true
+      }
+     }
+    }
+   ]
+  },
+  {
+   "id": "ato2-ponte",
+   "ato": 2,
+   "titulo": "O trem das três e cinco",
+   "texto": "O trem parou na ponte, a cem passos da estação, com a fumaça dura sobre a chaminé. Num vagão de primeira, um homem de colete cinza se mexe: tem um cronômetro do banco aberto na mão e a porta trancada por dentro. É o Dr. Proença. Ele vê você e não abre.",
+   "abordagens": [
+    {
+     "id": "forca",
+     "rotulo": "Forçar a porta do vagão",
+     "teste": {
+      "chave": "forca",
+      "dificuldade": 8
+     },
+     "ajuda": [
+      "alavanca"
+     ],
+     "ajudantes": [
+      {
+       "nome": "o foguista, meio acordado",
+       "nivel": 2
+      }
+     ],
+     "sucesso": {
+      "texto": "A porta cede. O Dr. Proença recua até a janela, abraçado à pasta. 'Eu não pedi este serviço', ele diz. Entrega o cronômetro como quem entrega uma arma, e fica com a pasta.",
+      "cronica": "{nome} arrombou o vagão do homem do banco e saiu com o cronômetro dele.",
+      "efeitos": {
+       "item": "cronometro",
+       "marca": "assustou"
+      }
+     },
+     "falha": {
+      "texto": "A porta do vagão é de ferro e não deve nada a você. Seu ombro é que fica devendo. Lá dentro, o homem fecha a cortina.",
+      "cronica": "{nome} machucou o ombro na porta do vagão, e o homem do banco fechou a cortina.",
+      "efeitos": {
+       "vida": -2,
+       "marca": "assustou"
+      }
+     }
+    },
+    {
+     "id": "inteligencia",
+     "rotulo": "Ler a pasta pelo vidro",
+     "teste": {
+      "chave": "inteligencia",
+      "dificuldade": 6
+     },
+     "ajuda": [
+      "lente"
+     ],
+     "sucesso": {
+      "texto": "A pasta está aberta no banco. Dezoito nomes da praça, dezoito dívidas, e embaixo de todas a mesma assinatura de fiador, na letra miúda do seu pai. Ele devia por todo mundo.",
+      "cronica": "{nome} leu pelo vidro do vagão que o pai era fiador de dezoito vizinhos.",
+      "efeitos": {
+       "marca": "fiador",
+       "marco": true
+      }
+     },
+     "falha": {
+      "texto": "O vidro está embaçado da respiração dele, a única que embaça alguma coisa na cidade. Você lê números, e nenhum nome.",
+      "cronica": "{nome} tentou ler a pasta do banco por um vidro embaçado.",
+      "efeitos": {
+       "brasa": -1
+      }
+     }
+    },
+    {
+     "id": "presenca",
+     "rotulo": "Pedir prazo em nome da praça",
+     "teste": {
+      "chave": "presenca",
+      "dificuldade": 8
+     },
+     "ajudantes": [
+      {
+       "nome": "quem veio atrás de você",
+       "nivel": 1
+      }
+     ],
+     "sucesso": {
+      "texto": "Você fala pela janela, sem levantar a voz. Ele escuta até o fim. Depois escreve trinta dias num papel timbrado, assina, e passa por baixo da porta. 'Se o tempo voltar', diz. 'Se.'",
+      "cronica": "{nome} pediu prazo ao homem do banco e saiu com trinta dias assinados.",
+      "efeitos": {
+       "lacos": 1,
+       "marca": "prazo",
+       "marco": true
+      }
+     },
+     "falha": {
+      "texto": "Ele ouve e balança a cabeça. 'A senhora fala por quem?' Você olha para trás e a ponte está vazia. Ele fecha a cortina com delicadeza.",
+      "cronica": "{nome} pediu prazo ao banco sem ter quem falasse com ela.",
+      "efeitos": {
+       "sanidade": -2
+      }
+     }
+    },
+    {
+     "id": "mutirao",
+     "rotulo": "Chegar com a rua inteira atrás",
+     "requer": {
+      "marca": "mutirao"
+     },
+     "livre": true,
+     "resultado": {
+      "texto": "Não precisa falar. A banda, o Salim, o barbeiro de avental, todos molhados, param na cabeceira da ponte. O Dr. Proença olha um por um, abre a porta e assina trinta dias no joelho.",
+      "cronica": "{nome} apareceu na ponte com a rua inteira, e o banco deu trinta dias.",
+      "efeitos": {
+       "marca": "prazo",
+       "lacos": 1
+      }
+     }
+    },
+    {
+     "id": "fiador",
+     "rotulo": "Dizer que você sabe quem assinou",
+     "requer": {
+      "marca": "fiador"
+     },
+     "teste": {
+      "chave": "inteligencia",
+      "dificuldade": 5
+     },
+     "sucesso": {
+      "texto": "'Meu pai é o fiador. O senhor veio executar um homem só.' Ele empalidece: ninguém do banco contou assim. Abre a porta, mostra a pasta e deixa você levar o cronômetro. 'Para ele', diz.",
+      "cronica": "{nome} disse ao banco que sabia do fiador e ganhou o cronômetro para levar ao pai.",
+      "efeitos": {
+       "item": "cronometro",
+       "marca": "prazo",
+       "lacos": 1
+      }
+     },
+     "falha": {
+      "texto": "Você diz, e a voz falha no nome do seu pai. O Dr. Proença baixa os olhos. 'Sinto muito', ele diz, e é verdade, e não muda nada.",
+      "cronica": "{nome} falou do pai ao homem do banco e não aguentou terminar.",
+      "efeitos": {
+       "sanidade": -1
+      }
+     }
+    }
+   ]
+  },
+  {
+   "id": "ato2-porta",
+   "ato": 2,
+   "titulo": "A porta da torre",
+   "texto": "A rua acaba no pé da torre. A porta de ferro está trancada por dentro, e a fechadura é do seu pai: você conhece o desenho. No vão da escada, alguma coisa repete com a voz de todo mundo: 'três horas, três horas'. Nico aperta a caixa de engraxate contra o peito.",
+   "abordagens": [
+    {
+     "id": "forca",
+     "rotulo": "Arrombar a porta",
+     "teste": {
+      "chave": "forca",
+      "dificuldade": 9
+     },
+     "ajuda": [
+      "alavanca"
+     ],
+     "sucesso": {
+      "texto": "A dobradiça de cima cede primeiro. A porta deita para dentro com um estrondo que sobe a escada inteira. Lá no alto, um passo. Alguém ouviu, e está acordado.",
+      "cronica": "{nome} arrombou a porta da torre, e alguém lá em cima ouviu.",
+      "efeitos": {
+       "marca": "arrombou"
+      }
+     },
+     "falha": {
+      "texto": "A porta é mais velha que a cidade e mais teimosa. Você desiste com as mãos abertas em bolhas e entra, afinal, pelo basculante da casa do sineiro, de mau jeito.",
+      "cronica": "{nome} perdeu para a porta da torre e entrou pelo basculante.",
+      "efeitos": {
+       "vida": -2,
+       "brasa": -1
+      }
+     }
+    },
+    {
+     "id": "percepcao",
+     "rotulo": "Lembrar onde ele guarda a cópia",
+     "teste": {
+      "chave": "percepcao",
+      "dificuldade": 7
+     },
+     "sucesso": {
+      "texto": "Seu pai nunca confiou em bolso. Terceiro tijolo à esquerda do batente, solto desde que você era pequena. A chave está lá, embrulhada num lenço com as iniciais da sua mãe.",
+      "cronica": "{nome} achou a chave da torre atrás do tijolo, no lenço da mãe.",
+      "efeitos": {
+       "marca": "lenco",
+       "marco": true
+      }
+     },
+     "falha": {
+      "texto": "Você tateia tijolo por tijolo e não acha. A voz do vão da escada conta junto com você: três, três, três. Por fim a fechadura cede a um grampo, e você a um arrepio.",
+      "cronica": "{nome} abriu a torre com um grampo, ouvindo a escada contar.",
+      "efeitos": {
+       "sanidade": -2
+      }
+     }
+    },
+    {
+     "id": "fe",
+     "rotulo": "Chamar pelo pai através da porta",
+     "teste": {
+      "chave": "fe",
+      "dificuldade": 7
+     },
+     "sucesso": {
+      "texto": "Você chama uma vez, do jeito de casa. Demora. Depois a voz dele desce pela escada, cansada e inteira: 'Não sobe, Dora.' E o ferrolho, lá dentro, corre sozinho.",
+      "cronica": "{nome} chamou pelo pai, que pediu que ela não subisse e abriu a porta assim mesmo.",
+      "efeitos": {
+       "marca": "ouviu-pai",
+       "lacos": 1
+      }
+     },
+     "falha": {
+      "texto": "Quem responde é o vão da escada, com a sua própria voz de criança: 'três horas, pai'. Você encosta a testa no ferro até passar.",
+      "cronica": "{nome} chamou pelo pai e ouviu a própria voz de criança responder.",
+      "efeitos": {
+       "sanidade": -3
+      }
+     }
+    },
+    {
+     "id": "eco",
+     "rotulo": "Enfrentar a voz da escada",
+     "combate": "eco",
+     "vitoria": {
+      "texto": "Você acerta o seu relógio em voz alta, minuto por minuto, por cima da voz. Ela gagueja, erra a hora e some. A fechadura, sem ninguém para vigiar, cede ao primeiro grampo.",
+      "cronica": "{nome} calou o Eco das Três dizendo a hora certa em voz alta.",
+      "efeitos": {
+       "marca": "calou-eco"
+      }
+     },
+     "derrota": {
+      "texto": "A voz ganha. Por um tempo você não sabe que horas são nem quantos anos tem. Nico puxa a sua manga até você voltar, e a porta, não se sabe como, está aberta.",
+      "cronica": "{nome} perdeu a hora diante do Eco das Três e voltou pela mão de Nico."
+     },
+     "fuga": {
+      "texto": "Você tapa os ouvidos e recua até a rua. A voz não segue. Fica lá dentro, contando, e você dá a volta pela casa do sineiro.",
+      "cronica": "{nome} fugiu da voz da escada e deu a volta pela casa do sineiro.",
+      "efeitos": {
+       "brasa": -1
+      }
+     }
+    },
+    {
+     "id": "ensinar",
+     "rotulo": "Ensinar Nico a abrir a fechadura",
+     "requer": {
+      "nivel": {
+       "maquinas": 1
+      },
+      "marca": "promessa",
+      "companheiro": "nico"
+     },
+     "teste": {
+      "chave": "maquinas",
+      "dificuldade": 3
+     },
+     "ajuda": [
+      "ferramenta"
+     ],
+     "sucesso": {
+      "texto": "'Depois' é agora. Você segura as mãos dele em volta do grampo e diz o que sentir: um degrau, outro, o terceiro. A lingueta salta. Nico olha os próprios dedos como se fossem novos.",
+      "cronica": "{nome} cumpriu a promessa e ensinou Nico a abrir a fechadura da torre.",
+      "efeitos": {
+       "lacos": 1,
+       "marca": "ensinou",
+       "marco": true
+      }
+     },
+     "falha": {
+      "texto": "As mãos dele são pequenas e o grampo entorta. Você acaba abrindo sozinha, depressa, e ele percebe. 'Depois', ele repete, sem olhar para você.",
+      "cronica": "{nome} começou a ensinar Nico e acabou abrindo a fechadura sozinha.",
+      "efeitos": {
+       "sanidade": -1
+      }
+     }
+    }
+   ]
+  },
+  {
+   "id": "ato3-escada",
+   "ato": 3,
+   "titulo": "Cento e vinte degraus",
+   "texto": "A escada sobe em caracol por dentro da torre, e no meio do vão descem as correntes dos pesos, imóveis. Faltam degraus: alguém os tirou de propósito, três aqui, dois ali. Lá embaixo, pela porta aberta, entra o som da rua acordada. Lá em cima, nada.",
+   "abordagens": [
+    {
+     "id": "fisico",
+     "rotulo": "Subir no fôlego",
+     "teste": {
+      "chave": "fisico",
+      "dificuldade": 7
+     },
+     "sucesso": {
+      "texto": "Você sobe sem parar, pulando os vãos, com o relógio batendo contra o peito. No último patamar o ar é mais frio e cheira a óleo de máquina. Cheira a casa.",
+      "cronica": "{nome} subiu os cento e vinte degraus da torre de um fôlego só."
+     },
+     "falha": {
+      "texto": "No degrau setenta as pernas dizem que não. Você se senta no escuro e ouve o próprio relógio gastar o que você não tem para gastar.",
+      "cronica": "{nome} parou sem fôlego no meio da escada da torre.",
+      "efeitos": {
+       "vida": -1,
+       "brasa": -1
+      }
+     }
+    },
+    {
+     "id": "percepcao",
+     "rotulo": "Ler a escada antes de pisar",
+     "teste": {
+      "chave": "percepcao",
+      "dificuldade": 7
+     },
+     "ajuda": [
+      "lente"
+     ],
+     "sucesso": {
+      "texto": "Os degraus tirados têm ordem: são os que rangem. Seu pai não quis impedir ninguém de subir. Quis ouvir quem subia. Você pisa só nos mudos e chega sem aviso.",
+      "cronica": "{nome} entendeu que o pai tirou os degraus que rangiam e subiu em silêncio.",
+      "efeitos": {
+       "marca": "silencio",
+       "marco": true
+      }
+     },
+     "falha": {
+      "texto": "Você conta errado e o pé acha o vazio. A mão acha a corrente do peso, fria, e você fica pendurada um instante sobre a torre inteira.",
+      "cronica": "{nome} pisou no vazio e se agarrou à corrente dos pesos.",
+      "efeitos": {
+       "sanidade": -2
+      }
+     }
+    },
+    {
+     "id": "vontade",
+     "rotulo": "Subir sem ouvir a escada contar",
+     "teste": {
+      "chave": "vontade",
+      "dificuldade": 8
+     },
+     "sucesso": {
+      "texto": "A voz do vão recomeça: três, três. Você responde com a hora do seu relógio, degrau por degrau, até ela desistir. Chega lá em cima rouca e certa do minuto em que vive.",
+      "cronica": "{nome} subiu dizendo a hora certa a cada degrau.",
+      "efeitos": {
+       "marca": "hora-certa"
+      }
+     },
+     "falha": {
+      "texto": "No meio da subida você se pega contando com a voz: três, três. Não sabe há quantos degraus. Nico belisca o seu braço e você volta, envergonhada.",
+      "cronica": "{nome} começou a contar com a escada e precisou de um beliscão.",
+      "efeitos": {
+       "sanidade": -3
+      }
+     }
+    },
+    {
+     "id": "maos-dadas",
+     "rotulo": "Subir com Nico no compasso",
+     "requer": {
+      "marca": "ensinou",
+      "companheiro": "nico"
+     },
+     "teste": {
+      "chave": "destreza",
+      "dificuldade": 5
+     },
+     "ajudantes": [
+      {
+       "nome": "Nico, que agora confia",
+       "nivel": 2
+      }
+     ],
+     "sucesso": {
+      "texto": "Ele vai na frente, leve, testando cada degrau com o pé e dizendo 'bom' ou 'não'. O despertador de lata no bolso dele e o seu relógio batem quase juntos. Quase.",
+      "cronica": "{nome} subiu a torre atrás de Nico, que testava os degraus um por um.",
+      "efeitos": {
+       "lacos": 1
+      }
+     },
+     "falha": {
+      "texto": "Um degrau que ele chamou de bom não era. Você o segura pelo colarinho a tempo, e os dois ficam um minuto inteiro sem dizer nada, colados à parede.",
+      "cronica": "{nome} segurou Nico pelo colarinho quando um degrau cedeu.",
+      "efeitos": {
+       "sanidade": -1
+      }
+     }
+    }
+   ]
+  },
+  {
+   "id": "ato3-sineiro",
+   "ato": 3,
+   "titulo": "A badalada que falta",
+   "texto": "Na casa do sino, Seu Tibúrcio parou com a corda nas duas mãos e o corpo jogado para trás. O sino deu duas das três badaladas. A terceira está no ar, presa no bronze, e dá para sentir nos dentes. Pela janela, a praça olha para cima.",
+   "abordagens": [
+    {
+     "id": "forca",
+     "rotulo": "Puxar a corda do sino",
+     "teste": {
+      "chave": "forca",
+      "dificuldade": 8
+     },
+     "ajudantes": [
+      {
+       "nome": "Seu Tibúrcio, que quase acorda",
+       "nivel": 1
+      }
+     ],
+     "sucesso": {
+      "texto": "O bronze se mexe um dedo e para: o relógio grande não deixa. Mas você sentiu onde prende. Não é no sino. É mais acima, na máquina, uma coisa pequena segurando uma coisa enorme.",
+      "cronica": "{nome} puxou a corda do sino e sentiu que a trava estava na máquina.",
+      "efeitos": {
+       "marca": "trava"
+      }
+     },
+     "falha": {
+      "texto": "A corda queima as suas mãos e não cede. O sino responde com um gemido baixo que desce a torre e faz a praça inteira dar um passo para trás.",
+      "cronica": "{nome} queimou as mãos na corda do sino, que só gemeu.",
+      "efeitos": {
+       "vida": -2
+      }
+     }
+    },
+    {
+     "id": "sabedoria",
+     "rotulo": "Entender o que a terceira badalada solta",
+     "teste": {
+      "chave": "sabedoria",
+      "dificuldade": 7
+     },
+     "sucesso": {
+      "texto": "Duas badaladas avisam, a terceira confirma. Enquanto ela não soar, as três não aconteceram de todo. Quem travou o relógio só precisou segurar isto. E quem soltar, só precisa deixar soar.",
+      "cronica": "{nome} entendeu que a cidade esperava a terceira badalada das três.",
+      "efeitos": {
+       "marca": "trava",
+       "marco": true
+      }
+     },
+     "falha": {
+      "texto": "Você fica muito tempo de olhos fechados, com a badalada presa zunindo no crânio. Quando abre, a luz da janela mudou de lugar. Só para você.",
+      "cronica": "{nome} ficou ouvindo a badalada presa até perder a conta do tempo.",
+      "efeitos": {
+       "brasa": -1,
+       "sanidade": -1
+      }
+     }
+    },
+    {
+     "id": "presenca",
+     "rotulo": "Acordar o sineiro",
+     "teste": {
+      "chave": "presenca",
+      "dificuldade": 8
+     },
+     "sucesso": {
+      "texto": "Seu Tibúrcio abre um olho. 'Seu pai subiu chorando', ele diz, sem largar a corda. 'Pediu que eu não tocasse a terceira. Eu obedeci. Faz quarenta anos que obedeço a essa família.'",
+      "cronica": "{nome} acordou o sineiro e soube que o pai subiu chorando.",
+      "efeitos": {
+       "lacos": 1,
+       "marca": "chorando"
+      }
+     },
+     "falha": {
+      "texto": "Você chama, sacode, pede. Seu Tibúrcio continua jogado para trás, fiel. Você solta o ombro dele com a impressão de ter sido grosseira com um santo.",
+      "cronica": "{nome} sacudiu o sineiro, que não largou a corda.",
+      "efeitos": {
+       "sanidade": -1
+      }
+     }
+    },
+    {
+     "id": "valsa",
+     "rotulo": "Pedir a valsa pela janela",
+     "requer": {
+      "marca": "mutirao"
+     },
+     "livre": true,
+     "resultado": {
+      "texto": "Você faz o gesto do maestro lá de cima, e a banda entende. A valsa das três sobe a torre, torta, molhada, sem a tuba no começo. Em algum lugar acima de você, uma ferramenta cai no chão.",
+      "cronica": "{nome} pediu a valsa pela janela da torre, e a praça inteira tocou para o pai dela.",
+      "efeitos": {
+       "lacos": 1,
+       "marca": "valsa",
+       "brasa": -1
+      }
+     }
+    }
+   ]
+  },
+  {
+   "id": "ato3-pesos",
+   "ato": 3,
+   "titulo": "A sala dos pesos",
+   "texto": "Os três pesos do relógio grande estão no alto do curso, calçados com um toco de madeira. No prego da parede, o paletó do seu pai. No bolso de dentro, um maço de cartas na letra da sua mãe, amarrado com fio de relojoeiro. A de cima tem o seu nome.",
+   "abordagens": [
+    {
+     "id": "destreza",
+     "rotulo": "Tirar o calço dos pesos",
+     "teste": {
+      "chave": "destreza",
+      "dificuldade": 8
+     },
+     "ajuda": [
+      "ferramenta",
+      "alavanca"
+     ],
+     "sucesso": {
+      "texto": "O calço sai e os pesos não despencam: ficam, tensos, pedindo para descer. A máquina toda agora só depende de uma coisa, lá em cima. Você tirou de seu pai uma desculpa.",
+      "cronica": "{nome} tirou o calço dos pesos e deixou o relógio da torre pronto para andar.",
+      "efeitos": {
+       "marca": "pesos"
+      }
+     },
+     "falha": {
+      "texto": "O toco escapa e um dos pesos desce meio metro num tranco que sacode a torre. Lá em cima, seu pai grita o seu nome inteiro, como quando você era pequena e quebrava alguma coisa.",
+      "cronica": "{nome} deixou um peso do relógio despencar, e o pai gritou seu nome.",
+      "efeitos": {
+       "sanidade": -2,
+       "marca": "pesos"
+      }
+     }
+    },
+    {
+     "id": "inteligencia",
+     "rotulo": "Seguir a máquina com os olhos",
+     "teste": {
+      "chave": "inteligencia",
+      "dificuldade": 8
+     },
+     "ajuda": [
+      "lente"
+     ],
+     "sucesso": {
+      "texto": "Peso, tambor, rodas, escape. Você sobe a máquina de cabeça e chega ao único lugar onde uma coisa do tamanho de um anel para uma coisa do tamanho de uma cidade. E sabe de que anel se trata.",
+      "cronica": "{nome} seguiu a máquina de cabeça e adivinhou que era a aliança da mãe que travava tudo.",
+      "efeitos": {
+       "marca": "alianca",
+       "marco": true
+      }
+     },
+     "falha": {
+      "texto": "A máquina é dele, não sua, e guarda os segredos dele. Você se perde na terceira roda e fica com raiva de um homem que ainda nem viu.",
+      "cronica": "{nome} se perdeu na máquina do pai e ficou com raiva dele.",
+      "efeitos": {
+       "sanidade": -1,
+       "brasa": -1
+      }
+     }
+    },
+    {
+     "id": "fe",
+     "rotulo": "Abrir a carta com o seu nome",
+     "teste": {
+      "chave": "fe",
+      "dificuldade": 7
+     },
+     "sucesso": {
+      "texto": "'Dora: fiz o seu relógio para o dia em que seu pai tiver medo. Ele é bom e tem medo de dever. Não tome nada dele. Peça.' Você dobra a carta e guarda do lado do relógio.",
+      "cronica": "{nome} leu a carta da mãe, que pedia para não tomar nada do pai: pedir.",
+      "efeitos": {
+       "item": "carta",
+       "marca": "carta"
+      }
+     },
+     "falha": {
+      "texto": "Você abre e não consegue passar da primeira linha, que é só o seu nome na letra dela. Guarda a carta fechada. Pesa mais do que os três pesos.",
+      "cronica": "{nome} não conseguiu ler a carta da mãe e a guardou fechada.",
+      "efeitos": {
+       "item": "carta",
+       "sanidade": -2
+      }
+     }
+    },
+    {
+     "id": "maquinas",
+     "rotulo": "Desenhar o escape no pó",
+     "requer": {
+      "nivel": {
+       "maquinas": 2
+      }
+     },
+     "teste": {
+      "chave": "maquinas",
+      "dificuldade": 4
+     },
+     "ajuda": [
+      "ferramenta",
+      "lente"
+     ],
+     "sucesso": {
+      "texto": "Você risca a âncora e a roda de escape no pó do assoalho, do jeito que ele ensinou. Um anel no terceiro dente trava sem quebrar. Tirado com jeito, sai. Arrancado, leva o dente junto.",
+      "cronica": "{nome} desenhou o escape no pó e soube como a aliança sairia sem quebrar o relógio.",
+      "efeitos": {
+       "marca": "alianca",
+       "lacos": 1,
+       "marco": true
+      }
+     },
+     "falha": {
+      "texto": "O desenho sai errado duas vezes. Na terceira você entende que ele mudou a máquina desde que ensinou você, e que não contou.",
+      "cronica": "{nome} descobriu, riscando no pó, que o pai tinha mudado a máquina sem contar.",
+      "efeitos": {
+       "sanidade": -1
+      }
+     }
+    }
+   ]
+  },
+  {
+   "id": "ato3-alcapao",
+   "ato": 3,
+   "titulo": "O alçapão",
+   "texto": "O último lance é uma escada de mão até um alçapão fechado. Por cima dele, o peso de um homem sentado. 'Dora', diz seu pai, através da madeira. 'Eu ouvi a banda. Desce, filha. Aqui em cima está tudo certo. São três horas e ninguém deve nada a ninguém.'",
+   "abordagens": [
+    {
+     "id": "forca",
+     "rotulo": "Forçar o alçapão",
+     "teste": {
+      "chave": "forca",
+      "dificuldade": 10
+     },
+     "ajuda": [
+      "alavanca"
+     ],
+     "sucesso": {
+      "texto": "A tampa sobe com ele em cima. Seu pai rola para o lado e fica no chão, olhando você entrar como se entra em casa alheia. Não diz nada. Era o que você mais temia.",
+      "cronica": "{nome} forçou o alçapão com o pai sentado em cima.",
+      "efeitos": {
+       "marca": "forcou"
+      }
+     },
+     "falha": {
+      "texto": "Ele pesa, e pesa mais porque quer. A escada de mão range e você desce dois degraus sem querer, com o ombro latejando. 'Desce', ele repete, baixinho.",
+      "cronica": "{nome} tentou forçar o alçapão e perdeu para o peso do pai.",
+      "efeitos": {
+       "vida": -2,
+       "marca": "forcou"
+      }
+     }
+    },
+    {
+     "id": "inteligencia",
+     "rotulo": "Fazer as contas em voz alta",
+     "teste": {
+      "chave": "inteligencia",
+      "dificuldade": 8
+     },
+     "ajuda": [
+      "prova"
+     ],
+     "sucesso": {
+      "texto": "Dezoito dívidas, trinta dias, uma praça inteira trabalhando. Você soma em voz alta, devagar, como ele soma. Do outro lado, silêncio de quem confere. O peso sai de cima da tampa.",
+      "cronica": "{nome} fez as contas da praça em voz alta até o pai sair de cima do alçapão.",
+      "efeitos": {
+       "marca": "contas",
+       "lacos": 1
+      }
+     },
+     "falha": {
+      "texto": "'Conta de quem nunca deveu', ele diz. Você erra uma parcela, ele corrige através da madeira, e por um instante vocês são só dois relojoeiros discutindo. A tampa não abre.",
+      "cronica": "{nome} errou uma conta, e o pai corrigiu sem abrir o alçapão.",
+      "efeitos": {
+       "brasa": -1
+      }
+     }
+    },
+    {
+     "id": "fe",
+     "rotulo": "Sentar no degrau e esperar",
+     "teste": {
+      "chave": "fe",
+      "dificuldade": 8
+     },
+     "sucesso": {
+      "texto": "Você se senta, encosta a cabeça na madeira e deixa o seu relógio falar por você. Ele ouve o tique que a mulher dele fez. Depois de muito tempo, o trinco corre.",
+      "cronica": "{nome} esperou no degrau até o pai abrir o alçapão por conta própria.",
+      "efeitos": {
+       "marca": "esperou",
+       "brasa": -1,
+       "lacos": 1
+      }
+     },
+     "falha": {
+      "texto": "Você espera, e a corda vai. Ele espera melhor do que você: tem o tempo todo da cidade. Você acaba batendo na madeira com o punho, de raiva, e se arrepende na hora.",
+      "cronica": "{nome} perdeu a paciência e bateu no alçapão com o punho.",
+      "efeitos": {
+       "brasa": -2,
+       "sanidade": -1
+      }
+     }
+    },
+    {
+     "id": "prazo",
+     "rotulo": "Passar os trinta dias pela fresta",
+     "requer": {
+      "marca": "prazo"
+     },
+     "teste": {
+      "chave": "vontade",
+      "dificuldade": 4
+     },
+     "sucesso": {
+      "texto": "Você enfia o papel timbrado na fresta e não diz nada. Ele lê duas vezes: dá para ouvir o papel. 'Quem pediu isto?' 'A rua inteira, pai.' O trinco corre sozinho.",
+      "cronica": "{nome} passou o prazo do banco pela fresta, e o pai abriu o alçapão.",
+      "efeitos": {
+       "marca": "pai-leu",
+       "lacos": 1,
+       "marco": true
+      }
+     },
+     "falha": {
+      "texto": "Sua mão treme e o papel rasga na fresta. Ele lê a metade que chegou. 'Trinta o quê, Dora?' Você tem de explicar pela madeira, e explicar custa.",
+      "cronica": "{nome} rasgou o prazo do banco na fresta do alçapão.",
+      "efeitos": {
+       "marca": "pai-leu",
+       "brasa": -1
+      }
+     }
+    },
+    {
+     "id": "fiador",
+     "rotulo": "Dizer que você sabe de tudo",
+     "requer": {
+      "marca": "fiador"
+     },
+     "teste": {
+      "chave": "sabedoria",
+      "dificuldade": 5
+     },
+     "sucesso": {
+      "texto": "'Eu sei que o senhor assinou por eles. Eles também sabem. Ninguém desceu da praça, pai. Subiram.' Um soluço atravessa a tampa, um só. Ele se levanta.",
+      "cronica": "{nome} disse ao pai que a praça sabia do fiador e tinha vindo assim mesmo.",
+      "efeitos": {
+       "marca": "pai-ouviu",
+       "lacos": 1
+      }
+     },
+     "falha": {
+      "texto": "Sai como acusação. Você ouve a palavra 'fiador' bater nele do outro lado. 'Então você veio cobrar', ele diz. Não era isso, e agora é tarde para dizer de outro jeito.",
+      "cronica": "{nome} falou do fiador ao pai, e saiu como cobrança.",
+      "efeitos": {
+       "sanidade": -2,
+       "marca": "cobrou"
+      }
+     }
+    }
+   ]
+  }
+ ],
+ "desfecho": [
+  {
+   "id": "fim-alianca",
+   "ato": 4,
+   "titulo": "O terceiro dente",
+   "texto": "A casa das máquinas cheira a óleo e a café frio. Seu pai está de pé ao lado da roda de escape, com a mão aberta sobre ela, sem tocar. No terceiro dente, uma aliança de ouro gasto. A valsa entra pela janela. 'Eu só queria que ela não chegasse', ele diz. 'A hora.'",
+   "abordagens": [
+    {
+     "id": "destreza",
+     "rotulo": "Tirar a aliança antes dele",
+     "teste": {
+      "chave": "destreza",
+      "dificuldade": 9
+     },
+     "ajuda": [
+      "ferramenta"
+     ],
+     "sucesso": {
+      "texto": "Sua mão é mais rápida e mais nova. A aliança sai inteira, o dente fica. Seu pai olha a própria mão vazia e depois a sua, fechada. Senta no caixote de ferramentas, devagar, como um homem muito mais velho.",
+      "cronica": "{nome} tirou a aliança da mãe do relógio antes que o pai pudesse escolher.",
+      "efeitos": {
+       "marca": "arrancou"
+      }
+     },
+     "falha": {
+      "texto": "Ele segura o seu pulso, você puxa, e a aliança sai levando uma lasca do dente. O ouro rola pelo assoalho. Nenhum dos dois vai buscar.",
+      "cronica": "{nome} arrancou a aliança num puxão e lascou a roda do relógio da torre.",
+      "efeitos": {
+       "marca": "arrancou",
+       "sanidade": -2
+      }
+     }
+    },
+    {
+     "id": "sabedoria",
+     "rotulo": "Pedir, sem tomar nada",
+     "teste": {
+      "chave": "sabedoria",
+      "dificuldade": 8
+     },
+     "ajuda": [
+      "prova"
+     ],
+     "sucesso": {
+      "texto": "'Não vim tomar nada, pai. Vim pedir.' Ele reconhece a frase sem saber de onde. Tira a aliança do dente com dois dedos, do jeito que tira uma mola fina, e põe na palma da sua mão.",
+      "cronica": "{nome} pediu, e o pai tirou a aliança do relógio com a própria mão.",
+      "efeitos": {
+       "marca": "pediu",
+       "lacos": 1
+      }
+     },
+     "falha": {
+      "texto": "Você pede, e a voz sai de cobradora, cansada da subida. Ele encolhe os ombros. Fica entre vocês um silêncio comprido em que só o seu relógio trabalha.",
+      "cronica": "{nome} pediu ao pai com a voz errada, e a corda foi embora no silêncio.",
+      "efeitos": {
+       "brasa": -2
+      }
+     }
+    },
+    {
+     "id": "presenca",
+     "rotulo": "Levar o pai até a janela",
+     "teste": {
+      "chave": "presenca",
+      "dificuldade": 9
+     },
+     "ajudantes": [
+      {
+       "nome": "a praça, tocando",
+       "nivel": 2
+      }
+     ],
+     "sucesso": {
+      "texto": "Você o leva pelo braço. Lá embaixo, dezoito vizinhos molhados tocam mal uma valsa para ele. Ninguém foi embora. Ele volta à máquina sozinho e tira a aliança, e as mãos não tremem.",
+      "cronica": "{nome} mostrou a praça ao pai pela janela, e ele mesmo soltou o relógio.",
+      "efeitos": {
+       "marca": "pediu",
+       "lacos": 1
+      }
+     },
+     "falha": {
+      "texto": "Ele não quer olhar. 'Eles não sabem o que eu fiz.' 'Sabem.' Não adianta: ele só acredita no que confere. Você fica com o braço dele na mão e o tempo escorrendo.",
+      "cronica": "{nome} não conseguiu levar o pai até a janela.",
+      "efeitos": {
+       "brasa": -1,
+       "sanidade": -1
+      }
+     }
+    },
+    {
+     "id": "contas",
+     "rotulo": "Entregar o prazo e as contas",
+     "requer": {
+      "marca": [
+       "prazo",
+       "contas"
+      ]
+     },
+     "teste": {
+      "chave": "inteligencia",
+      "dificuldade": 5
+     },
+     "sucesso": {
+      "texto": "Você põe o papel do banco sobre a bancada e repete a soma. Ele confere a lápis, na margem, e chega ao mesmo número. 'Dá', ele diz, espantado. Tira a aliança e beija antes de entregar.",
+      "cronica": "{nome} deu ao pai o prazo e as contas, e ele conferiu que dava.",
+      "efeitos": {
+       "marca": "pediu",
+       "lacos": 1
+      }
+     },
+     "falha": {
+      "texto": "Ele confere e acha um erro seu de dois mil-réis. Sorri, pela primeira vez na tarde. A conta fecha assim mesmo, mas ele ainda não soltou o anel.",
+      "cronica": "{nome} errou a soma por dois mil-réis, e o pai sorriu.",
+      "efeitos": {
+       "brasa": -1
+      }
+     }
+    }
+   ]
+  },
+  {
+   "id": "fim-badalada",
+   "ato": 4,
+   "titulo": "A terceira badalada",
+   "texto": "A roda de escape está livre e não anda: falta a terceira badalada das três, presa no bronze desde que tudo começou. A corda do sino desce pelo assoalho até as mãos de Seu Tibúrcio, um andar abaixo. O seu relógio de bolso bate mais devagar. A praça parou de tocar e espera.",
+   "abordagens": [
+    {
+     "id": "forca",
+     "rotulo": "Descer e puxar a corda",
+     "teste": {
+      "chave": "forca",
+      "dificuldade": 9
+     },
+     "ajudantes": [
+      {
+       "nome": "Seu Tibúrcio",
+       "nivel": 1
+      },
+      {
+       "nome": "seu pai",
+       "nivel": 1
+      }
+     ],
+     "sucesso": {
+      "texto": "Três pares de mãos na corda. O bronze cede, vai, e volta com a badalada mais atrasada da história da cidade. O chão treme. Lá em cima a máquina dá o primeiro passo.",
+      "cronica": "{nome} puxou a corda do sino com o pai e o sineiro, e as três horas acabaram.",
+      "efeitos": {
+       "marca": "badalada"
+      }
+     },
+     "falha": {
+      "texto": "A corda sobe e desce e o sino só balança, mudo. Na terceira tentativa ele toca, fraco, torto. Serve. Mas você gastou nisso o que não tinha.",
+      "cronica": "{nome} precisou de três puxões para arrancar a badalada do sino.",
+      "efeitos": {
+       "marca": "badalada",
+       "brasa": -2,
+       "vida": -1
+      }
+     }
+    },
+    {
+     "id": "inteligencia",
+     "rotulo": "Acertar a torre pelo seu relógio",
+     "teste": {
+      "chave": "inteligencia",
+      "dificuldade": 9
+     },
+     "ajuda": [
+      "ferramenta",
+      "lente"
+     ],
+     "sucesso": {
+      "texto": "Você encosta o relógio de bolso na platina grande e deixa um ensinar o compasso ao outro. A âncora morde, solta, morde. O martelo do sino cai sozinho, na hora que o seu relógio mandou.",
+      "cronica": "{nome} acertou o relógio da torre pelo relógio da mãe, e o sino tocou sozinho.",
+      "efeitos": {
+       "marca": "badalada",
+       "marco": true
+      }
+     },
+     "falha": {
+      "texto": "O relógio grande aceita o compasso por três batidas e engasga. Seu pai empurra o pêndulo com o ombro, praguejando. Anda. Mas o seu relógio de bolso deu tudo o que tinha para dar.",
+      "cronica": "{nome} gastou a corda do relógio da mãe para pôr o da torre no compasso.",
+      "efeitos": {
+       "marca": "badalada",
+       "brasa": -2
+      }
+     }
+    },
+    {
+     "id": "fe",
+     "rotulo": "Dar o relógio de bolso ao pai",
+     "teste": {
+      "chave": "fe",
+      "dificuldade": 8
+     },
+     "sucesso": {
+      "texto": "Você põe o relógio da sua mãe na mão dele. Ele dá corda com o polegar, do jeito dela, e o tique enche a sala. Lá embaixo, Seu Tibúrcio acorda de vez e termina o que começou.",
+      "cronica": "{nome} deu o relógio da mãe ao pai, e o sineiro terminou a badalada.",
+      "efeitos": {
+       "marca": "badalada",
+       "lacos": 1
+      }
+     },
+     "falha": {
+      "texto": "Ele não quer pegar. 'É seu.' Vocês empurram o relógio um para o outro como criança, e é Nico, ou o vento, quem afinal esbarra na corda do sino.",
+      "cronica": "{nome} discutiu com o pai sobre de quem era o relógio, e o sino tocou por acaso.",
+      "efeitos": {
+       "marca": "badalada",
+       "brasa": -1
+      }
+     }
+    },
+    {
+     "id": "nico",
+     "rotulo": "Deixar Nico tocar o sino",
+     "requer": {
+      "companheiro": "nico",
+      "marca": "ensinou"
+     },
+     "teste": {
+      "chave": "destreza",
+      "dificuldade": 5
+     },
+     "ajudantes": [
+      {
+       "nome": "Nico",
+       "nivel": 2
+      }
+     ],
+     "sucesso": {
+      "texto": "'Sente o peso antes de puxar', você diz, e ele sente. O menino sobe com a corda e desce com ela, rindo, e a terceira badalada sai limpa, redonda, dele.",
+      "cronica": "{nome} deixou Nico tocar a terceira badalada das três.",
+      "efeitos": {
+       "marca": "badalada",
+       "lacos": 1
+      }
+     },
+     "falha": {
+      "texto": "A corda leva Nico do chão e você o agarra pelas pernas. Os dois sobem e descem juntos, sem a menor dignidade, e o sino toca assim mesmo, às gargalhadas.",
+      "cronica": "{nome} e Nico tocaram o sino pendurados na mesma corda.",
+      "efeitos": {
+       "marca": "badalada",
+       "brasa": -1
+      }
+     }
+    }
+   ]
+  }
+ ],
+ "finais": [
+  {
+   "id": "quatro",
+   "titulo": "Quatro horas",
+   "estrelas": 3,
+   "quando": {
+    "brasa": {
+     "min": 1
+    },
+    "lacos": {
+     "min": 7
+    },
+    "marca": [
+     "pediu",
+     "badalada"
+    ],
+    "semMarca": "arrancou"
+   },
+   "texto": "O relógio da praça bate três e um, e a cidade solta o ar de uma vez: o leite cai, o pão sai do forno, o trem entra na estação. O Dr. Proença desce com trinta dias no bolso e é recebido com café. Seu pai conserta relógios na calçada, à vista de todos, e deve a todos, e todos sabem. Nico segura a lupa para ele. Às quatro, a banda toca a valsa inteira."
+  },
+  {
+   "id": "ultimo-dente",
+   "titulo": "A corda dos outros",
+   "estrelas": 3,
+   "quando": {
+    "brasa": {
+     "max": 0
+    },
+    "lacos": {
+     "min": 8
+    },
+    "marca": "badalada"
+   },
+   "texto": "Seu relógio para no instante em que o sino toca, e você para com ele, no meio de um passo. Dura pouco. Dona Ilda encosta o relógio de pulso no seu ouvido, Salim o despertador do balcão, Nico o dele, de lata. Dezoito tiques desencontrados. Você acorda no chão da torre com a praça inteira em volta, dando corda em você."
+  },
+  {
+   "id": "anel",
+   "titulo": "O anel na mão errada",
+   "estrelas": 2,
+   "quando": {
+    "brasa": {
+     "min": 1
+    },
+    "marca": [
+     "arrancou",
+     "badalada"
+    ]
+   },
+   "texto": "O tempo volta, porque você o fez voltar. A praça consegue os trinta dias e, com eles, quase tudo. Seu pai desce da torre e não sobe mais: o relógio grande agora é seu. Ele acerta os de bolso, na bancada, e é educado com você. A aliança fica na gaveta. Um dia, sem aviso, ele a pede de volta, e você entende que foi perdoada."
+  },
+  {
+   "id": "tres-e-um",
+   "titulo": "Três e um",
+   "estrelas": 1,
+   "quando": {
+    "brasa": {
+     "min": 1
+    }
+   },
+   "texto": "O ponteiro anda um minuto e a cidade anda com ele, tonta, sem saber o que perdeu. O trem chega. O banco cobra. Parte da praça se salva e parte muda de dono, e ninguém entende direito por que a filha do relojoeiro olha tanto para a torre. Seu relógio de bolso continua adiantado um minuto em relação a todos os outros."
+  },
+  {
+   "id": "tres",
+   "titulo": "Três em ponto, para sempre",
+   "estrelas": 0,
+   "texto": "A corda acaba no último degrau. Você sente o tique espaçar, espaçar, e sobra tempo para pensar que sua mãe fez um relógio bom. Depois são três horas. Na casa das máquinas, um homem velho segura a mão parada da filha e não tira a aliança do dente, agora por outro motivo."
+  }
+ ],
+ "quedas": {
+  "morte": {
+   "id": "morte",
+   "titulo": "Sem corda",
+   "estrelas": 0,
+   "texto": "O corpo desiste antes do relógio. Ele continua andando no seu bolso por mais um dia inteiro, sozinho, e depois faz como a cidade. Ninguém nota. Não há ninguém acordado para notar."
+  },
+  "perdido": {
+   "id": "perdido",
+   "titulo": "Três em ponto",
+   "estrelas": 0,
+   "texto": "Você se senta no banco da praça e olha o mostrador grande. São três horas. Sempre foram. Você não se lembra de ter achado isso estranho, nem de ter tido pressa alguma vez na vida."
+  }
+ }
+}

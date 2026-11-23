@@ -47,9 +47,11 @@ function gastarPontos(e) {
   }
 }
 
-/** Joga uma sessão inteira e devolve o estado final. */
-export function jogar({ semente, passado, aventura, perfil = 'atento', limite = 400 }) {
-  const e = J.nova({ semente, passado, aventura });
+/**
+ * Segue uma sessão até o fim, ou até a história viva pedir a sequência (o
+ * acampamento fica à espera do ato seguinte).
+ */
+export function seguir(e, { semente = e.semente, perfil = 'atento', limite = 400 } = {}) {
   const r = fluxo(semente, 'robo', perfil);
   for (let passo = 0; passo < limite && e.fase !== 'fim'; passo++) {
     if (e.fase === 'cena') {
@@ -72,10 +74,16 @@ export function jogar({ semente, passado, aventura, perfil = 'atento', limite = 
       gastarPontos(e);
       const falta = { feridas: 1 - e.vida / e.max.vida, cabeca: 1 - e.sanidade / e.max.sanidade, brasa: e.brasa <= 4 ? 0.45 : 0.2 };
       J.repousar(e, Object.entries(falta).sort((a, b) => b[1] - a[1])[0][0]);
+      if (J.faltaSequencia(e)) return e;
       J.continuar(e);
     } else {
       J.continuar(e);
     }
   }
   return e;
+}
+
+/** Joga uma sessão inteira e devolve o estado final. */
+export function jogar({ semente, passado, aventura, perfil = 'atento', limite = 400 }) {
+  return seguir(J.nova({ semente, passado, aventura }), { semente, perfil, limite });
 }

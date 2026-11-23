@@ -423,3 +423,34 @@ p.ajuste { flex-direction: initial; margin: 0; font-size: 1rem; line-height: 1.3
 .palco.clareia { animation: clareia 0.9s ease-out; }
 @keyframes treme { 10%, 90% { transform: translateX(-2px); } 20%, 80% { transform: translateX(4px); } 30%, 50%, 70% { transform: translateX(-7px); } 40%, 60% { transform: translateX(7px); } }
 @keyframes clareia { 0% { filter: brightness(1.9) saturate(1.3); } 100% { filter: none; } }
+
+/* ---------- História viva: criar, colar, exportar ---------- */
+
+.oficina-acoes { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-top: 0.6rem; }
+.oficina-acoes .secundario { width: auto; flex: 1 1 9rem; min-height: 2.6rem; font-size: 0.95rem; }
+.oficina-acoes .perigo { flex: 0 1 auto; color: var(--erro); }
+.oficina-aviso { flex: 1 1 100%; color: var(--erro); font-size: 0.88rem; }
+.aventura.sua { border-style: dashed; }
+.passo { font-size: 0.75rem; letter-spacing: 0.09em; text-transform: uppercase; color: var(--tinta-2); }
+.escolhido h3, .troca h3 { font-family: var(--serif); font-size: 1.35rem; line-height: 1.2; }
+.troca {
+  background: var(--papel);
+  color: var(--tinta);
+  border-radius: 14px;
+  padding: 1.1rem;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 0.75rem;
+  border-top: 5px solid var(--fogo);
+  box-shadow: 0 10px 32px rgb(0 0 0 / 0.45);
+}
+.escolhido .troca { background: none; padding: 0; border: 0; box-shadow: none; }
+.troca ol { margin: 0; padding-left: 1.2rem; display: grid; gap: 0.15rem; font-size: 0.95rem; }
+.troca .secundario, .escolhido > .secundario, .escolhido .linha .secundario { color: var(--tinta); border-color: #c9b998; }
+.troca details summary { font-size: 0.85rem; color: var(--tinta-2); cursor: pointer; padding: 0.3rem 0; }
+.troca textarea.pedido { font-family: ui-monospace, 'SF Mono', Menlo, monospace; font-size: 0.72rem; line-height: 1.35; }
+.troca .campo textarea.colado { font-family: ui-monospace, 'SF Mono', Menlo, monospace; font-size: 0.8rem; }
+.troca .copiado { color: #2f7a4a; text-align: left; }
+.troca .erros { border: 1px solid var(--erro); border-radius: 9px; padding: 0.7rem 0.8rem; display: grid; gap: 0.45rem; background: #fbeee9; }
+.troca .erros ul { margin: 0; padding-left: 1.1rem; font-size: 0.86rem; display: grid; gap: 0.15rem; }
+.troca .erros p { font-size: 0.9rem; }

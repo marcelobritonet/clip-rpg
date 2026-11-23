@@ -174,6 +174,9 @@ const PAISAGENS = {
   },
 };
 
+/** As paisagens que existem: uma história colada escolhe entre elas, não desenha. */
+export const PAISAGENS_DISPONIVEIS = Object.keys(PAISAGENS);
+
 /**
  * SVG do cenário. `tipo` é uma das paisagens; `chave` fixa o desenho (id da
  * cena); `luz` vai de 0 a 1.

@@ -227,15 +227,15 @@ export const desfecho = [
 ];
 
 /**
- * Endings: the first one whose condition holds wins. `quando` receives the
- * session summary: { brasa, lacos, marcas (Set), vida, companheiros }.
+ * Endings: the first one whose condition holds wins. `quando` is declared as data
+ * (see `fechaFinal` in jogo.js); the last one has no condition.
  */
 export const finais = [
   {
     id: 'muitos',
     titulo: 'A Beacon of Many',
     estrelas: 3,
-    quando: (s) => s.brasa >= 2 && s.marcas.has('faroleiro') && s.lacos >= 5,
+    quando: { brasa: { min: 2 }, marca: 'faroleiro', lacos: { min: 5 } },
     texto:
       'The Keeper holds the brazier and you lay the ember down. The fire catches slowly and then all at once, and the light sweeps the valley. Down below, one by one, windows answer: people you met on the road, lighting whatever they have. The old man weeps and does not hide it. "It isn\'t one light," he says. "It\'s many."',
   },
@@ -243,7 +243,7 @@ export const finais = [
     id: 'emprestado',
     titulo: 'Borrowed Fire',
     estrelas: 3,
-    quando: (s) => s.brasa <= 0 && s.lacos >= 6,
+    quando: { brasa: { max: 0 }, lacos: { min: 6 } },
     texto:
       'The lantern arrives cold. You sit down beside the dead brazier and wait for the Long Night. What comes up the stairs, though, is footsteps, a great many. People from the road, each with an ember from their own hearth. "You didn\'t think you were going alone," someone says. The Beacon is lit with fire from the whole valley.',
   },
@@ -251,7 +251,7 @@ export const finais = [
     id: 'aceso',
     titulo: 'The Beacon Lit',
     estrelas: 2,
-    quando: (s) => s.brasa >= 3,
+    quando: { brasa: { min: 3 } },
     texto:
       'The ember is still alive, fat and bright, when it touches the kindling. The High Beacon lights as if it had never gone out, and the Long Night draws back behind the mountains. You walk down the next day, in no hurry, with the empty lantern knocking against your leg.',
   },
@@ -259,7 +259,7 @@ export const finais = [
     id: 'fraca',
     titulo: 'A Faint Light',
     estrelas: 1,
-    quando: (s) => s.brasa > 0,
+    quando: { brasa: { min: 1 } },
     texto:
       'One red speck is left at the bottom of the lantern. You blow, you shelter it, you pray. The fire catches, small. It is not the beacon from the stories, but it is a light, and the valley below will cross the winter looking up at it.',
   },
@@ -267,7 +267,6 @@ export const finais = [
     id: 'cinza',
     titulo: 'Ash',
     estrelas: 0,
-    quando: () => true,
     texto:
       'The lantern arrives cold. In the brazier, only old ash. You sit at the top of the tower and watch the Long Night come down over Bellford like a tide. Someone will have to try again. Maybe you.',
   },

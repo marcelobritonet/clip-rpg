@@ -120,7 +120,7 @@ Sempre com um preço claro. `custo: { magia: 1 }` cobra antes (só aparece se pu
 | `vida` | Pontos de Vida (quem não é do Corpo começa com 5!) | −1 a −3 |
 | `sanidade` | medo, horror, culpa | −1 a −4 |
 | `magia` | Pontos de Magia | −2 a +2 |
-| `brasa` | a brasa da lanterna: o relógio da jornada (começa em 10; cada cena já gasta 1) | −1 a −2, raramente +1 |
+| `brasa` | a brasa da lanterna: o relógio da jornada (começa em 10; cada noite gasta 2) | −1 a −2, raramente +1 |
 | `lacos` | gente que você ajudou e que lembra de você: decide os melhores finais | +1 |
 | `item` / `semItem` | id ou lista de ids | |
 | `companheiro` / `semCompanheiro` | id | |
@@ -157,6 +157,18 @@ resistir a temperatura extrema, resistir a veneno, conhecer a geografia local, l
 de volta de um labirinto, notar uma trava secreta, perceber uma mentira, conhecer a cultura local,
 evitar um controle mental, reunir uma multidão, fazer a plateia rir, conseguir uma confissão,
 proferir um discurso impactante.
+
+## Finais
+
+`finais` é uma lista do melhor para o pior; vale o primeiro cuja condição `quando` fecha, e o último não tem
+condição. `quando` é dado, não código: `{ brasa: { min: 2 }, lacos: { min: 5 }, marca: 'faroleiro' }`. Aceita
+`brasa`, `lacos` e `vida` com `min` e `max`; `marca`, `semMarca`, `companheiro` e `semCompanheiro` com um id ou lista.
+
+## Histórias do jogador (JSON)
+
+As aventuras que o jogador cria com uma IA de fora usam as mesmas cenas, em JSON puro e um ato por vez. O
+formato e a conferência estão em `historia.js`; as regras ditas para a IA, em `prompt.js` (função `guia`), que
+é este arquivo em versão de prompt. Mudou uma regra de escrita aqui, mude lá.
 
 ## Conferir
 

@@ -20,8 +20,8 @@ export function validarCenas({ cenas, itens = {}, companheiros = {}, inimigos = 
       if (!REQUER.has(k)) erros.push(`${onde}: requer desconhecido "${k}"`);
       if (k === 'nivel') for (const c of Object.keys(v)) if (!tipoDaChave(c)) erros.push(`${onde}: chave desconhecida "${c}"`);
       if (k === 'antecedente' && !ANTECEDENTES.has(v)) erros.push(`${onde}: antecedente desconhecido "${v}"`);
-      if (k === 'item' && !itens[v]) erros.push(`${onde}: item desconhecido "${v}"`);
-      if (k === 'companheiro' && !companheiros[v]) erros.push(`${onde}: companheiro desconhecido "${v}"`);
+      if (k === 'item') for (const i of lista(v)) if (!itens[i]) erros.push(`${onde}: item desconhecido "${i}"`);
+      if (k === 'companheiro') for (const c of lista(v)) if (!companheiros[c]) erros.push(`${onde}: companheiro desconhecido "${c}"`);
     }
   };
 
@@ -96,7 +96,8 @@ export function validarCenas({ cenas, itens = {}, companheiros = {}, inimigos = 
   return erros;
 }
 
-if (import.meta.url === `file://${process.argv[1]}`) {
+// Só na linha de comando: no navegador (a história viva importa este arquivo) não há `process`.
+if (typeof process !== 'undefined' && import.meta.url === `file://${process.argv[1]}`) {
   // node validar.js brasa            confere a abertura e o desfecho da aventura
   // node validar.js brasa/ato1.js    confere um arquivo de ato
   const [pasta, arquivo] = (process.argv[2] ?? 'brasa').split('/');

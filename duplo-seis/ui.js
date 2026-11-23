@@ -7,6 +7,8 @@ import { sementeNova } from './rng.js';
 import { som, alternarSom, somLigado } from './som.js';
 import { VERSAO } from './versao.js';
 import { cenario } from './cenario.js';
+import * as H from './aventuras/historia.js';
+import * as P from './aventuras/prompt.js';
 
 const $ = (s) => document.querySelector(s);
 const params = new URLSearchParams(location.search);
@@ -14,7 +16,9 @@ const RAPIDO = params.has('rapido') || matchMedia('(prefers-reduced-motion: redu
 const espera = (ms) => new Promise((ok) => setTimeout(ok, RAPIDO ? 0 : ms));
 
 /** As aventuras no idioma da mesa (as que ainda não têm tradução vêm em português). */
-const AVENTURAS = aventurasPara(idiomaAtual());
+const CASA = aventurasPara(idiomaAtual());
+/** As da casa mais as histórias que o jogador criou (entram logo abaixo, quando o guardado já pode ser lido). */
+let AVENTURAS = CASA;
 /** Quem chegou com ?idioma= no endereço continua com ele nos endereços que a mesa monta. */
 const COM_IDIOMA = params.has('idioma') ? `&idioma=${idiomaAtual()}` : '';
 
@@ -36,6 +40,9 @@ function h(seletor, attrs = {}, ...filhos) {
   for (const f of filhos.flat(Infinity)) if (f != null && f !== false) el.append(f);
   return el;
 }
+
+/** Troca os filhos de um elemento, aceitando listas e ignorando o que não veio (replaceChildren escreveria "null"). */
+const por = (el, ...filhos) => el.replaceChildren(...filhos.flat(Infinity).filter((f) => f != null && f !== false));
 
 const nomeDoAntecedente = (k) => t(`nomes.antecedentes.${k}`);
 const nomeDaMedida = (tipo) => (tipo === 'brasa' ? AVENTURA.relogio.nome : t(`nomes.medidas.${tipo}`));
@@ -71,7 +78,32 @@ function guardado() {
   try { return JSON.parse(localStorage.getItem(CHAVE)) ?? {}; } catch { return {}; }
 }
 function guardar(d) {
-  try { localStorage.setItem(CHAVE, JSON.stringify(d)); } catch { /* sem armazenamento */ }
+  try { localStorage.setItem(CHAVE, JSON.stringify(d)); return true; } catch { return false; /* sem armazenamento */ }
+}
+
+/* ---------- Histórias do jogador ---------- */
+
+const ehHistoria = (av) => av.ordem === 'escrita';
+AVENTURAS = [...CASA, ...Object.values(guardado().historias ?? {}).filter((x) => x?.id && x.abertura && Array.isArray(x.cenas))];
+AVENTURA = AVENTURAS.find((a) => a.id === params.get('aventura')) ?? AVENTURA;
+
+/** Guarda a história (nova ou com mais um ato) no aparelho. */
+function guardarHistoria(historia) {
+  const g = guardado();
+  g.historias ??= {};
+  g.historias[historia.id] = historia;
+  if (!AVENTURAS.includes(historia)) AVENTURAS = [...AVENTURAS.filter((a) => a.id !== historia.id), historia];
+  return guardar(g);
+}
+
+function exportarHistoria(historia) {
+  const { formulario, ...arquivo } = historia;
+  const url = URL.createObjectURL(new Blob([JSON.stringify(arquivo, null, 2)], { type: 'application/json' }));
+  const a = h('a', { href: url, download: `${historia.id}.json` });
+  document.body.append(a);
+  a.click();
+  a.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
 }
 
 /* ---------- Início ---------- */
@@ -89,7 +121,7 @@ const dataCurta = (iso) => {
   const [ano, mes, dia] = iso.split('-').map(Number);
   return new Intl.DateTimeFormat(idiomaAtual(), { month: 'short', day: 'numeric' }).format(new Date(ano, mes - 1, dia));
 };
-const aventuraDoDia = () => AVENTURAS[Math.floor(new Date(`${hoje()}T12:00:00`).getTime() / 86400000) % AVENTURAS.length];
+const aventuraDoDia = () => CASA[Math.floor(new Date(`${hoje()}T12:00:00`).getTime() / 86400000) % CASA.length];
 const totalDeFinais = (av) => av.finais.length + Object.keys(av.quedas).length;
 
 function montarInicio() {
@@ -121,12 +153,17 @@ function montarInicio() {
   );
 
   // Aventuras.
-  $('#aventuras').replaceChildren(...AVENTURAS.map((av) => h('button.aventura', { type: 'button', role: 'radio', 'aria-checked': String(av === AVENTURA), disabled: modoDia && av !== AVENTURA, onclick: () => { AVENTURA = av; som.toque(); montarInicio(); } },
-    h('small', {}, av.genero),
+  $('#aventuras').replaceChildren(...AVENTURAS.map((av) => h(`button.aventura${ehHistoria(av) ? '.sua' : ''}`, { type: 'button', role: 'radio', 'aria-checked': String(av === AVENTURA && !oficina), disabled: modoDia && av !== AVENTURA, onclick: () => { AVENTURA = av; oficina = null; rascunho = null; som.toque(); montarInicio(); } },
+    h('small', {}, ehHistoria(av) ? t('oficina.sua', { genero: av.genero }) : av.genero),
     h('strong', {}, av.nome),
     h('span', {}, av.resumo),
-    h('em', {}, t('inicio.finaisDescobertos', { vistos: (g.vistos?.[av.id] ?? []).length, total: totalDeFinais(av) })),
+    h('em', {}, ehHistoria(av) && H.escritaAte(av) < 4
+      ? t('oficina.escritaAte', { n: H.escritaAte(av) })
+      : t('inicio.finaisDescobertos', { vistos: (g.vistos?.[av.id] ?? []).length, total: totalDeFinais(av) })),
   )));
+  montarAcoesDaOficina();
+  $('#secao-passados').hidden = !!oficina;
+  if (oficina) { montarOficina(); return; }
 
   // Passados da aventura, mais a ficha livre.
   $('#passados').replaceChildren(
@@ -210,10 +247,15 @@ function resumoDaFicha(ficha, { completa = false } = {}) {
 const PONTOS_LIVRES = 12;
 const ITENS_LIVRES = 3;
 
-function montarFichaLivre(caixa) {
+/**
+ * `criando`: a ficha de uma história que ainda vai ser escrita. Não há sacola
+ * (os itens vêm da IA) nem semente, e o botão leva ao pedido em vez da mesa.
+ */
+function montarFichaLivre(caixa, criando = null) {
   const g = guardado();
-  rascunho ??= g.livre?.[AVENTURA.id] ?? { id: 'livre', titulo: '', nome: '', quem: '', motivo: '', atributos: {}, aprimoramentos: {}, pericias: {}, antecedentes: {}, itens: [] };
-  rascunho.itens = rascunho.itens.filter((i) => AVENTURA.itens[i]);
+  const gaveta = criando ? 'oficina' : AVENTURA.id;
+  rascunho ??= g.livre?.[gaveta] ?? { id: 'livre', titulo: '', nome: '', quem: '', motivo: '', atributos: {}, aprimoramentos: {}, pericias: {}, antecedentes: {}, itens: [] };
+  rascunho.itens = criando ? [] : rascunho.itens.filter((i) => AVENTURA.itens[i]);
   const p = rascunho;
   caixa.dataset.caminho = 'livre';
 
@@ -261,7 +303,7 @@ function montarFichaLivre(caixa) {
     ));
     const pericias = Object.keys(R.PERICIAS).filter((k) => R.teto(ficha, k) > 0);
     const jaVem = [AVENTURA.abertura.efeitosAoEntrar?.item].flat();
-    const kit = Object.entries(AVENTURA.itens).filter(([id, i]) => (i.mod ?? 0) <= 1 && !jaVem.includes(id));
+    const kit = criando ? [] : Object.entries(AVENTURA.itens).filter(([id, i]) => (i.mod ?? 0) <= 1 && !jaVem.includes(id));
     const pronto = p.quem.trim().length >= 20 && livres === 0;
     const oQueFalta = () => (p.quem.trim().length < 20 ? t('livre.conteudoRei') : livres > 0 ? t('livre.faltam', { pontos: plural(livres, 'ponto') }) : '');
 
@@ -272,7 +314,9 @@ function montarFichaLivre(caixa) {
     titulo.addEventListener('input', () => { p.titulo = titulo.value; });
     const nome = h('input', { id: 'nome', type: 'text', maxlength: '18', value: p.nome, placeholder: t('livre.exemploNome'), autocomplete: 'off' });
     nome.addEventListener('input', () => { p.nome = nome.value; });
-    const botao = h('button.principal', { type: 'button', disabled: !pronto, onclick: () => { escolhido = fecharRascunho(); comecar(); } }, t('inicio.sentar'));
+    const botao = criando
+      ? h('button.principal', { type: 'button', disabled: !pronto, onclick: () => criando.aoFechar(fecharRascunho(gaveta)) }, t('oficina.gerar'))
+      : h('button.principal', { type: 'button', disabled: !pronto, onclick: () => { escolhido = fecharRascunho(); comecar(); } }, t('inicio.sentar'));
     const aviso = h('p.nota.escura', {}, oQueFalta());
     const atualizarBotao = () => {
       const ok = p.quem.trim().length >= 20 && livres === 0;
@@ -280,7 +324,8 @@ function montarFichaLivre(caixa) {
       aviso.textContent = oQueFalta();
     };
 
-    caixa.replaceChildren(
+    por(caixa,
+      criando?.cabecalho,
       h('p.quem', {}, t('livre.manual')),
       h('label.campo', {}, t('livre.quemEVoce'), quem),
       h('div.linha.dupla', {}, h('label.campo', {}, t('livre.comoChamam'), titulo), h('label.campo', {}, t('inicio.nome'), nome)),
@@ -289,7 +334,7 @@ function montarFichaLivre(caixa) {
       pericias.length ? h('div.bloco', { 'data-caminho': 'livre' }, h('h4', {}, t('livre.pericias')), pericias.map((k) => linha(p.pericias, k, 'pericia'))) : h('p.nota.escura', {}, t('livre.periciasAparecem')),
       h('p.numeros', {}, t('livre.numeros', { vida: v.vida, magia: v.magia, sanidade: v.sanidade, ataque: v.ataqueCurta, defesa: v.defesa, caminho: nomeDoCaminho(v.dominante) })),
       blocoDeAntecedentes(p, ficha, desenharLivre),
-      h('div.bloco', { 'data-caminho': 'livre' },
+      criando ? null : h('div.bloco', { 'data-caminho': 'livre' },
         h('h4', {}, t('livre.sacola', { n: p.itens.length, total: ITENS_LIVRES })),
         h('div.kit', {}, kit.map(([id]) => h('button.alavanca.clara', { type: 'button', 'aria-pressed': String(p.itens.includes(id)), disabled: !p.itens.includes(id) && p.itens.length >= ITENS_LIVRES, onclick: () => {
           const i = p.itens.indexOf(id);
@@ -297,9 +342,10 @@ function montarFichaLivre(caixa) {
           som.toque(); desenharLivre();
         } }, nomeDoItem(id)))),
       ),
-      camposDaSemente(),
+      criando ? null : camposDaSemente(),
       aviso,
       botao,
+      criando?.rodape,
     );
   };
   desenharLivre();
@@ -337,15 +383,166 @@ function blocoDeAntecedentes(p, ficha, redesenhar) {
   );
 }
 
-function fecharRascunho() {
+function fecharRascunho(gaveta = AVENTURA.id) {
   const p = rascunho;
   const ficha = R.novaFicha(p);
   const pronto = { ...p, id: 'livre', titulo: p.titulo.trim() || t('livre.semTitulo'), nome: p.nome.trim() || t('livre.semNome'), caminho: R.caminhoDominante(ficha) };
   const g = guardado();
   g.livre ??= {};
-  g.livre[AVENTURA.id] = pronto;
+  g.livre[gaveta] = pronto;
   guardar(g);
   return pronto;
+}
+
+/* ---------- Oficina: a história viva, do formulário à primeira colagem ---------- */
+
+let oficina = null; // { passo: 1 | 2 | 3, formulario, ficha }
+const FORMULARIO_VAZIO = { premissa: '', lugar: '', tom: '', relogio: '', emJogo: '', evitar: '', fios: ['', '', ''] };
+
+/** Os botões debaixo da lista de aventuras: criar, importar e, na história escolhida, exportar e apagar. */
+function montarAcoesDaOficina() {
+  const aviso = h('p.oficina-aviso', { role: 'status' });
+  const arquivo = h('input', { type: 'file', accept: '.json,application/json', hidden: true });
+  arquivo.addEventListener('change', async () => {
+    const lido = H.lerColado(await arquivo.files[0]?.text());
+    const erros = lido.erro ? [lido.erro] : H.validarArquivo(lido.doc);
+    if (erros.length) { aviso.textContent = `${t('oficina.arquivoRuim')} ${erros.slice(0, 3).join('; ')}`; return; }
+    const nova = H.daImportacao(lido.doc);
+    if (!guardarHistoria(nova)) { aviso.textContent = t('oficina.semEspaco'); return; }
+    AVENTURA = nova; oficina = null; rascunho = null;
+    montarInicio();
+  });
+  const sua = ehHistoria(AVENTURA) && !oficina;
+  por($('#oficina-acoes'),
+    h('button.secundario', { type: 'button', 'aria-pressed': String(!!oficina), disabled: modoDia, onclick: () => {
+      oficina = oficina ? null : { passo: 1, formulario: { ...FORMULARIO_VAZIO, ...guardado().oficina, fios: [...(guardado().oficina?.fios ?? FORMULARIO_VAZIO.fios)] } };
+      rascunho = null; som.toque(); montarInicio();
+    } }, t('oficina.criar')),
+    h('button.secundario', { type: 'button', disabled: modoDia, onclick: () => arquivo.click() }, t('oficina.importar')),
+    sua ? h('button.secundario', { type: 'button', onclick: () => exportarHistoria(AVENTURA) }, t('oficina.exportar')) : null,
+    sua ? h('button.secundario.perigo', { type: 'button', onclick: () => {
+      if (!confirm(t('oficina.apagarConfirma', { nome: AVENTURA.nome }))) return;
+      const g = guardado();
+      delete g.historias?.[AVENTURA.id];
+      if (g.sessao?.aventura === AVENTURA.id) delete g.sessao;
+      guardar(g);
+      AVENTURAS = AVENTURAS.filter((a) => a !== AVENTURA);
+      AVENTURA = AVENTURAS[0];
+      montarInicio();
+    } }, t('oficina.apagar')) : null,
+    arquivo,
+    aviso,
+  );
+}
+
+function montarOficina() {
+  const caixa = $('#escolhido');
+  caixa.hidden = false;
+  caixa.dataset.caminho = 'livre';
+  const f = oficina.formulario;
+  const lembrar = () => { const g = guardado(); g.oficina = f; guardar(g); };
+  const ir = (passo) => { oficina.passo = passo; som.toque(); montarOficina(); caixa.scrollIntoView({ behavior: RAPIDO ? 'auto' : 'smooth', block: 'start' }); };
+  const cabecalho = (n) => [h('p.passo', {}, t(`oficina.passo${n}`)), h('h3', {}, t('oficina.titulo'))];
+  const voltar = (passo) => h('button.secundario', { type: 'button', onclick: () => ir(passo) }, t('oficina.voltar'));
+
+  if (oficina.passo === 1) {
+    const campo = (chave, linhas = 1) => {
+      const el = linhas > 1 ? h('textarea', { rows: String(linhas), maxlength: '400', placeholder: t(`oficina.exemplo${chave[0].toUpperCase()}${chave.slice(1)}`) }) : h('input', { type: 'text', maxlength: '160', placeholder: t(`oficina.exemplo${chave[0].toUpperCase()}${chave.slice(1)}`), autocomplete: 'off' });
+      el.value = f[chave];
+      el.addEventListener('input', () => { f[chave] = el.value; lembrar(); botao.disabled = f.premissa.trim().length < 12; });
+      return h('label.campo', {}, t(`oficina.${chave}`), el);
+    };
+    const fio = (i) => {
+      const el = h('input', { type: 'text', maxlength: '160', placeholder: t('oficina.exemploFio'), autocomplete: 'off' });
+      el.value = f.fios[i] ?? '';
+      el.addEventListener('input', () => { f.fios[i] = el.value; lembrar(); });
+      return h('label.campo', {}, t('oficina.fio', { n: i + 1 }), el);
+    };
+    const botao = h('button.principal', { type: 'button', disabled: f.premissa.trim().length < 12, onclick: () => ir(2) }, t('oficina.avancar'));
+    por(caixa,
+      cabecalho(1),
+      h('p.quem', {}, t('oficina.explica')),
+      campo('premissa', 3),
+      h('p.nota.escura', {}, t('oficina.opcional')),
+      campo('lugar'), campo('tom'), campo('relogio'), campo('emJogo'),
+      fio(0), fio(1), fio(2),
+      campo('evitar'),
+      botao,
+      h('button.secundario', { type: 'button', onclick: () => { oficina = null; montarInicio(); } }, t('oficina.cancelar')),
+    );
+  } else if (oficina.passo === 2) {
+    montarFichaLivre(caixa, {
+      cabecalho: [...cabecalho(2), h('p.nota.escura', {}, t('oficina.personagemExplica'))],
+      rodape: voltar(1),
+      aoFechar: (ficha) => { oficina.ficha = ficha; ir(3); },
+    });
+  } else {
+    por(caixa,
+      cabecalho(3),
+      blocoDeTroca({
+        pedido: () => P.promptInicial(f, oficina.ficha, idiomaAtual()),
+        rotulo: t('oficina.conferir'),
+        aoColar: (doc) => {
+          const erros = H.validarHistoria(doc);
+          if (erros.length) return erros;
+          const nova = H.montarHistoria(doc, oficina.ficha, { formulario: f });
+          if (!guardarHistoria(nova)) return [t('oficina.semEspaco')];
+          const g = guardado(); delete g.oficina; guardar(g);
+          AVENTURA = nova; oficina = null; rascunho = null;
+          escolhido = nova.passados[0];
+          caixa.replaceChildren(); // o pedido inicial não fica para trás, escondido atrás da mesa
+          comecar();
+          return [];
+        },
+      }),
+      voltar(2),
+    );
+  }
+}
+
+let colado = ''; // o que está no campo de colar sobrevive a um redesenho
+
+/**
+ * Os três passos de toda ida à IA: copiar o pedido, colar a resposta, conferir.
+ * `aoColar(doc)` devolve a lista de erros (vazia quando deu certo).
+ */
+function blocoDeTroca({ titulo = null, explica = null, pedido, rotulo, aoColar }) {
+  const texto = pedido();
+  const aviso = h('span.copiado', { role: 'status' });
+  const copiar = async (o_que, onde) => {
+    try { await navigator.clipboard.writeText(o_que); onde.textContent = t('oficina.copiado'); } catch { onde.textContent = t('oficina.naoCopiou'); }
+  };
+  const mostra = h('textarea.pedido', { rows: '10', readonly: true, 'aria-label': t('oficina.copiar') });
+  mostra.value = texto;
+  const campo = h('textarea.colado', { rows: '6', spellcheck: 'false', placeholder: t('oficina.exemploColar') });
+  campo.value = colado;
+  campo.addEventListener('input', () => { colado = campo.value; botao.disabled = !colado.trim(); });
+  const erros = h('div');
+  const botao = h('button.principal', { type: 'button', disabled: !colado.trim(), onclick: () => {
+    const lido = H.lerColado(campo.value);
+    const lista = lido.erro ? [lido.erro] : aoColar(lido.doc);
+    if (!lista.length) { colado = ''; som.sucesso(); return; }
+    const avisoConserto = h('span.copiado', { role: 'status' });
+    erros.replaceChildren(h('div.erros', { role: 'alert' },
+      h('p', {}, h('b', {}, t('oficina.erros', { n: lista.length }))),
+      h('ul', {}, lista.slice(0, 12).map((x) => h('li', {}, x)), lista.length > 12 ? h('li', {}, t('oficina.maisErros', { n: lista.length - 12 })) : null),
+      h('p', {}, t('oficina.consertoExplica')),
+      h('button.secundario', { type: 'button', onclick: () => copiar(P.promptConserto(lista), avisoConserto) }, t('oficina.copiarConserto')),
+      avisoConserto,
+    ));
+    erros.scrollIntoView({ behavior: RAPIDO ? 'auto' : 'smooth', block: 'nearest' });
+  } }, rotulo);
+  return h('section.troca', {},
+    titulo ? h('h3', {}, titulo) : null,
+    explica ? h('p', {}, explica) : null,
+    h('ol', {}, h('li', {}, t('oficina.troca1')), h('li', {}, t('oficina.troca2')), h('li', {}, t('oficina.troca3'))),
+    h('button.secundario', { type: 'button', onclick: () => copiar(pedido(), aviso) }, t('oficina.copiar')),
+    aviso,
+    h('details', {}, h('summary', {}, t('oficina.verPedido', { n: texto.length })), mostra),
+    h('label.campo', {}, t('oficina.colar'), campo),
+    botao,
+    erros,
+  );
 }
 
 function comecar() {
@@ -704,6 +901,8 @@ function desenharSurto(palco) {
 
 function desenharAcampamento(palco) {
   const a = e.acampamento;
+  // História viva: o ato seguinte ainda não foi escrito, e é aqui que se pede.
+  const falta = J.faltaSequencia(e);
   const lojas = J.compras(e);
   const grupos = Object.keys(R.CAMINHOS).map((c) => h('div.coluna', { 'data-caminho': c },
     h('h4', {}, nomeDoCaminho(c)),
@@ -722,7 +921,7 @@ function desenharAcampamento(palco) {
       h('button.escolha', { type: 'button', 'data-caminho': 'espirito', disabled: e.sanidade >= e.max.sanidade, onclick: () => { J.repousar(e, 'cabeca'); desenhar(); } }, h('span.rot', {}, t('acampamento.aquietar')), h('span.det', {}, t('acampamento.aquietarDetalhe'))),
       h('button.escolha', { type: 'button', 'data-caminho': 'livre', disabled: e.brasa >= J.MESA.brasa, onclick: () => { J.repousar(e, 'brasa'); som.brasa(); desenhar(); } }, h('span.rot', {}, AVENTURA.textos.velar), h('span.det', {}, `${AVENTURA.relogio.nome} +${J.MESA.repouso.brasa}`)),
     );
-  palco.replaceChildren(
+  por(palco,
     h('article.carta.mestre', {},
       h('p.sobre', {}, t('acampamento.fimDoAto', { n: a.ato })),
       h('p.narra', {}, a.texto),
@@ -734,7 +933,22 @@ function desenharAcampamento(palco) {
       h('div.colunas', {}, grupos),
     ),
     repouso,
-    h('button.principal', { type: 'button', onclick: () => { som.toque(); J.continuar(e); desenhar(); } }, e.ato >= J.MESA.atos ? AVENTURA.textos.subir : (AVENTURA.textos.seguir ?? t('acampamento.seguir'))),
+    falta
+      ? [h('p.nota', {}, t('oficina.dica')), blocoDeTroca({
+        titulo: falta > J.MESA.atos ? t('oficina.finalTitulo') : t('oficina.sequenciaTitulo', { n: falta }),
+        explica: t('oficina.sequenciaExplica', { nome: e.nome }),
+        pedido: () => P.promptSequencia(AVENTURA, e, falta, idiomaAtual()),
+        rotulo: t('oficina.conferirSeguir'),
+        aoColar: (doc) => {
+          const erros = H.validarSequencia(doc, AVENTURA, falta);
+          if (erros.length) return erros;
+          J.anexar(AVENTURA, doc);
+          if (!guardarHistoria(AVENTURA)) return [t('oficina.semEspaco')];
+          desenhar();
+          return [];
+        },
+      })]
+      : h('button.principal', { type: 'button', onclick: () => { som.toque(); J.continuar(e); desenhar(); } }, e.ato >= J.MESA.atos ? AVENTURA.textos.subir : (AVENTURA.textos.seguir ?? t('acampamento.seguir'))),
   );
 }
 
@@ -758,7 +972,7 @@ function desenharFim(palco) {
   const texto = `${J.cronica(e)}\n${endereco}`;
   const aviso = h('span.copiado', { role: 'status' });
   const todos = [...AVENTURA.finais, ...Object.values(AVENTURA.quedas)];
-  palco.replaceChildren(
+  por(palco,
     h('article.carta.final', { 'data-estrelas': f.estrelas },
       h('p.sobre', {}, e.dia ? t('inicio.doDia', { data: dataCurta(e.dia) }) : t('fim.daSessao')),
       h('h2', {}, f.titulo),
@@ -785,6 +999,7 @@ function desenharFim(palco) {
     ),
     h('button.principal', { type: 'button', onclick: () => { location.search = `?aventura=${AVENTURA.id}${COM_IDIOMA}`; } }, t('fim.outraSessao')),
     e.dia ? null : h('button.secundario', { type: 'button', onclick: () => { location.search = `?aventura=${AVENTURA.id}&semente=${encodeURIComponent(e.semente)}${COM_IDIOMA}`; } }, t('fim.mesmaSemente')),
+    ehHistoria(AVENTURA) ? h('button.secundario', { type: 'button', onclick: () => exportarHistoria(AVENTURA) }, t('oficina.guardarArquivo')) : null,
   );
 }
 

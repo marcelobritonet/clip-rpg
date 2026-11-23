@@ -264,15 +264,15 @@ export const desfecho = [
 ];
 
 /**
- * Finais: vale o primeiro cuja condição fecha. `quando` recebe o resumo da
- * sessão: { brasa, lacos, marcas (Set), vida, companheiros }. Aqui `brasa` é o Ar.
+ * Finais: vale o primeiro cuja condição fecha. `quando` é declarado como dados
+ * (ver `fechaFinal` em jogo.js); o último não tem condição. Aqui `brasa` é o Ar.
  */
 export const finais = [
   {
     id: 'duzentos',
     titulo: 'Ar para duzentos',
     estrelas: 3,
-    quando: (s) => s.brasa >= 2 && s.marcas.has('zeladora') && s.lacos >= 5,
+    quando: { brasa: { min: 2 }, marca: 'zeladora', lacos: { min: 5 } },
     texto:
       'A Zeladora abre as válvulas na ordem certa; você encaixa o cartucho. O reciclador tosse, engasga e pega, e o vento volta pelos dutos da estação inteira. Nos painéis, um a um, acendem os avisos de gente que você encontrou no caminho, abrindo as grades de casa. A voz dela demora. "Refiz as contas", diz. "Dá para duzentos. Eu tinha esquecido de contar com vocês."',
   },
@@ -280,7 +280,7 @@ export const finais = [
     id: 'folego',
     titulo: 'Fôlego emprestado',
     estrelas: 3,
-    quando: (s) => s.brasa <= 0 && s.lacos >= 6,
+    quando: { brasa: { max: 0 }, lacos: { min: 6 } },
     texto:
       'O ar acaba antes do último parafuso. Você se senta ao lado do reciclador aberto e espera o sono. O que vem pelo corredor, porém, são passos, muitos. Gente do caminho, cada um com a garrafinha de emergência de casa. "Você achou mesmo que vinha só?", diz alguém, e encosta o bocal na sua boca. O cartucho é encaixado por vinte mãos.',
   },
@@ -288,7 +288,7 @@ export const finais = [
     id: 'limpo',
     titulo: 'Ar limpo',
     estrelas: 2,
-    quando: (s) => s.brasa >= 3,
+    quando: { brasa: { min: 3 } },
     texto:
       'O cartucho entra no encaixe com um estalo que soa certo. O reciclador pega como se nunca tivesse parado, e um vento com cheiro de horta molhada corre o Eixo até o Anel Verde. Você volta no turno seguinte, sem pressa, com a embalagem vazia batendo na perna.',
   },
@@ -296,7 +296,7 @@ export const finais = [
     id: 'ralo',
     titulo: 'Ar ralo',
     estrelas: 1,
-    quando: (s) => s.brasa > 0,
+    quando: { brasa: { min: 1 } },
     texto:
       'Resta um fio de ar quando o cartucho encaixa. A máquina pega, fraca, tossindo. Vão ser meses de dor de cabeça, de falar pouco e subir escada devagar. Mas a Aurora-7 vai atravessar a safra respirando, e ninguém vai precisar fazer lista.',
   },
@@ -304,7 +304,6 @@ export const finais = [
     id: 'quarenta',
     titulo: 'A conta da Zeladora',
     estrelas: 0,
-    quando: () => true,
     texto:
       'O ar acaba com o cartucho ainda no seu colo, a um parafuso do encaixe. Pelos alto-falantes, baixinho, a Zeladora começa a ler quarenta nomes. O seu não está. O cartucho fica ali, ao lado da máquina parada, esperando que alguém da lista termine o serviço.',
   },

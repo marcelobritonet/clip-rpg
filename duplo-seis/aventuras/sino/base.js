@@ -265,15 +265,15 @@ export const desfecho = [
 ];
 
 /**
- * Finais: vale o primeiro cuja condição fecha. `quando` recebe o resumo da
- * sessão: { brasa, lacos, marcas (Set), vida, companheiros }. Aqui `brasa` é a vela.
+ * Finais: vale o primeiro cuja condição fecha. `quando` é declarado como dados
+ * (ver `fechaFinal` em jogo.js); o último não tem condição. Aqui `brasa` é a vela.
  */
 export const finais = [
   {
     id: 'nome',
     titulo: 'O nome dele',
     estrelas: 3,
-    quando: (s) => s.brasa >= 2 && s.marcas.has('damiao') && s.lacos >= 5,
+    quando: { brasa: { min: 2 }, marca: 'damiao', lacos: { min: 5 } },
     texto:
       'Você diz "Damião" do alto da torre, e lá embaixo a margem inteira repete, com a sua gente na frente. O sino pequeno dá uma última badalada, comprida, de quem se despede. Os onze olham as próprias mãos e dizem os próprios nomes. No domingo, Padre Olavo reza missa pelo sineiro, e a igreja nova não tem lugar para todo mundo.',
   },
@@ -281,7 +281,7 @@ export const finais = [
     id: 'acordado',
     titulo: 'Acordado por eles',
     estrelas: 3,
-    quando: (s) => s.brasa <= 0 && s.lacos >= 6,
+    quando: { brasa: { max: 0 }, lacos: { min: 6 } },
     texto:
       'A vela apaga no último degrau e o sono vem como água. Você acorda na margem, molhado até o peito, com gente em volta segurando os seus braços e repetindo o seu nome, alto, até ele voltar. Depois, juntos, eles sobem a torre e perguntam ao sineiro o nome dele. Ele diz.',
   },
@@ -289,7 +289,7 @@ export const finais = [
     id: 'silencio',
     titulo: 'O badalo amarrado',
     estrelas: 2,
-    quando: (s) => s.brasa >= 3,
+    quando: { brasa: { min: 3 } },
     texto:
       'Você amarra o badalo à viga com o que tem, nó de barqueiro, apertado. O sino tenta e não consegue. Os onze acordam na margem e voltam para casa sem saber direito por quê. A vila dorme em paz por muito tempo. Mas a seca vai voltar um dia, e a torre também.',
   },
@@ -297,7 +297,7 @@ export const finais = [
     id: 'madrugada',
     titulo: 'Toco de vela',
     estrelas: 1,
-    quando: (s) => s.brasa > 0,
+    quando: { brasa: { min: 1 } },
     texto:
       'O sino cala quando a vela já é um toco que queima os dedos. Os onze acordam devagar, uns de manhã, outros na semana seguinte, e um deles nunca lembra direito do próprio sobrenome. Você também não dorme bem por um bom tempo. Mas a vila amanhece.',
   },
@@ -305,7 +305,6 @@ export const finais = [
     id: 'agua',
     titulo: 'Doze',
     estrelas: 0,
-    quando: () => true,
     texto:
       'A vela apaga e ninguém vem. O sono chega manso e leva você escada abaixo, porta afora, lama adentro, até a água morna da cintura. De manhã, Luzia puxa para a canoa uma pessoa que não sabe quem é. Na vila, agora, dizem doze.',
   },

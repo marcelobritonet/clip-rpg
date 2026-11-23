@@ -227,15 +227,15 @@ export const desfecho = [
 ];
 
 /**
- * Finais: vale o primeiro cuja condição fecha. `quando` recebe o resumo da
- * sessão: { brasa, lacos, marcas (Set), vida, companheiros }.
+ * Finais: vale o primeiro cuja condição fecha. `quando` é declarado como dados
+ * (ver `fechaFinal` em jogo.js); o último não tem condição.
  */
 export const finais = [
   {
     id: 'muitos',
     titulo: 'Farol de muitos',
     estrelas: 3,
-    quando: (s) => s.brasa >= 2 && s.marcas.has('faroleiro') && s.lacos >= 5,
+    quando: { brasa: { min: 2 }, marca: 'faroleiro', lacos: { min: 5 } },
     texto:
       'O Faroleiro segura o braseiro; você deita a brasa. O fogo pega devagar e depois de uma vez, e a luz varre o vale. Lá embaixo, uma a uma, janelas respondem: gente que você encontrou no caminho, acendendo o que tem. O velho chora sem esconder. "Não é uma luz", ele diz. "São muitas."',
   },
@@ -243,7 +243,7 @@ export const finais = [
     id: 'emprestado',
     titulo: 'Fogo emprestado',
     estrelas: 3,
-    quando: (s) => s.brasa <= 0 && s.lacos >= 6,
+    quando: { brasa: { max: 0 }, lacos: { min: 6 } },
     texto:
       'A lanterna chega fria. Você se senta ao lado do braseiro morto e espera a Longa Noite. O que sobe a escada, porém, são passos, muitos. Gente do caminho, cada um com uma brasa da própria lareira. "Você não achou que ia sozinho", diz alguém. O Farol acende com fogo de todo o vale.',
   },
@@ -251,7 +251,7 @@ export const finais = [
     id: 'aceso',
     titulo: 'Farol aceso',
     estrelas: 2,
-    quando: (s) => s.brasa >= 3,
+    quando: { brasa: { min: 3 } },
     texto:
       'A brasa ainda está viva e gorda quando toca a lenha. O Farol do Alto acende como se nunca tivesse apagado, e a Longa Noite recua para trás das montanhas. Você desce no dia seguinte, sem pressa, com a lanterna vazia batendo na perna.',
   },
@@ -259,7 +259,7 @@ export const finais = [
     id: 'fraca',
     titulo: 'Luz fraca',
     estrelas: 1,
-    quando: (s) => s.brasa > 0,
+    quando: { brasa: { min: 1 } },
     texto:
       'Resta um ponto vermelho no fundo da lanterna. Você sopra, protege, reza. O fogo pega, miúdo. Não é o farol das histórias, mas é uma luz, e o vale lá embaixo vai atravessar o inverno olhando para ela.',
   },
@@ -267,7 +267,6 @@ export const finais = [
     id: 'cinza',
     titulo: 'Cinza',
     estrelas: 0,
-    quando: () => true,
     texto:
       'A lanterna chega fria. No braseiro, só cinza velha. Você se senta no alto da torre e vê a Longa Noite descer sobre Vau-do-Sino como uma maré. Alguém vai ter de tentar de novo. Talvez você.',
   },

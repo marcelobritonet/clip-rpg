@@ -101,10 +101,11 @@ export function fecha(e, requer) {
   for (const [k, v] of Object.entries(requer)) {
     if (k === 'nivel') { for (const [c, n] of Object.entries(v)) if (R.nivel(e.ficha, c) < n) return false; }
     else if (k === 'antecedente') { if (!e.ficha.antecedentes[v]) return false; }
-    else if (k === 'item') { if (!e.itens.includes(v)) return false; }
-    else if (k === 'companheiro') { if (!e.companheiros.includes(v)) return false; }
-    else if (k === 'marca') { if (!e.marcas.includes(v)) return false; }
-    else if (k === 'semMarca') { if (e.marcas.includes(v)) return false; }
+    // Cada um aceita um id ou uma lista: todos têm de valer (em `semMarca`, nenhum).
+    else if (k === 'item') { if (!lista(v).every((i) => e.itens.includes(i))) return false; }
+    else if (k === 'companheiro') { if (!lista(v).every((c) => e.companheiros.includes(c))) return false; }
+    else if (k === 'marca') { if (!lista(v).every((m) => e.marcas.includes(m))) return false; }
+    else if (k === 'semMarca') { if (lista(v).some((m) => e.marcas.includes(m))) return false; }
     else if (k === 'lacos') { if (e.lacos < v) return false; }
   }
   return true;
@@ -139,7 +140,12 @@ function aplicar(e, efeitos) {
     } else if (k === 'semCompanheiro') {
       for (const id of lista(v)) {
         const i = e.companheiros.indexOf(id);
-        if (i >= 0) { e.companheiros.splice(i, 1); mudou.push({ tipo: 'semCompanheiro', nome: av.companheiros[id].nome }); }
+        if (i >= 0) {
+          e.companheiros.splice(i, 1);
+          // Quem ficou pelo caminho: a história viva conta isso à IA na sequência.
+          (e.perdidos ??= []).push(id);
+          mudou.push({ tipo: 'semCompanheiro', nome: av.companheiros[id].nome });
+        }
       }
     } else if (k === 'marca') {
       for (const m of lista(v)) if (!e.marcas.includes(m)) e.marcas.push(m);
@@ -331,8 +337,11 @@ function resolverTeste(e, insistiu) {
 
 /** Fecha a cena com um desfecho: aplica efeitos, escreve a crônica. */
 function fechar(e, desf, { tipo, ok, critico = null, antes = [], extra = null }) {
+  const marcasAntes = e.marcas.length;
   const mudou = [...antes, ...aplicar(e, desf.efeitos), ...aplicar(e, extra)];
   e.cronica.push(comNome(e, desf.cronica));
+  // De onde veio cada marca: a história viva conta isso à IA, que só vê a palavra.
+  for (const m of e.marcas.slice(marcasAntes)) (e.origens ??= {})[m] = e.cronica.length - 1;
   e.trilha.push({ cena: e.cena.id, abordagem: e.abordagem.id, caminho: caminhoDaAbordagem(e.abordagem), ok, critico });
   e.desfecho = { tipo, ok, critico, texto: comNome(e, desf.texto), mudou, avisos: [] };
   e.fase = 'desfecho';
@@ -516,7 +525,7 @@ export function continuar(e) {
     return avancar(e);
   }
   if (e.fase === 'surto') return avancar(e);
-  if (e.fase === 'acampamento') return partir(e);
+  if (e.fase === 'acampamento') return faltaSequencia(e) ? e : partir(e);
   return e;
 }
 
@@ -566,7 +575,8 @@ function avancar(e) {
 /** A ordem das cenas de um ato depende só da semente; o que entra, do que já aconteceu. */
 function sortearCena(e) {
   const doAto = e.aventura.cenas.filter((c) => c.ato === e.ato);
-  const ordem = embaralhar(fluxo(e.semente, 'roteiro', e.ato), doAto);
+  // História viva: as cenas vêm encadeadas, na ordem em que foram escritas.
+  const ordem = e.aventura.ordem === 'escrita' ? doAto : embaralhar(fluxo(e.semente, 'roteiro', e.ato), doAto);
   return ordem.find((c) => !e.vistas.includes(c.id) && fecha(e, c.requer)) ?? null;
 }
 
@@ -658,9 +668,57 @@ export function curar(e) {
 
 /* ---------- Fim ---------- */
 
+/**
+ * Condição de um final, declarada como dados (uma aventura não carrega código):
+ * `{ brasa: { min: 2 }, lacos: { min: 5 }, marca: 'x' }`. `brasa`, `lacos` e
+ * `vida` aceitam `min` e `max`; `marca`, `semMarca`, `companheiro` e
+ * `semCompanheiro` aceitam um id ou uma lista. Sem condição, o final sempre fecha.
+ */
+export function fechaFinal(s, quando) {
+  if (!quando) return true;
+  for (const [k, v] of Object.entries(quando)) {
+    if (k === 'brasa' || k === 'lacos' || k === 'vida') {
+      if (v.min != null && s[k] < v.min) return false;
+      if (v.max != null && s[k] > v.max) return false;
+    } else if (k === 'marca') { if (!lista(v).every((m) => s.marcas.includes(m))) return false; }
+    else if (k === 'semMarca') { if (lista(v).some((m) => s.marcas.includes(m))) return false; }
+    else if (k === 'companheiro') { if (!lista(v).every((c) => s.companheiros.includes(c))) return false; }
+    else if (k === 'semCompanheiro') { if (lista(v).some((c) => s.companheiros.includes(c))) return false; }
+    else return false;
+  }
+  return true;
+}
+
 function finalDaSessao(e) {
-  const s = { brasa: e.brasa, lacos: e.lacos, marcas: new Set(e.marcas), vida: e.vida, companheiros: e.companheiros };
-  return e.aventura.finais.find((f) => f.quando(s));
+  const finais = e.aventura.finais;
+  return finais.find((f) => fechaFinal(e, f.quando)) ?? finais[finais.length - 1];
+}
+
+/* ---------- História viva: a aventura chega um ato por vez ---------- */
+
+/**
+ * No acampamento de uma história viva, o ato seguinte ainda não foi escrito:
+ * devolve o número do ato que falta (2, 3, ou 4 para o final) ou 0.
+ */
+export function faltaSequencia(e) {
+  if (e.fase !== 'acampamento') return 0;
+  const av = e.aventura;
+  const proximo = e.ato + 1;
+  if (proximo > MESA.atos) return av.desfecho?.length && av.finais?.length ? 0 : MESA.atos + 1;
+  return av.cenas.some((c) => c.ato === proximo) ? 0 : proximo;
+}
+
+/** Junta à história a sequência que a IA escreveu (já conferida por `validarSequencia`). */
+export function anexar(aventura, seq) {
+  for (const campo of ['itens', 'companheiros', 'inimigos']) Object.assign(aventura[campo], seq[campo] ?? {});
+  if (seq.rumo) aventura.rumo = seq.rumo;
+  if (seq.ato > MESA.atos) {
+    aventura.desfecho = seq.desfecho;
+    aventura.finais = seq.finais;
+  } else {
+    aventura.cenas = [...aventura.cenas.filter((c) => c.ato !== seq.ato), ...seq.cenas];
+  }
+  return aventura;
 }
 
 function terminar(e, final) {

@@ -264,15 +264,15 @@ export const desfecho = [
 ];
 
 /**
- * Endings: the first one whose condition holds wins. `quando` receives the
- * session summary: { brasa, lacos, marcas (Set), vida, companheiros }. Here `brasa` is the Air.
+ * Endings: the first one whose condition holds wins. `quando` is declared as data
+ * (see `fechaFinal` in jogo.js); the last one has no condition. Here `brasa` is the Air.
  */
 export const finais = [
   {
     id: 'duzentos',
     titulo: 'Air for Two Hundred',
     estrelas: 3,
-    quando: (s) => s.brasa >= 2 && s.marcas.has('zeladora') && s.lacos >= 5,
+    quando: { brasa: { min: 2 }, marca: 'zeladora', lacos: { min: 5 } },
     texto:
       'The Caretaker opens the valves in the right order; you seat the cartridge. The recycler coughs, chokes and catches, and the wind comes back through the ducts of the whole station. On the panels, one by one, lights come on for the people you met along the way, opening the grilles at home. Her voice is slow to come. "I have done the sums again," she says. "There is enough for two hundred. I had forgotten to count on all of you."',
   },
@@ -280,7 +280,7 @@ export const finais = [
     id: 'folego',
     titulo: 'Borrowed Breath',
     estrelas: 3,
-    quando: (s) => s.brasa <= 0 && s.lacos >= 6,
+    quando: { brasa: { max: 0 }, lacos: { min: 6 } },
     texto:
       'The air runs out before the last bolt. You sit down beside the open recycler and wait for sleep. What comes down the corridor, though, is footsteps, a great many. People from along the way, each with the emergency bottle from home. "Did you really think you had come alone?" someone says, and presses the mouthpiece to your lips. The cartridge is seated by twenty hands.',
   },
@@ -288,7 +288,7 @@ export const finais = [
     id: 'limpo',
     titulo: 'Clean Air',
     estrelas: 2,
-    quando: (s) => s.brasa >= 3,
+    quando: { brasa: { min: 3 } },
     texto:
       'The cartridge goes into its seat with a click that sounds right. The recycler catches as if it had never stopped, and a wind smelling of watered garden runs the Spine all the way to the Green Ring. You walk back on the next shift, in no hurry, with the empty casing knocking against your leg.',
   },
@@ -296,7 +296,7 @@ export const finais = [
     id: 'ralo',
     titulo: 'Thin Air',
     estrelas: 1,
-    quando: (s) => s.brasa > 0,
+    quando: { brasa: { min: 1 } },
     texto:
       'A thread of air is left when the cartridge seats. The machine catches, weakly, coughing. There will be months of headaches, of saying little and taking the stairs slowly. But Aurora-7 will get through the harvest breathing, and nobody will have to draw up a list.',
   },
@@ -304,7 +304,6 @@ export const finais = [
     id: 'quarenta',
     titulo: 'The Caretaker\'s Sum',
     estrelas: 0,
-    quando: () => true,
     texto:
       'The air runs out with the cartridge still in your lap, one bolt short of its seat. Through the loudspeakers, very quietly, the Caretaker begins to read out forty names. Yours is not among them. The cartridge stays there, beside the stopped machine, waiting for someone on the list to finish the job.',
   },

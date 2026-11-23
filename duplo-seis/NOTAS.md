@@ -12,6 +12,7 @@ as regras foram reescritas do zero em `regras.js`, cada função citando a seç�
 
 | Versão | Data | O que mudou |
 |---|---|---|
+| 0.4.0 | 22/11/2026, ainda sem publicar | **História viva: o jogador cria a aventura com uma IA de fora.** Formulário guiado e ficha livre viram um pedido completo; a IA devolve o núcleo e o ato 1 em JSON, que se cola no jogo. A cada pausa o jogo monta o pedido da sequência com a crônica, as escolhas e o estado do personagem, e o ato seguinte (e por fim o final) nasce disso. Conferência do que foi colado com pedido de conserto, exportar e importar `.json`. Os finais das três aventuras da casa passaram de função a condição declarada, sem mudar resultado. Detalhes na seção "História viva" |
 | 0.3.0 | 22/11/2026 | **Terceira aventura e as duas primeiras revistas.** "O Sino Afogado", horror de interior nos anos 1950, só em português: um sino toca no lago seco e quem ouve dormindo esquece o nome; a vela da última missa é o relógio. Abertura, 36 cenas, duas cenas na torre, cinco finais, seis passados e cinco cenários desenhados. A Brasa e o Ar passam a ter 12 cenas por ato (18 novas, só em português), com uma revisão de continuidade dos textos (15 correções). Equilíbrio refeito, robô atento, final de 3 estrelas: Brasa de 32% a 58%, Ar de 33% a 54% (o Piloto subiu de 16% para 36%), Sino de 32% a 57%. Em inglês, o que ainda não foi traduzido aparece em português (PENDENCIAS 8.11). |
 | 0.2.1 | 21/11/2026 | **Polimento.** "Como se joga" na tela inicial, Antecedentes na ficha livre (pontos pelo menor Caminho, como no manual), vibração nos dados, tremor de tela na falha e clarão no duplo seis, atalhos de teclado (1 a 9, Enter, F), título "Double Six" em inglês. Ficou por fazer: revisão de continuidade dos textos das duas aventuras e equilíbrio entre os passados da Brasa. |
 | 0.2.0 | 21/11/2026 | **Genérico e adaptável: outra aventura, outro idioma, as mesmas regras.** Segunda aventura, "Ar Rarefeito", ficção científica numa estação orbital: 27 cenas, seis passados, sete finais; a magia do suplemento vira "sintonia" (o manual prevê poderes psíquicos ou nascidos com o personagem) sem mudar regra nenhuma. O jogo inteiro em inglês ("Double Six": interface, "The Last Ember" e "Thin Air"), com um teste que confere que a tradução tem exatamente a mesma mecânica. Robô atento, 400 sessões por passado, final de 3 estrelas: na Brasa de 21% (Desertora) a 82% (Menestrel); no Ar de 17% (Piloto) a 56% (Sensitiva). |
@@ -62,9 +63,49 @@ Tudo isto está no bloco `MESA` de `jogo.js`. Nada aqui muda regra escrita.
 
 ## Escrever uma aventura
 
-`aventuras/FORMATO.md` descreve o formato das cenas. Cada aventura é uma pasta com `base.js` (catálogo, abertura,
+`aventuras/FORMATO.md` descreve o formato das cenas das aventuras da casa (as do jogador seguem a seção
+"História viva"). Cada aventura é uma pasta com `base.js` (catálogo, abertura,
 final, textos), `passados.js`, três atos e um `index.js`; a tradução fica numa subpasta `en/` com os mesmos arquivos.
 `node duplo-seis/aventuras/paridade.js ar en` confere que a tradução não mexeu na mecânica.
+
+## História viva (22/11/2026, 8.13)
+
+O jogador cria a aventura com uma IA de fora, um ato por vez, e o que o personagem faz muda o que vem depois.
+
+| Tópico | Como ficou |
+|---|---|
+| Fluxo | Formulário guiado → ficha livre → pedido inicial → colar o núcleo e o ato 1 → jogar → em cada pausa, pedido da sequência → colar → ... → pedido do final. Quatro idas à IA por história |
+| Formato | JSON puro, dois documentos: `duplo-seis/historia@1` (núcleo, abertura e ato 1; é também o arquivo exportado) e `duplo-seis/sequencia@1` (ato 2, ato 3 ou o final). Descritos em `aventuras/historia.js` |
+| Memória | O pedido da sequência leva a crônica, cada escolha com o resultado, a ficha como está, Vida, Sanidade, Magia, relógio, laços, marcas, itens, companheiros que seguem e os que ficaram pelo caminho (`e.perdidos`), e o `rumo` |
+| `rumo` | Segredo do Mestre que a IA escreve e o jogador não lê: volta em todo pedido e a IA o atualiza a cada ato |
+| Ordem | As 4 cenas de um ato entram na ordem escrita (`ordem: 'escrita'`), sem sorteio. Cena de história não leva `requer`; as abordagens levam |
+| Personagem | Só a ficha livre, feita antes; a IA escolhe até 3 itens iniciais. A ficha do criador vira o passado da história |
+| Finais | Condição declarada como dados (`fechaFinal` em `jogo.js`): `brasa`, `lacos`, `vida` com `min`/`max`; `marca`, `semMarca`, `companheiro`, `semCompanheiro`. As três da casa foram convertidas e o simulador deu números idênticos |
+| Quedas | Vêm no núcleo, não no final: o personagem pode morrer antes de o final existir |
+| Conferência | `validarHistoria` e `validarSequencia` reusam `validarCenas` e somam forma, faixas de efeito (uma IA mão-pesada não mata numa cena), ids, marcas que ninguém concede, paisagens e finais. Erro vira "pedido de conserto" para colar na mesma conversa |
+| Segurança | Nada colado é código nem HTML: só dados, escritos na tela como texto. Ids fora do padrão são recusados |
+| Idioma | O pedido é sempre em português e manda a IA escrever no idioma da mesa |
+| Depois do fim | A história completa é uma aventura comum: dá para jogar de novo, exportar e importar |
+
+Conferir: `test/duplo-seis-historia.test.js` joga uma história de mentira (`test/duplo-seis-historia-exemplo.js`)
+do núcleo ao final. `node test/duplo-seis-historia-exemplo.js <pasta>` grava os quatro JSON para colar à mão.
+
+### Primeiro teste com IA (22/11/2026)
+
+O Claude respondeu aos quatro pedidos de verdade (formulário e ficha do exemplo), no papel da IA de fora. Ressalva:
+foi a mesma IA que escreveu o pedido e a conferência, então o teste é generoso. Falta repetir no ChatGPT e no Gemini.
+
+| O quê | Resultado |
+|---|---|
+| Tamanho | Pedidos de 16 a 19 mil letras; respostas de 10 a 19 mil (a maior é o núcleo com o ato 1). Coube sem cortar |
+| Conferência | Núcleo, ato 2 e ato 3 passaram de primeira. O final voltou com 2 erros |
+| Erro 1 | `brasa: -3` numa falha, fora da faixa. A conferência pegou e o conserto resolveu |
+| Erro 2 | `requer.marca` com lista, que só os finais aceitavam. Era defeito do jogo: `requer` agora aceita lista em item, companheiro e marca |
+| História viva | Encadeou: a banda acordada no coreto (ato 1) virou o mutirão do armazém (ato 2), que convenceu o banco na ponte e tocou a valsa para o pai na torre (ato 3); a promessa feita a Nico foi cobrada na porta da torre e no sino |
+| Equilíbrio | Fácil demais. Rejogada 300 vezes, o robô atento tira 3 estrelas em 100% e não falha nunca; o que joga ao acaso falha 51% e tira 3 estrelas em 2%. A IA pôs uma especial sem dados ou quase certa em toda cena |
+| Ajustes no pedido | No máximo uma especial livre por ato; cada marca vai com a frase da crônica que a concedeu (uma IA em conversa nova só via a palavra) |
+
+A história que saiu está em `aventuras/exemplos/as-tres-da-tarde.json`: dá para importar no jogo e jogar.
 
 ## Medir a mesa
 
