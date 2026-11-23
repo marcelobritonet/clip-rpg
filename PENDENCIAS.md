@@ -10,7 +10,7 @@ Fonte da verdade do que falta decidir, corrigir ou escrever no manual. Ao fechar
 |---|---|---|---|---|---|---|
 | 1.1 | Cálculo do dano | Erro | "Subtraia o Valor de Ataque do Valor de Defesa" (daria dano negativo) | Ataque − Defesa | Corrigir o texto para "Valor de Ataque − Valor de Defesa" | ☐ |
 | 1.2 | Resistência conta duas vezes | Contradição | Entra no Valor de Defesa **e** é subtraída de novo do dano | Segue o texto: conta duas vezes (`REGRAS.resistenciaReduzDano`) | Tirar a Resistência da Defesa (Defesa = Reflexo + Perícias) e deixar só a redução de dano, que é o papel descrito para ela | ☐ |
-| 1.3 | Recuperar Sanidade | Contradição | "Um personagem **jamais** pode recuperar os seus Pontos de Sanidade até no máximo o seu valor inicial" | Permite recuperar até o máximo | Escrever: "pode recuperar até no máximo o valor inicial" e dizer **como** se recupera (descanso, Fé, ajuda; ver 4.4) | ☐ |
+| 1.3 | Recuperar Sanidade | Contradição | "Um personagem **jamais** pode recuperar os seus Pontos de Sanidade até no máximo o seu valor inicial" | Permite recuperar até o máximo | Escrever: "pode recuperar até no máximo o valor inicial" e dizer **como** se recupera (descanso, Fé, ajuda; ver 4.4) | ✅ 23/11/2026: "jamais" saiu do texto (regras 0.9.4). Falta dizer como se recupera (4.4) |
 | 1.4 | "Ataque à Curta Distância" duplicado | Erro | O item aparece duas vezes em Valores Resumidos | Usa o primeiro | Apagar a cópia | ☐ |
 | 1.5 | Iniciativa cita "Atributo Corpo" | Erro | Corpo é Caminho, não Atributo | Usa o valor do Caminho do Corpo | Trocar por "Maior valor no Caminho do Corpo" | ☐ |
 | 1.6 | Valor de um Caminho | Lacuna | Usa "maior valor no Caminho", "Corpo 3" e a ficha tem campo "Nível" do Caminho, sem definir o cálculo | Soma dos 3 Atributos (`REGRAS.valorCaminho`) | Definir como soma dos Atributos | ☐ |
@@ -38,7 +38,7 @@ Hoje Inteligência, Percepção, Sabedoria, Vontade e Fé não têm Aprimorament
 | Sabedoria | Vivência | Costumes, culturas, "como as coisas funcionam" | — | ☐ |
 | Sabedoria | Serenidade | −1 em cada perda de Sanidade | Resistência | ☐ |
 | Vontade | Determinação | Permite Insistir em testes de Mente, pagando com Sanidade | — | ☐ |
-| Vontade | Autocontrole | +1 na Defesa contra Ataque Mental e Controle | Reflexo | ☐ |
+| Vontade | Autocontrole | +1 na Defesa contra Ataque Mental e Controle | Reflexo | ✅ 23/11/2026: adotado no manual (regras 0.9.4), +1 por nível na Defesa contra Mágicas de Ataque Mental e de Controle |
 | Vontade | Foco | +1 no limite de PM gastos por mágica | Manipulação de Peso | ☐ |
 | Fé | Convicção | Resistir a dúvida, tentação e Mágicas de Controle | — | ☐ |
 | Fé | Devoção | Canalizar aquilo em que se acredita (magia de fé) | — | ☐ |
@@ -94,15 +94,15 @@ O protótipo [`crawler/`](crawler/) precisou decidir estas regras para funcionar
 
 | # | Tópico | Situação | Proposta | Decisão |
 |---|---|---|---|---|
-| 7.1 | Sanidade 0 | "Perde o controle" não diz por quanto tempo nem se volta | Surto curto (5 turnos): o personagem age sozinho, volta com metade e uma cicatriz; o terceiro surto encerra | ✅ 21/11/2026: no surto o jogador não age. O personagem ataca quem estiver perto (aliados também), quebra coisas, corre sem rumo e perde itens. Volta com metade da Sanidade e uma cicatriz; o terceiro surto encerra. Falta escrever no manual |
-| 7.2 | Teste de "isto é real?" | O manual não tem teste contra ilusão | Percepção ou Sabedoria contra a lucidez de quem olha | ✅ 21/11/2026: Percepção ou Sabedoria (o maior) contra uma dificuldade que sobe com a perda de lucidez. Falta escrever no manual |
-| 7.3 | Convencer em conflito | Não há regra para convencer um inimigo no meio da luta | Presença + Aprimoramento social contra 3 + Vontade + andar | ✅ 21/11/2026: Presença + Aprimoramento social contra 3 + Vontade do outro. Falta escrever no manual |
-| 7.4 | Defesa mental | Igual à arena e às cartas | Vontade + Fé + Autocontrole (proposto na seção 2) | ✅ 21/11/2026: Vontade + Fé + Autocontrole (depende da seção 2 adotar o Autocontrole). Falta escrever no manual |
-| 7.5 | Caminho dominante muda | O manual não diz o que acontece ao evoluir e trocar de Caminho | Vida e Sanidade recalculadas pelo novo Caminho, mantendo o dano sofrido | ✅ 21/11/2026: recalcula Vida e Sanidade pelo novo Caminho, mantendo o dano sofrido. Falta escrever no manual |
-| 7.6 | Aliados e Unindo forças | O manual soma Atributos ao unir forças | A companhia luta ao lado com números fixos e faz o tempo pesar menos | ✅ 21/11/2026: o aliado do Mestre também une forças (soma o Atributo dele). O Desvario ainda usa números fixos. Falta escrever no manual |
-| 7.7 | Cansaço | O Clip tem Vida, Magia e Sanidade, sem fadiga | Consciência como terceiro recurso (cai com o tempo e as pancadas, volta descansando). Ou cabe nos Pontos de Magia? | ✅ 21/11/2026: o cansaço cabe nos Pontos de Magia; o Clip continua com três recursos. O Desvario mantém a Consciência separada, como regra só dele |
-| 7.8 | Penalidade por ferimento | O manual não diz se o personagem ferido luta pior | Lentidão e tremor com Vida baixa | ✅ 21/11/2026: −1 nos testes físicos com Vida abaixo da metade; −2 abaixo de um quarto. O Desvario usa lentidão e tremor. Falta escrever no manual |
-| 7.9 | Manobras de combate | Não há defesa total, empurrar nem preparar golpe | Defender (+2 na defesa e contra-golpe), empurrar (teste de Força), golpe preparado (avisado, +2 no ataque) | ✅ 21/11/2026: só defender (defesa total). Empurrar e golpe preparado ficam no Desvario. Falta escrever no manual |
+| 7.1 | Sanidade 0 | "Perde o controle" não diz por quanto tempo nem se volta | Surto curto (5 turnos): o personagem age sozinho, volta com metade e uma cicatriz; o terceiro surto encerra | ✅ 21/11/2026: no surto o jogador não age. O personagem ataca quem estiver perto (aliados também), quebra coisas, corre sem rumo e perde itens. Volta com metade da Sanidade e uma cicatriz; o terceiro surto encerra. Escrito no manual (regras 0.9.4) |
+| 7.2 | Teste de "isto é real?" | O manual não tem teste contra ilusão | Percepção ou Sabedoria contra a lucidez de quem olha | ✅ 21/11/2026: Percepção ou Sabedoria (o maior) contra uma dificuldade que sobe com a perda de lucidez. Escrito no manual (regras 0.9.4) |
+| 7.3 | Convencer em conflito | Não há regra para convencer um inimigo no meio da luta | Presença + Aprimoramento social contra 3 + Vontade + andar | ✅ 21/11/2026: Presença + Aprimoramento social contra 3 + Vontade do outro. Escrito no manual (regras 0.9.4) |
+| 7.4 | Defesa mental | Igual à arena e às cartas | Vontade + Fé + Autocontrole (proposto na seção 2) | ✅ 21/11/2026: Vontade + Fé + Autocontrole Escrito no manual (regras 0.9.4), com o Autocontrole adotado |
+| 7.5 | Caminho dominante muda | O manual não diz o que acontece ao evoluir e trocar de Caminho | Vida e Sanidade recalculadas pelo novo Caminho, mantendo o dano sofrido | ✅ 21/11/2026: recalcula Vida e Sanidade pelo novo Caminho, mantendo o dano sofrido. Escrito no manual (regras 0.9.4) |
+| 7.6 | Aliados e Unindo forças | O manual soma Atributos ao unir forças | A companhia luta ao lado com números fixos e faz o tempo pesar menos | ✅ 21/11/2026: o aliado do Mestre também une forças (soma o Atributo dele). O Desvario ainda usa números fixos. Escrito no manual (regras 0.9.4) |
+| 7.7 | Cansaço | O Clip tem Vida, Magia e Sanidade, sem fadiga | Consciência como terceiro recurso (cai com o tempo e as pancadas, volta descansando). Ou cabe nos Pontos de Magia? | ✅ 21/11/2026: o cansaço cabe nos Pontos de Magia; o Clip continua com três recursos. O Desvario mantém a Consciência separada, como regra só dele. Escrito no manual (regras 0.9.4) |
+| 7.8 | Penalidade por ferimento | O manual não diz se o personagem ferido luta pior | Lentidão e tremor com Vida baixa | ✅ 21/11/2026: −1 nos testes físicos com Vida abaixo da metade; −2 abaixo de um quarto. O Desvario usa lentidão e tremor. Escrito no manual (regras 0.9.4) |
+| 7.9 | Manobras de combate | Não há defesa total, empurrar nem preparar golpe | Defender (+2 na defesa e contra-golpe), empurrar (teste de Força), golpe preparado (avisado, +2 no ataque) | ✅ 21/11/2026: só defender (defesa total). Empurrar e golpe preparado ficam no Desvario. Escrito no manual (regras 0.9.4) |
 
 ## 8. Duplo Seis (em `duplo-seis/`, na 0.4.0 em 23/11/2026)
 

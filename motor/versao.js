@@ -7,6 +7,6 @@
  */
 export const VERSAO = {
   ferramentas: '1.3.0',
-  regras: '0.9.3',
-  data: '2026-11-22',
+  regras: '0.9.4',
+  data: '2026-11-23',
 };

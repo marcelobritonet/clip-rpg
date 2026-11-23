@@ -124,7 +124,7 @@ export const APRIMORAMENTOS = {
 
   // Propostos: Espírito
   determinacao: { nome: 'Determinação', atributo: 'vontade', proposto: true, efeito: 'Permite Insistir em testes de Mente, pagando com Sanidade.' },
-  autocontrole: { nome: 'Autocontrole', atributo: 'vontade', proposto: true, efeito: '+1 na Defesa contra Ataque Mental e Controle.' },
+  autocontrole: { nome: 'Autocontrole', atributo: 'vontade', efeito: '+1 na Defesa contra Ataque Mental e Controle.' },
   foco: { nome: 'Foco', atributo: 'vontade', proposto: true, efeito: '+1 no limite de PM gastos por mágica.' },
   conviccao: { nome: 'Convicção', atributo: 'fe', proposto: true, efeito: 'Resistir a dúvida, tentação e Mágicas de Controle.' },
   devocao: { nome: 'Devoção', atributo: 'fe', proposto: true, efeito: 'Canalizar forças em que se acredita (magia de fé).' },
@@ -603,7 +603,7 @@ export function atacar(atacante, defensor, { distancia = 'curta', ...resto } = {
  * pelo nível da Perícia Mágica e pelos PM disponíveis.
  *
  * - `ataqueFisico`: Valor de Ataque = 1D6 + PM gastos (mínimo 1).
- * - `ataqueMental`: o mesmo, mas o alvo defende com 1D6 + Vontade + Fé e o
+ * - `ataqueMental`: o mesmo, mas o alvo defende com 1D6 + Vontade + Fé + Autocontrole e o
  *   dano sai da Sanidade.
  * Outros tipos devolvem só a potência, para o Mestre aplicar.
  */
